@@ -1,0 +1,2185 @@
+{
+  "collection":
+  [
+    {
+      "ID": 1,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [0, 1, 2, 3, 4, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 4
+    },
+    {
+      "ID": 2,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 2
+    },
+    {
+      "ID": 3,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 4,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 5,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 6,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 7,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12],
+      "icons": [13],
+      "value": 2
+    },
+    {
+      "ID": 8,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 1
+    },
+    {
+      "ID": 9,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 1
+    },
+    {
+      "ID": 10,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12, 13],
+      "icons": [13],
+      "value": 2
+    },
+    {
+      "ID": 11,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 1
+    },
+    {
+      "ID": 12,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 13,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [2, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 2
+    },
+    {
+      "ID": 14,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [9, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 15,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12, 16],
+      "value": 1
+    },
+    {
+      "ID": 16,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 17,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [20, 20, 20, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 18,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [12, 13],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [13, 7],
+      "value": 1
+    },
+    {
+      "ID": 19,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [12, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 20,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [16, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 21,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [12, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 22,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [16, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 23,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [12, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 24,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12, 13],
+      "icons": [13, 5],
+      "value": 1
+    },
+    {
+      "ID": 25,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [8, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 26,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [14, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 27,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 28,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12, 15],
+      "value": 1
+    },
+    {
+      "ID": 29,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12, 13],
+      "icons": [13, 16],
+      "value": 1
+    },
+    {
+      "ID": 30,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 31,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [16, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 32,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12],
+      "icons": [13],
+      "value": 2
+    },
+    {
+      "ID": 33,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [5, 8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12],
+      "icons": [8, 13],
+      "value": 2
+    },
+    {
+      "ID": 34,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22, 22, 22, 22, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 35,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 36,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22, 22],
+      "value": 3
+    },
+    {
+      "ID": 37,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [8, 12, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 38,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 39,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [15, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 40,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12, 8],
+      "value": 1
+    },
+    {
+      "ID": 41,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12],
+      "icons": [13],
+      "value": 3
+    },
+    {
+      "ID": 42,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 43,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 44,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 1
+    },
+    {
+      "ID": 45,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [0, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [13],
+      "value": 2
+    },
+    {
+      "ID": 46,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 2
+    },
+    {
+      "ID": 47,
+      "deckType": 0,
+      "cardType": 3,
+      "requirements": [19, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 3
+    },
+    {
+      "ID": 48,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [16],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12, 13],
+      "icons": [13],
+      "value": 3
+    },
+    {
+      "ID": 49,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 2
+    },
+    {
+      "ID": 50,
+      "deckType": 0,
+      "cardType": 2,
+      "requirements": [2, 2, 3, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 51,
+      "deckType": 0,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [12],
+      "value": 1
+    },
+    {
+      "ID": 52,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9],
+      "value": 1
+    },
+    {
+      "ID": 53,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 4],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 54,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 1
+    },
+    {
+      "ID": 55,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [14],
+      "value": 2
+    },
+    {
+      "ID": 56,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 4],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9],
+      "value": 1
+    },
+    {
+      "ID": 57,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [10, 8, 5, 6],
+      "adjacentRequirements":[],
+      "icons": [6],
+      "value": 2
+    },
+    {
+      "ID": 58,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [4, 4],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [15],
+      "value": 1
+    },
+    {
+      "ID": 59,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 1
+    },
+    {
+      "ID": 60,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 2
+    },
+    {
+      "ID": 61,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [13],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [15],
+      "value": 1
+    },
+    {
+      "ID": 62,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9, 15],
+      "value": 1
+    },
+    {
+      "ID": 63,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [2, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 2
+    },
+    {
+      "ID": 64,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16, 15],
+      "value": 1
+    },
+    {
+      "ID": 65,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 66,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 1
+    },
+    {
+      "ID": 67,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 2
+    },
+    {
+      "ID": 68,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 2
+    },
+    {
+      "ID": 69,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[12],
+      "icons": [10],
+      "value": 1
+    },
+    {
+      "ID": 70,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 0],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [15],
+      "value": 1
+    },
+    {
+      "ID": 71,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [2, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 72,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 1],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 1
+    },
+    {
+      "ID": 73,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 2
+    },
+    {
+      "ID": 74,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [3, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 75,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9, 15],
+      "value": 1
+    },
+    {
+      "ID": 76,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 2
+    },
+    {
+      "ID": 77,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 4],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [14],
+      "value": 1
+    },
+    {
+      "ID": 78,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 2
+    },
+    {
+      "ID": 79,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [16],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 2
+    },
+    {
+      "ID": 80,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 2
+    },
+    {
+      "ID": 81,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 2
+    },
+    {
+      "ID": 82,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 1],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 83,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 2
+    },
+    {
+      "ID": 84,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [11],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 2
+    },
+    {
+      "ID": 85,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 1
+    },
+    {
+      "ID": 86,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 1
+    },
+    {
+      "ID": 87,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": [6, 7],
+      "adjacentRequirements":[],
+      "icons": [6],
+      "value": 1
+    },
+    {
+      "ID": 88,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 2
+    },
+    {
+      "ID": 89,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [12, 13],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 2
+    },
+    {
+      "ID": 90,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 1
+    },
+    {
+      "ID": 91,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 2
+    },
+    {
+      "ID": 92,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [14],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [6],
+      "value": 2
+    },
+    {
+      "ID": 93,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [6],
+      "value": 1
+    },
+    {
+      "ID": 94,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [13],
+      "value": 1
+    },
+    {
+      "ID": 95,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 1
+    },
+    {
+      "ID": 96,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 2
+    },
+    {
+      "ID": 97,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 1
+    },
+    {
+      "ID": 98,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [1, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [14],
+      "value": 1
+    },
+    {
+      "ID": 99,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9],
+      "value": 1
+    },
+    {
+      "ID": 100,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [15],
+      "value": 2
+    },
+    {
+      "ID": 101,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [0, 4, 4],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [7],
+      "value": 1
+    },
+    {
+      "ID": 102,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 2
+    },
+    {
+      "ID": 103,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [6, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 2
+    },
+    {
+      "ID": 104,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [5, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 2
+    },
+    {
+      "ID": 105,
+      "deckType": 1,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 2
+    },
+    {
+      "ID": 106,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 7],
+      "value": 0
+    },
+    {
+      "ID": 107,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 9],
+      "value": 0
+    },
+    {
+      "ID": 108,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 5],
+      "value": 0
+    },
+    {
+      "ID": 109,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 6],
+      "value": 0
+    },
+    {
+      "ID": 110,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 7],
+      "value": 0
+    },
+    {
+      "ID": 111,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 5],
+      "value": 0
+    },
+    {
+      "ID": 112,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 1],
+      "value": 0
+    },
+    {
+      "ID": 113,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 3],
+      "value": 0
+    },
+    {
+      "ID": 114,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 5],
+      "value": 0
+    },
+    {
+      "ID": 115,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 9],
+      "value": 0
+    },
+    {
+      "ID": 116,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 7],
+      "value": 0
+    },
+    {
+      "ID": 117,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 9],
+      "value": 0
+    },
+    {
+      "ID": 118,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 5],
+      "value": 0
+    },
+    {
+      "ID": 119,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 9],
+      "value": 0
+    },
+    {
+      "ID": 120,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 7],
+      "value": 0
+    },
+    {
+      "ID": 121,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 9],
+      "value": 0
+    },
+    {
+      "ID": 122,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 9],
+      "value": 0
+    },
+    {
+      "ID": 123,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 7],
+      "value": 0
+    },
+    {
+      "ID": 124,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 7],
+      "value": 0
+    },
+    {
+      "ID": 125,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 14],
+      "value": 0
+    },
+    {
+      "ID": 126,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 7],
+      "value": 0
+    },
+    {
+      "ID": 127,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 9],
+      "value": 0
+    },
+    {
+      "ID": 128,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 6],
+      "value": 0
+    },
+    {
+      "ID": 129,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 4],
+      "value": 0
+    },
+    {
+      "ID": 130,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 5],
+      "value": 0
+    },
+    {
+      "ID": 131,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 5],
+      "value": 0
+    },
+    {
+      "ID": 132,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 7],
+      "value": 0
+    },
+    {
+      "ID": 133,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 16],
+      "value": 0
+    },
+    {
+      "ID": 134,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 3],
+      "value": 0
+    },
+    {
+      "ID": 135,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 5],
+      "value": 0
+    },
+    {
+      "ID": 136,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 9],
+      "value": 0
+    },
+    {
+      "ID": 137,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 5],
+      "value": 0
+    },
+    {
+      "ID": 138,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 9],
+      "value": 0
+    },
+    {
+      "ID": 139,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 6],
+      "value": 0
+    },
+    {
+      "ID": 140,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 5],
+      "value": 0
+    },
+    {
+      "ID": 141,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 7],
+      "value": 0
+    },
+    {
+      "ID": 142,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 1],
+      "value": 0
+    },
+    {
+      "ID": 143,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 5],
+      "value": 0
+    },
+    {
+      "ID": 144,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 3],
+      "value": 0
+    },
+    {
+      "ID": 145,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 14],
+      "value": 0
+    },
+    {
+      "ID": 146,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 6],
+      "value": 0
+    },
+    {
+      "ID": 147,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [3, 7],
+      "value": 0
+    },
+    {
+      "ID": 148,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 6],
+      "value": 0
+    },
+    {
+      "ID": 149,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 9],
+      "value": 0
+    },
+    {
+      "ID": 150,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 7],
+      "value": 0
+    },
+    {
+      "ID": 151,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 15],
+      "value": 0
+    },
+    {
+      "ID": 152,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 6],
+      "value": 0
+    },
+    {
+      "ID": 153,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 9],
+      "value": 0
+    },
+    {
+      "ID": 154,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [4, 9],
+      "value": 0
+    },
+    {
+      "ID": 155,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 5],
+      "value": 0
+    },
+    {
+      "ID": 156,
+      "deckType": 2,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [2, 6],
+      "value": 0
+    },
+    {
+      "ID": 157,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [13, 13],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9],
+      "value": 3
+    },
+    {
+      "ID": 158,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [8, 8, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 159,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [9, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [14],
+      "value": 3
+    },
+    {
+      "ID": 160,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [12, 12, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 4
+    },
+    {
+      "ID": 161,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [10, 12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 3
+    },
+    {
+      "ID": 162,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [6, 10, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [18],
+      "value": 3
+    },
+    {
+      "ID": 163,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 2, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [9],
+      "value": 3
+    },
+    {
+      "ID": 164,
+      "deckType": 3,
+      "cardType": 3,
+      "requirements": [11, 11, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 4
+    },
+    {
+      "ID": 165,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 5, 12, 13],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 4
+    },
+    {
+      "ID": 166,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 1, 15],
+      "optionalRequirements": [5, 6],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 4
+    },
+    {
+      "ID": 167,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 2, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [14],
+      "value": 3
+    },
+    {
+      "ID": 168,
+      "deckType": 3,
+      "cardType": 3,
+      "requirements": [14, 15, 22],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [20],
+      "value": 4
+    },
+    {
+      "ID": 169,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 6, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 3
+    },
+    {
+      "ID": 170,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [4, 4, 4, 9, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 171,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [1, 1, 9, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 172,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [21],
+      "optionalRequirements": ["4 of the same ground"],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 4
+    },
+    {
+      "ID": 173,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [19, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 174,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 9, 12],
+      "optionalRequirements": [6, 8],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 4
+    },
+    {
+      "ID": 175,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [13, 13, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 4
+    },
+    {
+      "ID": 176,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [10, 12],
+      "optionalRequirements": [6, 8],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 3
+    },
+    {
+      "ID": 177,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 10, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 4
+    },
+    {
+      "ID": 178,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 9, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 4
+    },
+    {
+      "ID": 179,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [9, 9, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 4
+    },
+    {
+      "ID": 180,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 5, 6, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 4
+    },
+    {
+      "ID": 181,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [1, 1, 1, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 182,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [18, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 183,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [6, 9, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [18],
+      "value": 3
+    },
+    {
+      "ID": 184,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 11],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 3
+    },
+    {
+      "ID": 185,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 3, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [7],
+      "value": 3
+    },
+    {
+      "ID": 186,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [7, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 3
+    },
+    {
+      "ID": 187,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 1, 2, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 3
+    },
+    {
+      "ID": 188,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [11],
+      "optionalRequirements": [5, 7],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 3
+    },
+    {
+      "ID": 189,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [11, 16, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 4
+    },
+    {
+      "ID": 190,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [0, 0, 0, 9, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 191,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [2, 2, 3, 3, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 192,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [10, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 3
+    },
+    {
+      "ID": 193,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [8, 10, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 4
+    },
+    {
+      "ID": 194,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 7, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 3
+    },
+    {
+      "ID": 195,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [],
+      "optionalRequirements": ["9 ground"],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 4
+    },
+    {
+      "ID": 196,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [7, 16],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 3
+    },
+    {
+      "ID": 197,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [5, 6, 10],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [18],
+      "value": 3
+    },
+    {
+      "ID": 198,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [4, 4, 6, 8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [17],
+      "value": 3
+    },
+    {
+      "ID": 199,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[13],
+      "icons": [14],
+      "value": 3
+    },
+    {
+      "ID": 200,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [2, 2, 3],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [15],
+      "value": 3
+    },
+    {
+      "ID": 201,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [6, 12],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [8],
+      "value": 3
+    },
+    {
+      "ID": 202,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [7, 7],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [11],
+      "value": 3
+    },
+    {
+      "ID": 203,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [9, 14, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 3
+    },
+    {
+      "ID": 204,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [16, 16],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [5],
+      "value": 3
+    },
+    {
+      "ID": 205,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [8, 8],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [18],
+      "value": 3
+    },
+    {
+      "ID": 206,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [4, 4, 9, 11, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 4
+    },
+    {
+      "ID": 207,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 2, 2],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [16],
+      "value": 3
+    },
+    {
+      "ID": 208,
+      "deckType": 3,
+      "cardType": 2,
+      "requirements": [2, 2, 2, 21],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [22],
+      "value": 3
+    },
+    {
+      "ID": 209,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [15, 16],
+      "optionalRequirements": [5, 6],
+      "adjacentRequirements":[],
+      "icons": [10],
+      "value": 3
+    },
+    {
+      "ID": 210,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 4, 14, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 3
+    },
+    {
+      "ID": 211,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [1, 4, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 3
+    },
+    {
+      "ID": 212,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 1],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 3
+    },
+    {
+      "ID": 213,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [4, 4, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 3
+    },
+    {
+      "ID": 214,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 9, 14, 15],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 4
+    },
+    {
+      "ID": 215,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [0, 0, 4, 4, 9],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 4
+    },
+    {
+      "ID": 216,
+      "deckType": 3,
+      "cardType": 1,
+      "requirements": [9, 9, 15, 16],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [19],
+      "value": 4
+    },
+    {
+      "ID": 217,
+      "deckType": -1,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [1, 7],
+      "value": 0
+    },
+    {
+      "ID": 218,
+      "deckType": -1,
+      "cardType": 0,
+      "requirements": [],
+      "optionalRequirements": [],
+      "adjacentRequirements":[],
+      "icons": [0, 5],
+      "value": 0
+    }
+  ]
+}

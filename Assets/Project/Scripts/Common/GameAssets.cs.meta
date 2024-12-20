@@ -1,0 +1,25 @@
+fileFormatVersion: 2
+guid: e7417ed5f2ec1424d91262e07f33403a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - cardDataJson: {instanceID: 0}
+  - deckPrefab: {instanceID: 0}
+  - cardPrefab: {instanceID: 0}
+  - boardCardHolderPrefab: {instanceID: 0}
+  - boardMarkerHolderPrefab: {instanceID: 0}
+  - tableCardHolderPrefab: {instanceID: 0}
+  - markerPrefab: {instanceID: 0}
+  - displayIconPrefab: {instanceID: 0}
+  - dummyDisplayIconPrefab: {instanceID: 0}
+  - baseAtlas: {instanceID: 0}
+  - West: {instanceID: 0}
+  - South: {instanceID: 0}
+  - East: {instanceID: 0}
+  - North: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

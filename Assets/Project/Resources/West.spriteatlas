@@ -1,0 +1,214 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!687078895 &4343727234628468602
+SpriteAtlas:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: West
+  m_EditorData:
+    serializedVersion: 2
+    textureSettings:
+      serializedVersion: 2
+      anisoLevel: 1
+      compressionQuality: 50
+      maxTextureSize: 2048
+      textureCompression: 0
+      filterMode: 1
+      generateMipMaps: 0
+      readable: 0
+      crunchedCompression: 0
+      sRGB: 1
+    platformSettings:
+    - serializedVersion: 3
+      m_BuildTarget: Standalone
+      m_MaxTextureSize: 8192
+      m_ResizeAlgorithm: 0
+      m_TextureFormat: 12
+      m_TextureCompression: 1
+      m_CompressionQuality: 50
+      m_CrunchedCompression: 0
+      m_AllowsAlphaSplitting: 0
+      m_Overridden: 1
+      m_IgnorePlatformSupport: 0
+      m_AndroidETC2FallbackOverride: 0
+      m_ForceMaximumCompressionQuality_BC6H_BC7: 0
+    packingSettings:
+      serializedVersion: 2
+      padding: 8
+      blockOffset: 1
+      allowAlphaSplitting: 0
+      enableRotation: 1
+      enableTightPacking: 0
+      enableAlphaDilation: 0
+    secondaryTextureSettings: {}
+    variantMultiplier: 1
+    packables:
+    - {fileID: 102900000, guid: 7281dc12cedcaa149b56097a78ecff79, type: 3}
+    bindAsDefault: 1
+    isAtlasV2: 0
+    cachedData: {fileID: 0}
+    packedSpriteRenderDataKeys:
+    - 900ab060844d92d40a8ca6c50d8fc574: 21300000
+    - 834faeb088c90a54ca44bfbaae3098fb: 21300000
+    - b2a4ce0184b01324cab6a0eee1361a89: 21300000
+    - 58e5d851f0e29d44a858720c25e959c4: 21300000
+    - aeb9da91addafe54791b8b0d13bfb54c: 21300000
+    - 770b0ac1d8c5d8748a82e71bfa2f9aeb: 21300000
+    - 748100f1bdc0e15428316f1bdf1ca8d3: 21300000
+    - 4d522b428a373e64c998a418fa769595: 21300000
+    - 7e94b392536d7a647acf7743f058a40a: 21300000
+    - 7c1c27b22636b6b41a8eba9613434ea4: 21300000
+    - 9f47f7f277810ec44ae56842621019e9: 21300000
+    - 2f6e3153dd34fab49a2b9bee5ebe1b55: 21300000
+    - 32df2a0412c25fb45bf852c8736bd6b7: 21300000
+    - 623d5e24e2d6d8740b31015597c49a7b: 21300000
+    - 067cd7646cbc2c940acb880de49badb3: 21300000
+    - 11870fb42e28de948847ae31612efce7: 21300000
+    - 5273436587ac4294b853c5f562352294: 21300000
+    - a6b0b8f53b4971b48b6e2a1b2813a85c: 21300000
+    - 6f980af563c824348bb9035ae5473ad2: 21300000
+    - 0ffc6e064481a4d4d813e24e0a6abaf8: 21300000
+    - 65672e16b52fbf24ba8602e93d44bbed: 21300000
+    - 6d2d8336c32323140b7954c404d83e3c: 21300000
+    - d7e6426611bc4da429c02cc1a85bd3a3: 21300000
+    - f82af12749ec3c84aa0ca3155f76835f: 21300000
+    - 3e38c9b7dbc47b44dba592249e8384d3: 21300000
+    - 1a58f508acc260e4d8f47d073131ad31: 21300000
+    - 7c0a6f18072a7ab4ea7aafeebe5b5d05: 21300000
+    - 955cef4825c60c648a1f63429377f1fc: 21300000
+    - 737bfc7885433314281cdc7cfbf295a7: 21300000
+    - baf5a198f191da940bd0b96610cfeedb: 21300000
+    - 448090e8038bbe340a76ad1922cdd94e: 21300000
+    - 9c5185f9838413d4eb29c14a3d950ac7: 21300000
+    - 0c6557baccb46cb42a424484c6846b41: 21300000
+    - 45c437da65d08d34596d2bc0028aa216: 21300000
+    - 28f90e4b95f6efa4e88fcac9852defe9: 21300000
+    - f621dbabb00e738429c02dc0d4e39ab2: 21300000
+    - d5a5a7bbcc4ea9a4f98d63a5d2962dbd: 21300000
+    - d4e6f7cb1eab47140b5497a161120e25: 21300000
+    - 5498cb1c5f772c24e8b95faba7b077df: 21300000
+    - 7e7c2eecd3383eb4294f3fefaadd4fb9: 21300000
+    - c0719bfccbcc32346bb998f1302700e6: 21300000
+    - f7b73c2d2d0f0054e80722d87e32669d: 21300000
+    - 05e77b7d0f03ecb45b3edb0337134810: 21300000
+    - 933fe38d2e88331419b806ac6c44e0be: 21300000
+    - 363dbf2e476f1ef488e6814e30becf53: 21300000
+    - 9fa0ce4e78238f54885fa04e570918ef: 21300000
+    - 7f6e598e3e461e847a4c08d58e417385: 21300000
+    - 2a2347ce23bad044abb9f272280c0b12: 21300000
+    - 0fb2582f5d6ca294883019bae3cb349b: 21300000
+    - 2196c7bf9d4a7e946831a9ce15c794eb: 21300000
+    - 721b2edf3bf42e443ac8dd4be6e85623: 21300000
+    - 936030ff10113894f9e535f0ece2f6c5: 21300000
+  m_MasterAtlas: {fileID: 0}
+  m_PackedSprites:
+  - {fileID: 21300000, guid: 900ab060844d92d40a8ca6c50d8fc574, type: 3}
+  - {fileID: 21300000, guid: 834faeb088c90a54ca44bfbaae3098fb, type: 3}
+  - {fileID: 21300000, guid: b2a4ce0184b01324cab6a0eee1361a89, type: 3}
+  - {fileID: 21300000, guid: 58e5d851f0e29d44a858720c25e959c4, type: 3}
+  - {fileID: 21300000, guid: aeb9da91addafe54791b8b0d13bfb54c, type: 3}
+  - {fileID: 21300000, guid: 770b0ac1d8c5d8748a82e71bfa2f9aeb, type: 3}
+  - {fileID: 21300000, guid: 748100f1bdc0e15428316f1bdf1ca8d3, type: 3}
+  - {fileID: 21300000, guid: 4d522b428a373e64c998a418fa769595, type: 3}
+  - {fileID: 21300000, guid: 7e94b392536d7a647acf7743f058a40a, type: 3}
+  - {fileID: 21300000, guid: 7c1c27b22636b6b41a8eba9613434ea4, type: 3}
+  - {fileID: 21300000, guid: 9f47f7f277810ec44ae56842621019e9, type: 3}
+  - {fileID: 21300000, guid: 2f6e3153dd34fab49a2b9bee5ebe1b55, type: 3}
+  - {fileID: 21300000, guid: 32df2a0412c25fb45bf852c8736bd6b7, type: 3}
+  - {fileID: 21300000, guid: 623d5e24e2d6d8740b31015597c49a7b, type: 3}
+  - {fileID: 21300000, guid: 067cd7646cbc2c940acb880de49badb3, type: 3}
+  - {fileID: 21300000, guid: 11870fb42e28de948847ae31612efce7, type: 3}
+  - {fileID: 21300000, guid: 5273436587ac4294b853c5f562352294, type: 3}
+  - {fileID: 21300000, guid: a6b0b8f53b4971b48b6e2a1b2813a85c, type: 3}
+  - {fileID: 21300000, guid: 6f980af563c824348bb9035ae5473ad2, type: 3}
+  - {fileID: 21300000, guid: 0ffc6e064481a4d4d813e24e0a6abaf8, type: 3}
+  - {fileID: 21300000, guid: 65672e16b52fbf24ba8602e93d44bbed, type: 3}
+  - {fileID: 21300000, guid: 6d2d8336c32323140b7954c404d83e3c, type: 3}
+  - {fileID: 21300000, guid: d7e6426611bc4da429c02cc1a85bd3a3, type: 3}
+  - {fileID: 21300000, guid: f82af12749ec3c84aa0ca3155f76835f, type: 3}
+  - {fileID: 21300000, guid: 3e38c9b7dbc47b44dba592249e8384d3, type: 3}
+  - {fileID: 21300000, guid: 1a58f508acc260e4d8f47d073131ad31, type: 3}
+  - {fileID: 21300000, guid: 7c0a6f18072a7ab4ea7aafeebe5b5d05, type: 3}
+  - {fileID: 21300000, guid: 955cef4825c60c648a1f63429377f1fc, type: 3}
+  - {fileID: 21300000, guid: 737bfc7885433314281cdc7cfbf295a7, type: 3}
+  - {fileID: 21300000, guid: baf5a198f191da940bd0b96610cfeedb, type: 3}
+  - {fileID: 21300000, guid: 448090e8038bbe340a76ad1922cdd94e, type: 3}
+  - {fileID: 21300000, guid: 9c5185f9838413d4eb29c14a3d950ac7, type: 3}
+  - {fileID: 21300000, guid: 0c6557baccb46cb42a424484c6846b41, type: 3}
+  - {fileID: 21300000, guid: 45c437da65d08d34596d2bc0028aa216, type: 3}
+  - {fileID: 21300000, guid: 28f90e4b95f6efa4e88fcac9852defe9, type: 3}
+  - {fileID: 21300000, guid: f621dbabb00e738429c02dc0d4e39ab2, type: 3}
+  - {fileID: 21300000, guid: d5a5a7bbcc4ea9a4f98d63a5d2962dbd, type: 3}
+  - {fileID: 21300000, guid: d4e6f7cb1eab47140b5497a161120e25, type: 3}
+  - {fileID: 21300000, guid: 5498cb1c5f772c24e8b95faba7b077df, type: 3}
+  - {fileID: 21300000, guid: 7e7c2eecd3383eb4294f3fefaadd4fb9, type: 3}
+  - {fileID: 21300000, guid: c0719bfccbcc32346bb998f1302700e6, type: 3}
+  - {fileID: 21300000, guid: f7b73c2d2d0f0054e80722d87e32669d, type: 3}
+  - {fileID: 21300000, guid: 05e77b7d0f03ecb45b3edb0337134810, type: 3}
+  - {fileID: 21300000, guid: 933fe38d2e88331419b806ac6c44e0be, type: 3}
+  - {fileID: 21300000, guid: 363dbf2e476f1ef488e6814e30becf53, type: 3}
+  - {fileID: 21300000, guid: 9fa0ce4e78238f54885fa04e570918ef, type: 3}
+  - {fileID: 21300000, guid: 7f6e598e3e461e847a4c08d58e417385, type: 3}
+  - {fileID: 21300000, guid: 2a2347ce23bad044abb9f272280c0b12, type: 3}
+  - {fileID: 21300000, guid: 0fb2582f5d6ca294883019bae3cb349b, type: 3}
+  - {fileID: 21300000, guid: 2196c7bf9d4a7e946831a9ce15c794eb, type: 3}
+  - {fileID: 21300000, guid: 721b2edf3bf42e443ac8dd4be6e85623, type: 3}
+  - {fileID: 21300000, guid: 936030ff10113894f9e535f0ece2f6c5, type: 3}
+  m_PackedSpriteNamesToIndex:
+  - 20
+  - 43
+  - 10
+  - 18
+  - 36
+  - 5
+  - 17
+  - 14
+  - 41
+  - 44
+  - 37
+  - 25
+  - 45
+  - 51
+  - 29
+  - 28
+  - 16
+  - 6
+  - 34
+  - 3
+  - 31
+  - 9
+  - 13
+  - 22
+  - 23
+  - 7
+  - 4
+  - 39
+  - 15
+  - 19
+  - 50
+  - 47
+  - 35
+  - 11
+  - 21
+  - 12
+  - 1
+  - 30
+  - 8
+  - 49
+  - 33
+  - 40
+  - 24
+  - 46
+  - 27
+  - 2
+  - 38
+  - 48
+  - 42
+  - back
+  - 26
+  - 32
+  m_RenderDataMap: {}
+  m_Tag: West
+  m_IsVariant: 0
