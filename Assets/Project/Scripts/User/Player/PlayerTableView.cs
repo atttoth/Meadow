@@ -81,6 +81,7 @@ public class PlayerTableView : ViewBase
         int prevHolderIndex = _activePrimaryCardHolders.Count == 1 ? 0 : direction == -1 ? 0 : _activePrimaryCardHolders.Count - 1;
         CardHolder prevHolder = _activePrimaryCardHolders[prevHolderIndex];
         CardHolder holder = _primaryCardHolderPool[0];
+        holder.Init(-1, HolderType.TableCard);
         holder.transform.SetParent(_primaryCardHolderContainer);
         holder.transform.SetSiblingIndex(listIndex);
         holder.gameObject.SetActive(true);
@@ -143,7 +144,7 @@ public class PlayerTableView : ViewBase
         _displayIcons = new();
         _preparedDisplayIcons = new();
         CardHolder holder = _primaryCardHolderPool[0];
-        holder.ID = 0;
+        holder.Init(-1, HolderType.TableCard);
         holder.gameObject.SetActive(true);
         holder.transform.SetParent(_primaryCardHolderContainer);
         holder.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 250f);
@@ -229,7 +230,6 @@ public class PlayerTableView : ViewBase
         DisplayIcon displayIcon = GetDisplayIconFromPool();
         displayIcon.transform.SetParent(_preparedIconsTransform);
         displayIcon.transform.position = _preparedIconsTransform.position;
-        Debug.Log(displayIcon.GetComponent<RectTransform>().position.x);
         displayIcon.SetUpDisplayIcon(holderID);
         List<CardIcon> icons = card.Data.icons.ToList();
         if (card.Data.cardType != CardType.Ground) // need to find a ground icon for displayIcon
@@ -436,12 +436,12 @@ public class PlayerTableView : ViewBase
 
     public void ExpandHolderVertically(GameTaskItemData data)
     {
-        UpdateHolderHeight(data.cardHolder, true);
+        UpdateHolderHeight((CardHolder)data.holder, true);
     }
 
     public void ExpandHolderVerticallyRewind(GameTaskItemData data)
     {
-        UpdateHolderHeight(data.cardHolder, false);
+        UpdateHolderHeight((CardHolder)data.holder, false);
     }
 
     private void UpdateHolderHeight(CardHolder holder, bool isIncrease)
@@ -483,42 +483,44 @@ public class PlayerTableView : ViewBase
 
     public void StackCard(GameTaskItemData data)
     {
-        data.cardHolder.AddToContentList(data.card);
-        int startingPosY = 115;
-        int count = data.cardHolder.contentList.Count - 1;
+        CardHolder holder = (CardHolder)data.holder;
+        holder.AddToContentList(data.card);
+        float startingPosY = 115f;
+        int count = holder.GetContentListSize() - 1;
         float topPositionY = count < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * count;
         RectTransform rect = data.card.GetComponent<RectTransform>();
         rect.anchorMin = new(0.5f, 0f);
         rect.anchorMax = new(0.5f, 0f);
         rect.anchoredPosition = new(0f, topPositionY);
         data.card.canMove = false;
-        data.card.cardLocationStatus = CardLocationStatus.PENDING_ON_TABLE;
-        if(data.cardHolder.contentList.Count > 1)
+        data.card.cardActionStatus = CardActionStatus.PENDING_ON_TABLE;
+        if(holder.GetContentListSize() > 1)
         {
-            Card cardBelow = ((Card)data.cardHolder.contentList[^2]);
-            if (cardBelow.cardLocationStatus == CardLocationStatus.PENDING_ON_TABLE)
+            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 2);
+            if (cardBelow.cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
             {
-                cardBelow.cardLocationStatus = CardLocationStatus.STACKED_PENDING_ON_TABLE;
+                cardBelow.cardActionStatus = CardActionStatus.STACKED_PENDING_ON_TABLE;
             }
         }
     }
 
     public void StackCardRewind(GameTaskItemData data)
     {
-        data.cardHolder.RemoveItemFromContentList(data.card);
+        CardHolder holder = (CardHolder)data.holder;
+        holder.RemoveItemFromContentList(data.card);
         RectTransform rect = data.card.GetComponent<RectTransform>();
         data.card.transform.SetParent(data.handTransform);
         rect.anchorMin = new(0.5f, 0.5f);
         rect.anchorMax = new(0.5f, 0.5f);
         rect.anchoredPosition = new(data.card.prevAnchoredPosition.x, data.card.prevAnchoredPosition.y);
         data.card.canMove = true;
-        data.card.cardLocationStatus = CardLocationStatus.IN_HAND;
-        if(data.cardHolder.contentList.Count > 0)
+        data.card.cardActionStatus = CardActionStatus.IN_HAND;
+        if(holder.GetContentListSize() > 0)
         {
-            Card cardBelow = ((Card)data.cardHolder.contentList[^1]);
-            if (cardBelow.cardLocationStatus == CardLocationStatus.STACKED_PENDING_ON_TABLE)
+            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 1);
+            if (cardBelow.cardActionStatus == CardActionStatus.STACKED_PENDING_ON_TABLE)
             {
-                cardBelow.cardLocationStatus = CardLocationStatus.PENDING_ON_TABLE;
+                cardBelow.cardActionStatus = CardActionStatus.PENDING_ON_TABLE;
             }
         }
     }

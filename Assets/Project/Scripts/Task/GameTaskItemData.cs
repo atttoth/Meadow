@@ -4,8 +4,9 @@ public class GameTaskItemData
     public int pendingCardDataID = -1; // only used at Pending card actions
 
     public Card card;
-    public CardHolder cardHolder;
-    public MarkerHolder markerHolder;
+   // public CardHolder cardHolder;
+    //public MarkerHolder markerHolder;
+    public Holder holder;
     public Marker marker;
     public bool isMarkerReset = false;
 

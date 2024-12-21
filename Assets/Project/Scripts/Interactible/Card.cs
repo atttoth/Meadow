@@ -45,7 +45,7 @@ public enum CardIcon
     Landscape // 22
 }
 
-public enum CardLocationStatus
+public enum CardActionStatus
 {
     DEFAULT,
     IN_HAND,
@@ -55,19 +55,19 @@ public enum CardLocationStatus
 
 public class Card : Interactable
 {
+    public CardActionStatus cardActionStatus;
     private CardData _data;
-    public int siblingIndexInParent;
+    private Transform _parent;
+    private int _siblingIndexInParent;
     public Image highlightFrame;
     public GameObject drawText;
-    public Sprite cardFront;
-    public Sprite cardBack;
-    public CardLocationStatus cardLocationStatus;
-    public bool canZoom;
+    private Sprite _cardFront;
+    private Sprite _cardBack;
+    private bool _canZoom;
+    private bool _isDragging;
     public bool isSelected;
-    public bool isDragging;
     public bool canMove;
     public bool canHover;
-    public int holderColIndex; // once card was drawn from board, the replacement requires the index of col
     public float originXInParent;
     public float hoverOriginY;
     public float hoverTargetY;
@@ -78,23 +78,26 @@ public class Card : Interactable
     Sequence cardDrawing;
     Sequence cardFlip;
 
-    public CardData Data
+    public void Init(CardData data, Sprite cardFront, Sprite cardBack)
     {
-        get
-        {
-            return _data;
-        }
-        set
-        {
-            _data = value;
-        }
+        ID = data.ID;
+        _data = data;
+        hoverOriginY = -10f;
+        hoverTargetY = 100f;
+        cardActionStatus = CardActionStatus.DEFAULT;
+        _cardFront = cardFront;
+        _cardBack = cardBack;
+        _mainImage = GetComponent<Image>();
+        _mainImage.sprite = cardBack;
+        highlightFrame = transform.GetChild(0).GetComponent<Image>();
+        highlightFrame.color = Color.green;
+        highlightFrame.gameObject.SetActive(false);
+        drawText = transform.GetChild(1).gameObject;
+        drawText.SetActive(false);
+        gameObject.SetActive(false);
     }
 
-    public void ShowDetails()
-    {
-        Debug.Log(_data.ID);
-        Debug.Log(_data.cardType);
-    }
+    public CardData Data { get { return _data; } }
 
     public override void OnDrag(PointerEventData eventData)
     {
@@ -150,7 +153,7 @@ public class Card : Interactable
                 holder = uiRect ? playerManager.Controller.GetLatestTableCardHolderByTag(uiRect.tag) : holder;
                 if (holder && holder.holderType == HolderType.TableCard && ReferenceManager.Instance.gameLogicManager.CanCardBePlaced(holder, this))
                 {
-                    StartEventHandler(GameEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, cardHolder = holder });
+                    StartEventHandler(GameEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
                     break;
                 }
                 else
@@ -167,12 +170,12 @@ public class Card : Interactable
     public void SavePosition(float posX)
     {
         originXInParent = posX;
-        siblingIndexInParent = transform.GetSiblingIndex();
+        _siblingIndexInParent = transform.GetSiblingIndex();
     }
 
     public void SetCardReadyInHand()
     {
-        cardLocationStatus = CardLocationStatus.IN_HAND;
+        cardActionStatus = CardActionStatus.IN_HAND;
         canMove = true;
         canHover = true;
     }
@@ -182,7 +185,7 @@ public class Card : Interactable
         PlayerController playerController = ReferenceManager.Instance.playerManager.Controller;
         transform.SetParent(playerController.GetHandView().transform);
         GetComponent<RectTransform>().anchoredPosition = new(originXInParent, hoverTargetY);
-        transform.SetSiblingIndex(siblingIndexInParent);
+        transform.SetSiblingIndex(_siblingIndexInParent);
         canHover = !playerController.IsTableVisible();
     }
 
@@ -190,31 +193,32 @@ public class Card : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            if (cardLocationStatus == CardLocationStatus.PENDING_ON_TABLE)
+            if (cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
             {
                 StartEventHandler(GameEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this });
             }
             else
             {
                 ExamineCard();
-                //ShowDetails();
             }
         }
 
         if (eventData.button == PointerEventData.InputButton.Left && isSelected)
         {
-            BoardManager boardManager = ReferenceManager.Instance.boardManager;
-            boardManager.DeSelectCards();
+            transform.SetParent(_parent);
+            _canZoom = false;
+            highlightFrame.gameObject.SetActive(false);
+            highlightFrame.color = Color.green;
+            drawText.SetActive(false);
             zoomSequence.Kill();
             transform.localScale = new Vector3(1f, 1f, 1f);
-            boardManager.FindParentOfCard(_data.ID);
-            StartEventHandler(GameEventType.CARD_PICKED, new GameTaskItemData() { card = this });
+            StartEventHandler(GameEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
         }
     }
 
     private void ExamineCard()
     {
-        transform.SetParent(parent);
+        transform.SetParent(_parent);
         StartEventHandler(GameEventType.CARD_EXAMINED, new GameTaskItemData() { 
             sprite = GetComponent<Image>().sprite, 
             needToRotate = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
@@ -234,7 +238,7 @@ public class Card : Interactable
 
     public override void ToggleRayCast(bool value)
     {
-        mainImage.raycastTarget = value;
+        _mainImage.raycastTarget = value;
         highlightFrame.raycastTarget = value;
     }
 
@@ -245,12 +249,12 @@ public class Card : Interactable
     private void OnHoverEnter()
     {
 
-        if (cardLocationStatus == CardLocationStatus.IN_HAND && canHover)
+        if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
         {
             MoveCard(hoverTargetY, 0.4f);
         }
 
-        if(Array.Exists(new[] { CardLocationStatus.IN_HAND, CardLocationStatus.PENDING_ON_TABLE }, value => value == cardLocationStatus) && !canHover)
+        if(Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
         {
             HighlightCard(true);
         }
@@ -262,7 +266,7 @@ public class Card : Interactable
             drawText.SetActive(true);
         }
 
-        if(canZoom)
+        if(_canZoom)
         {
             ZoomCard(true);
         }
@@ -271,12 +275,12 @@ public class Card : Interactable
     private void OnHoverExit()
     {
 
-        if (cardLocationStatus == CardLocationStatus.IN_HAND && canHover)
+        if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
         {
             MoveCard(hoverOriginY, 0.2f);
         }
 
-        if (Array.Exists(new[] { CardLocationStatus.IN_HAND, CardLocationStatus.PENDING_ON_TABLE, CardLocationStatus.STACKED_PENDING_ON_TABLE }, value => value == cardLocationStatus) && !canHover)
+        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE, CardActionStatus.STACKED_PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
         {
             HighlightCard(false);
         }
@@ -287,7 +291,7 @@ public class Card : Interactable
             drawText.SetActive(false);
         }
 
-        if(canZoom)
+        if(_canZoom)
         {
             ZoomCard(false);
         }
@@ -297,13 +301,13 @@ public class Card : Interactable
     {
         if(!value)
         {
-            transform.SetParent(parent);
+            transform.SetParent(_parent);
             zoomSequence.Kill();
         }
 
         if (value)
         {
-            parent = transform.parent;
+            _parent = transform.parent;
             transform.SetParent(transform.root);
         }
 
@@ -340,10 +344,10 @@ public class Card : Interactable
     public void PlayDrawingAnimation(float delay, CardHolder holder)
     {
         float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
+        _parent = holder.transform;
         gameObject.SetActive(true);
         canMove = false;
         canHover = false;
-        canZoom = true;
 
         cardDrawing = DOTween.Sequence();
         cardDrawing.Append(transform.DOMoveY(holder.transform.position.y, cardDrawSpeed).SetEase(Ease.InOutQuart).SetDelay(delay));
@@ -359,13 +363,13 @@ public class Card : Interactable
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         transform.SetParent(transform.root); // because next card should be above prev card
         cardFlip = DOTween.Sequence();
-        cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => mainImage.sprite = cardFront));
+        cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardFront));
         cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
-        cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
-        cardFlip.OnComplete(() =>
+        cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear).OnComplete(() =>
         {
-            transform.SetParent(parent);
+            transform.SetParent(_parent);
             transform.SetAsFirstSibling();
+            _canZoom = true;
         });
     }
 

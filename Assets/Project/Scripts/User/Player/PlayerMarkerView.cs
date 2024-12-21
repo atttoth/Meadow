@@ -12,6 +12,7 @@ public class PlayerMarkerView : ViewBase
     public override void Init()
     {
         _allMarkers = new();
+        _remainingMarkers = new();
         for (int index = 0; index < 5; index++)
         {
             Marker marker = Instantiate(GameAssets.Instance.markerPrefab).GetComponent<Marker>();
@@ -19,8 +20,8 @@ public class PlayerMarkerView : ViewBase
             marker.transform.SetParent(transform);
             marker.CreateMarker(index);
             _allMarkers.Add(marker);
+            _remainingMarkers.Add(marker);
         }
-        _remainingMarkers = _allMarkers;
         _currentMarkerIndex = -1;
     }
 
@@ -56,5 +57,19 @@ public class PlayerMarkerView : ViewBase
         placedMarker.Status = MarkerStatus.USED;
         _remainingMarkers.Remove(placedMarker);
         _currentMarkerIndex = 0;
+    }
+
+    public void Reset()
+    {
+        _allMarkers.ForEach(marker =>
+        {
+            MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
+            prevHolder.RemoveItemFromContentList(marker);
+            marker.gameObject.SetActive(false);
+            marker.transform.SetParent(transform);
+            marker.Status = MarkerStatus.NONE;
+            _remainingMarkers.Add(marker);
+        });
+        _currentMarkerIndex = -1;
     }
 }

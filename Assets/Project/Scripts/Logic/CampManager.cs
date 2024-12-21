@@ -17,10 +17,7 @@ public class CampManager : MonoBehaviour
         for(int i = 0; i < 3; i++)
         {
             MarkerHolder markerHolder = markerDisplayHolders.GetChild(i).GetComponent<MarkerHolder>();
-            markerHolder.Init();
-            markerHolder.ID = i;
-            markerHolder.holderType = HolderType.CampMarker;
-            markerHolder.contentList = new();
+            markerHolder.Init(i, HolderType.CampMarker);
             _markerHolders.Add(markerHolder);
         }
     }

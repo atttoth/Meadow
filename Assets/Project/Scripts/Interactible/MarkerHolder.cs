@@ -17,7 +17,7 @@ public enum MarkerDirection
 public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, IScrollHandler
 {
     private event EventHandler<InteractableHolderEventArgs> _interactionEventHandler;
-    private Image _image;
+    private Image _mainImage;
     private MarkerDirection _direction;
 
     public class InteractableHolderEventArgs
@@ -28,10 +28,11 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     public MarkerDirection Direction { get { return _direction; } }
 
-    public void Init()
+    public override void Init(int id, HolderType type)
     {
+        base.Init(id, type);
         _interactionEventHandler += ReferenceManager.Instance.gameLogicManager.OnMarkerHolderInteraction;
-        _image = GetComponent<Image>();
+        _mainImage = GetComponent<Image>();
         switch (transform.parent.gameObject.tag)
         {
             case "LeftHolder":
@@ -48,7 +49,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     private bool IsAvailable()
     {
-        foreach (Marker marker in contentList)
+        foreach (Marker marker in _contentList)
         {
             if(marker.Status == MarkerStatus.PLACED || marker.Status == MarkerStatus.USED)
             {
@@ -89,7 +90,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if(IsEmpty())
         {
-            _image.raycastTarget = value;
+            _mainImage.raycastTarget = value;
         }
     }
 }

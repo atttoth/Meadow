@@ -6,7 +6,6 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using System.Collections;
-using UnityEngine.WSA;
 
 public enum MarkerStatus
 {
@@ -29,16 +28,14 @@ public class Marker : Interactable
 
     public void CreateMarker(int index)
     {
-        parent = transform.parent;
         name = $"marker{index}";
         ID = index;
-        siblingIndex = transform.GetSiblingIndex();
         _status = MarkerStatus.NONE;
         _numberOnMarker = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         numberOnMarker = ID + 1;
         string value = ID < 4 ? numberOnMarker.ToString() : "?";
         _numberOnMarker.text = value;
-        mainImage = GetComponent<Image>();
+        _mainImage = GetComponent<Image>();
         _actionIcon = transform.GetChild(1).GetComponent<Image>();
     }
 
@@ -46,15 +43,21 @@ public class Marker : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            _status = MarkerStatus.NONE;
-            StartEventHandler(GameEventType.MARKER_CANCELLED, new GameTaskItemData() { marker = this });
+            if(_status == MarkerStatus.PLACED)
+            {
+                _status = MarkerStatus.NONE;
+                StartEventHandler(GameEventType.MARKER_CANCELLED, new GameTaskItemData() { marker = this });
+            }
         }
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            _status = MarkerStatus.PLACED;
-            MarkerHolder holder = parent.GetComponent<MarkerHolder>();
-            StartEventHandler(GameEventType.MARKER_PLACED, new GameTaskItemData() { markerHolder = holder, marker = this });
+            if(_status == MarkerStatus.NONE)
+            {
+                _status = MarkerStatus.PLACED;
+                MarkerHolder holder = transform.parent.GetComponent<MarkerHolder>();
+                StartEventHandler(GameEventType.MARKER_PLACED, new GameTaskItemData() { holder = holder, marker = this });
+            }
         }
     }
 
@@ -81,9 +84,16 @@ public class Marker : Interactable
         iconTransform.eulerAngles = new(0f, 0f, 0f);
     }
 
+    public void AdjustAlpha(bool isPlaced)
+    {
+        Color tempColor = _mainImage.color;
+        tempColor.a = isPlaced ? 1f : 0.5f;
+        _mainImage.color = tempColor;
+    }
+
     public override void ToggleRayCast(bool value)
     {
-        mainImage.raycastTarget = value;
+        base._mainImage.raycastTarget = value;
         _numberOnMarker.raycastTarget = value;
         _actionIcon.raycastTarget = value;
     }

@@ -13,29 +13,48 @@ public enum HolderType
 public class Holder : MonoBehaviour
 {
     [HideInInspector] public HolderType holderType;
-    public int ID; // used at BoardMarker, BoardCard to link holder with corresponding display icon
-    public List<Interactable> contentList;
+    public int ID;
+    protected List<Interactable> _contentList;
 
-    public bool IsEmpty() => contentList.Count < 1;
+    public virtual void Init(int id, HolderType type)
+    {
+        if (id != -1)
+        {
+            ID = id;
+        }
+        holderType = type;
+        _contentList = new();
+    }
+
+    public bool IsEmpty() => _contentList.Count < 1;
+
+    public int GetContentListSize()
+    {
+        return _contentList.Count;
+    }
 
     public void AddToContentList(Interactable item)
     {
-        item.GetComponent<Interactable>().parent = transform;
         item.transform.SetParent(transform);
-        contentList.Add(item);
+        _contentList.Add(item);
     }
 
     public Interactable GetItemFromContentListByIndex(int index)
     {
-        if (contentList.Count > 0)
+        if (_contentList.Count > 0)
         {
-            return contentList[index];
+            return _contentList[index];
         }
         return default;
     }
 
     public void RemoveItemFromContentList(Interactable item)
     {
-        contentList.Remove(item);
+        _contentList.Remove(item);
+    }
+
+    public List<Interactable> GetAllContent()
+    {
+        return _contentList;
     }
 }

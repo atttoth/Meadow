@@ -120,7 +120,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     private void UpdateCurrentIconsOfHolder(GameTaskItemData data)
     {
-        int ID = data.cardHolder.ID;
+        int ID = data.holder.ID;
         CardIcon[][] items = _allIconsOfHoldersInOrder[ID];
         _allIconsOfHoldersInOrder.Remove(ID);
 
@@ -136,7 +136,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     private void UpdateCurrentIconsOfHolderRewind(GameTaskItemData data)
     {
-        int ID = data.cardHolder.ID;
+        int ID = data.holder.ID;
         CardIcon[][] items = _allIconsOfHoldersInOrder[ID];
         _allIconsOfHoldersInOrder.Remove(ID);
 
@@ -157,7 +157,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         {
             return;
         }
-        int ID = data.cardHolder.ID;
+        int ID = data.holder.ID;
         _allIconsOfHoldersInOrder.Add(ID, new CardIcon[][] { });
     }
 
@@ -167,7 +167,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         {
             return;
         }
-        _allIconsOfHoldersInOrder.Remove(data.cardHolder.ID);
+        _allIconsOfHoldersInOrder.Remove(data.holder.ID);
         UpdateTableCardUI();
     }
 
@@ -244,12 +244,12 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
                 List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
                 dataCollection
                     .Select(data => data.card)
-                    .Where(card => card.cardLocationStatus == CardLocationStatus.PENDING_ON_TABLE)
+                    .Where(card => card.cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
                     .OrderBy(card => card.transform.parent.GetSiblingIndex())
                     .ToList()
                     .ForEach(card => _tableView.PrepareDisplayIcon(card));
 
-                dataCollection.ForEach(data => data.card.cardLocationStatus = CardLocationStatus.DEFAULT);
+                dataCollection.ForEach(data => data.card.cardActionStatus = CardActionStatus.DEFAULT);
                 int duration1 = _tableView.SetDisplayIconsHorizontalPosition();
                 task.StartDelayMs(duration1);
                 break;
@@ -290,5 +290,10 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     public void SetMarkerUsed()
     {
         _markerView.SetPlacedMarkerToUsed();
+    }
+
+    public void ResetMarkers()
+    {
+        _markerView.Reset();
     }
 }

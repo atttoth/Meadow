@@ -2,9 +2,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using DG.Tweening;
 using UnityEngine.UI;
 using UnityEngine.U2D;
+using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
@@ -16,18 +16,6 @@ public class BoardManager : MonoBehaviour
     // drawing sequence
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
     private List<Card> _cardsToDraw; // saved cards to draw
-
-    public List<CardHolder> EmptyHolders
-    {
-        get { return _emptyHolders; }
-        set { _emptyHolders = value; }
-    }
-
-    public List<Card> CardsToDraw
-    {
-        get { return _cardsToDraw; }
-        set { _cardsToDraw = value; }
-    }
 
     private T GetNextItem<T>(List<T> list)
     {
@@ -49,12 +37,7 @@ public class BoardManager : MonoBehaviour
             for(int j = 0; j < _GRID_SIZE; j++)
             {
                 CardHolder boardCardHolder = Instantiate(GameAssets.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
-                boardCardHolder.name = $"CardHolder{j}";
-                boardCardHolder.ID = j;
-                boardCardHolder.holderType = HolderType.BoardCard;
-                boardCardHolder.contentList = new();
-                boardCardHolder.backgroundImage = GetComponent<Image>();
-                boardCardHolder.blackOverlay = boardCardHolder.transform.GetChild(0).GetComponent<Image>();
+                boardCardHolder.Init(j, HolderType.BoardCard);
                 boardCardHolder.EnableOverlay(false);
                 list.Add(boardCardHolder);
             }
@@ -69,14 +52,17 @@ public class BoardManager : MonoBehaviour
             for (int j = 0; j < _GRID_SIZE; j++)
             {
                 MarkerHolder boardMarkerHolder = holderGroup.GetChild(j).GetComponent<MarkerHolder>();
-                boardMarkerHolder.Init();
-                boardMarkerHolder.ID = j;
-                boardMarkerHolder.holderType = HolderType.BoardMarker;
-                boardMarkerHolder.contentList = new();
+                boardMarkerHolder.Init(j, HolderType.BoardMarker);
                 list.Add(boardMarkerHolder);
             }
             _markerHolders.Add(i, list);
         }
+    }
+
+    public void PrepareCardDrawing(List<CardHolder> holders, List<Card> cards)
+    {
+        _emptyHolders = holders;
+        _cardsToDraw = cards;
     }
 
     public void BoardFillHandler(GameTask task)
@@ -125,14 +111,14 @@ public class BoardManager : MonoBehaviour
         return card;
     }
 
-    public Card[] SelectCardsFromBoard(int[][] indices)
+    public List<Card> SelectCardsFromBoard(int[][] indices)
     {
-        Card[] cards = new Card[4];
-        for(int i = 0; i < 4; i++)
+        List<Card> cards = new();
+        for(int i = 0; i < indices.Length; i++)
         {
             int[] pair = indices[i];
             Card card = GetCardFromCardHolder(pair[0], pair[1]);
-            cards[i] = card;
+            cards.Add(card);
         }
         return cards;
     }
@@ -168,24 +154,6 @@ public class BoardManager : MonoBehaviour
         return indices;
     }
 
-    public void FindParentOfCard(int cardID)
-    {
-        for(int col = 0; col < _cardHolders.Count; col++)
-        {
-            for(int row = 0; row < _cardHolders[col].Count; row++)
-            {
-                CardHolder holder = _cardHolders[col][row];
-                Card card = (Card)holder.GetItemFromContentListByIndex(0);
-                if(card && card.Data.ID == cardID)
-                {
-                    card.holderColIndex = col;
-                    holder.RemoveItemFromContentList(card);
-                    break;
-                }
-            }
-        }
-    }
-
     public void ToggleRayTargetOfCardsAndHolders(bool value)
     {
         for (int col = 0; col < _cardHolders.Count; col++)
@@ -193,10 +161,9 @@ public class BoardManager : MonoBehaviour
             for (int row = 0; row < _cardHolders[col].Count; row++)
             {
                 CardHolder holder = _cardHolders[col][row];
-                holder.backgroundImage.raycastTarget = value;
-                foreach (Card card in holder.contentList)
+                if(holder.GetContentListSize() > 0)
                 {
-                    card.ToggleRayCast(value);
+                    holder.GetAllContent().ForEach(card => card.ToggleRayCast(value));
                 }
             }
         }
@@ -206,7 +173,7 @@ public class BoardManager : MonoBehaviour
     {
         markers.ForEach(marker =>
         {
-            MarkerHolder prevHolder = marker.parent.GetComponent<MarkerHolder>();
+            MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
             if(prevHolder != null && !prevHolder.IsEmpty())
             {
                 prevHolder.RemoveItemFromContentList(marker);
@@ -214,15 +181,13 @@ public class BoardManager : MonoBehaviour
             holder.AddToContentList(marker);
             marker.transform.position = holder.transform.position;
             marker.Rotate(holder.Direction);
+            marker.AdjustAlpha(false);
         });
     }
 
     public void HideMarkersAtBoard(MarkerHolder holder, List<Marker> markers)
     {
-        markers.ForEach(marker =>
-        {
-            marker.gameObject.SetActive(false);
-        });
+        markers.ForEach(marker => marker.gameObject.SetActive(false));
     }
 
     public void ToggleMarkerHolders(bool value)
@@ -238,33 +203,24 @@ public class BoardManager : MonoBehaviour
         if (marker.ID < 4)
         {
             int[] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker);
-            Card card = SelectCardFromBoard(indices);
             EnableOverlayOfCardHolders(true, indices);
-            card.Select();
+            SelectCardFromBoard(indices).Select();
         }
         else
         {
             int[][] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction);
-            Card[] cards = SelectCardsFromBoard(indices);
-            EnableOverlayOfCardHolders(true, indices);
-            foreach (Card card in cards)
-            {
-                card.Select();
-            }
+            ToggleBlackOverlayOfCardHolders(true, indices);
+            SelectCardsFromBoard(indices).ForEach(card => card.Select());
         }
     }
 
     public void DeSelectCards()
     {
-        for(int i = 0; i < 4; i++)
+        for(int i = 0; i < _GRID_SIZE; i++)
         {
-            for(int j = 0; j < 4; j++)
+            for(int j = 0; j < _GRID_SIZE; j++)
             {
-                Card card = GetCardFromCardHolder(i, j);
-                if(card.isSelected)
-                {
-                    card.isSelected = false;
-                }
+                GetCardFromCardHolder(i, j).isSelected = false;
             }
         }
     }
@@ -274,11 +230,7 @@ public class BoardManager : MonoBehaviour
         for(int i = 0; i < _cardHolders.Count; i++)
         {
             List<CardHolder> holders = _cardHolders[i];
-            foreach(CardHolder holder in holders)
-            {
-                holder.blackOverlay.transform.SetAsLastSibling();
-                holder.EnableOverlay(value);
-            }
+            holders.ForEach(holder => holder.EnableOverlay(value));
         }
         if(value)
         {
@@ -286,20 +238,16 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void EnableOverlayOfCardHolders(bool value, int[][] indices = null)
+    public void ToggleBlackOverlayOfCardHolders(bool value, int[][] indices = null)
     {
         for (int i = 0; i < _cardHolders.Count; i++)
         {
             List<CardHolder> holders = _cardHolders[i];
-            foreach (CardHolder holder in holders)
-            {
-                holder.blackOverlay.transform.SetAsLastSibling();
-                holder.EnableOverlay(value);
-            }
+            holders.ForEach(holder => holder.EnableOverlay(value));
         }
         if (value)
         {
-            for (int i = 0; i < 4; i++)
+            for (int i = 0; i < _GRID_SIZE; i++)
             {
                 int[] pair = indices[i];
                 _cardHolders[pair[0]][pair[1]].EnableOverlay(!value);

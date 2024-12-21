@@ -4,11 +4,8 @@ using UnityEngine.UI;
 
 public abstract class Interactable : GameInteractionEvent, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    [HideInInspector] public Transform parent;
-    [HideInInspector] public Vector2 originInParent;
-    [HideInInspector] public Image mainImage;
     public int ID;
-    public int siblingIndex;
+    protected Image _mainImage; // to toggle raycast
 
     public virtual void ToggleRayCast(bool value) { return; }
 
