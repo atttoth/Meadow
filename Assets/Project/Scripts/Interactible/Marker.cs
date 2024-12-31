@@ -2,11 +2,6 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using System;
-using System.Collections.Generic;
-using UnityEngine.InputSystem;
-using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine.U2D;
 
 public enum MarkerStatus

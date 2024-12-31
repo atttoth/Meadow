@@ -9,7 +9,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 2,
@@ -19,7 +19,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 3,
@@ -29,7 +29,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 4,
@@ -39,7 +39,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 5,
@@ -49,7 +49,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 6,
@@ -59,7 +59,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 7,
@@ -69,7 +69,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12],
       "icons": [13],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 8,
@@ -79,7 +79,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 9,
@@ -89,7 +89,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 10,
@@ -99,7 +99,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12, 13],
       "icons": [13],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 11,
@@ -109,7 +109,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 12,
@@ -119,7 +119,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 13,
@@ -129,7 +129,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 14,
@@ -139,7 +139,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 15,
@@ -149,7 +149,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12, 16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 16,
@@ -159,7 +159,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 17,
@@ -169,7 +169,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 18,
@@ -179,7 +179,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [13, 7],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 19,
@@ -189,7 +189,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 20,
@@ -199,7 +199,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 21,
@@ -209,7 +209,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 22,
@@ -219,7 +219,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 23,
@@ -229,7 +229,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 24,
@@ -239,7 +239,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12, 13],
       "icons": [13, 5],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 25,
@@ -249,7 +249,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 26,
@@ -259,7 +259,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 27,
@@ -269,7 +269,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 28,
@@ -279,7 +279,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12, 15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 29,
@@ -289,7 +289,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12, 13],
       "icons": [13, 16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 30,
@@ -299,7 +299,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 31,
@@ -309,7 +309,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 32,
@@ -319,7 +319,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12],
       "icons": [13],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 33,
@@ -329,7 +329,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12],
       "icons": [8, 13],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 34,
@@ -339,7 +339,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 35,
@@ -349,7 +349,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 36,
@@ -359,7 +359,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22, 22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 37,
@@ -369,7 +369,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 38,
@@ -379,7 +379,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 39,
@@ -389,7 +389,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 40,
@@ -399,7 +399,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12, 8],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 41,
@@ -409,7 +409,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12],
       "icons": [13],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 42,
@@ -419,7 +419,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 43,
@@ -429,7 +429,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 44,
@@ -439,7 +439,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 45,
@@ -449,7 +449,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [13],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 46,
@@ -459,7 +459,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 47,
@@ -469,7 +469,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 48,
@@ -479,7 +479,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12, 13],
       "icons": [13],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 49,
@@ -489,7 +489,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 50,
@@ -499,7 +499,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 51,
@@ -509,7 +509,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [12],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 52,
@@ -519,7 +519,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 53,
@@ -529,7 +529,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 54,
@@ -539,7 +539,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 55,
@@ -549,7 +549,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [14],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 56,
@@ -559,7 +559,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 57,
@@ -569,7 +569,7 @@
       "optionalRequirements": [10, 8, 5, 6],
       "adjacentRequirements":[],
       "icons": [6],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 58,
@@ -579,7 +579,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 59,
@@ -589,7 +589,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 60,
@@ -599,7 +599,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 61,
@@ -609,7 +609,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 62,
@@ -619,7 +619,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9, 15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 63,
@@ -629,7 +629,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 64,
@@ -639,7 +639,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16, 15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 65,
@@ -649,7 +649,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 66,
@@ -659,7 +659,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 67,
@@ -669,7 +669,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 68,
@@ -679,7 +679,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 69,
@@ -689,7 +689,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[12],
       "icons": [10],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 70,
@@ -699,7 +699,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 71,
@@ -709,7 +709,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 72,
@@ -719,7 +719,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 73,
@@ -729,7 +729,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 74,
@@ -739,7 +739,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 75,
@@ -749,7 +749,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9, 15],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 76,
@@ -759,7 +759,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 77,
@@ -769,7 +769,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [14],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 78,
@@ -779,7 +779,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 79,
@@ -789,7 +789,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 80,
@@ -799,7 +799,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 81,
@@ -809,7 +809,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 82,
@@ -819,7 +819,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 83,
@@ -829,7 +829,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 84,
@@ -839,7 +839,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 85,
@@ -849,7 +849,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 86,
@@ -859,7 +859,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 87,
@@ -869,7 +869,7 @@
       "optionalRequirements": [6, 7],
       "adjacentRequirements":[],
       "icons": [6],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 88,
@@ -879,7 +879,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 89,
@@ -889,7 +889,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 90,
@@ -899,7 +899,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 91,
@@ -909,7 +909,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 92,
@@ -919,7 +919,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [6],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 93,
@@ -929,7 +929,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [6],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 94,
@@ -939,7 +939,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [13],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 95,
@@ -949,7 +949,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 96,
@@ -959,7 +959,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 97,
@@ -969,7 +969,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 98,
@@ -979,7 +979,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [14],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 99,
@@ -989,7 +989,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 100,
@@ -999,7 +999,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [15],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 101,
@@ -1009,7 +1009,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [7],
-      "value": 1
+      "score": 1
     },
     {
       "ID": 102,
@@ -1019,7 +1019,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 103,
@@ -1029,7 +1029,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 104,
@@ -1039,7 +1039,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 105,
@@ -1049,7 +1049,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 2
+      "score": 2
     },
     {
       "ID": 106,
@@ -1059,7 +1059,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 107,
@@ -1069,7 +1069,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 108,
@@ -1079,7 +1079,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 109,
@@ -1089,7 +1089,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 110,
@@ -1099,7 +1099,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 111,
@@ -1109,7 +1109,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 112,
@@ -1119,7 +1119,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 1],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 113,
@@ -1129,7 +1129,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 3],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 114,
@@ -1139,7 +1139,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 115,
@@ -1149,7 +1149,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 116,
@@ -1159,7 +1159,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 117,
@@ -1169,7 +1169,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 118,
@@ -1179,7 +1179,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 119,
@@ -1189,7 +1189,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 120,
@@ -1199,7 +1199,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 121,
@@ -1209,7 +1209,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 122,
@@ -1219,7 +1219,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 123,
@@ -1229,7 +1229,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 124,
@@ -1239,7 +1239,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 125,
@@ -1249,7 +1249,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 14],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 126,
@@ -1259,7 +1259,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 127,
@@ -1269,7 +1269,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 128,
@@ -1279,7 +1279,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 129,
@@ -1289,7 +1289,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 4],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 130,
@@ -1299,7 +1299,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 131,
@@ -1309,7 +1309,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 132,
@@ -1319,7 +1319,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 133,
@@ -1329,7 +1329,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 16],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 134,
@@ -1339,7 +1339,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 3],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 135,
@@ -1349,7 +1349,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 136,
@@ -1359,7 +1359,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 137,
@@ -1369,7 +1369,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 138,
@@ -1379,7 +1379,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 139,
@@ -1389,7 +1389,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 140,
@@ -1399,7 +1399,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 141,
@@ -1409,7 +1409,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 142,
@@ -1419,7 +1419,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 1],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 143,
@@ -1429,7 +1429,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 144,
@@ -1439,7 +1439,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 3],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 145,
@@ -1449,7 +1449,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 14],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 146,
@@ -1459,7 +1459,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 147,
@@ -1469,7 +1469,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [3, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 148,
@@ -1479,7 +1479,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 149,
@@ -1489,7 +1489,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 150,
@@ -1499,7 +1499,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 151,
@@ -1509,7 +1509,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 15],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 152,
@@ -1519,7 +1519,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 153,
@@ -1529,7 +1529,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 154,
@@ -1539,7 +1539,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [4, 9],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 155,
@@ -1549,7 +1549,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 5],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 156,
@@ -1559,7 +1559,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [2, 6],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 157,
@@ -1569,7 +1569,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 158,
@@ -1579,7 +1579,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 159,
@@ -1589,7 +1589,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [14],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 160,
@@ -1599,7 +1599,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 161,
@@ -1609,7 +1609,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 162,
@@ -1619,7 +1619,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [18],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 163,
@@ -1629,7 +1629,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [9],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 164,
@@ -1639,7 +1639,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 165,
@@ -1649,7 +1649,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 166,
@@ -1659,7 +1659,7 @@
       "optionalRequirements": [5, 6],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 167,
@@ -1669,7 +1669,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [14],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 168,
@@ -1679,7 +1679,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 169,
@@ -1689,7 +1689,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 170,
@@ -1699,7 +1699,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 171,
@@ -1709,7 +1709,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 172,
@@ -1719,7 +1719,7 @@
       "optionalRequirements": ["4 of the same ground"],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 173,
@@ -1729,7 +1729,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 174,
@@ -1739,7 +1739,7 @@
       "optionalRequirements": [6, 8],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 175,
@@ -1749,7 +1749,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 176,
@@ -1759,7 +1759,7 @@
       "optionalRequirements": [6, 8],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 177,
@@ -1769,7 +1769,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 178,
@@ -1779,7 +1779,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 179,
@@ -1789,7 +1789,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 180,
@@ -1799,7 +1799,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 181,
@@ -1809,7 +1809,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 182,
@@ -1819,7 +1819,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 183,
@@ -1829,7 +1829,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [18],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 184,
@@ -1839,7 +1839,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 185,
@@ -1849,7 +1849,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [7],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 186,
@@ -1859,7 +1859,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 187,
@@ -1869,7 +1869,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 188,
@@ -1879,7 +1879,7 @@
       "optionalRequirements": [5, 7],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 189,
@@ -1889,7 +1889,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 190,
@@ -1899,7 +1899,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 191,
@@ -1909,7 +1909,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 192,
@@ -1919,7 +1919,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 193,
@@ -1929,7 +1929,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 194,
@@ -1939,7 +1939,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 195,
@@ -1949,7 +1949,7 @@
       "optionalRequirements": ["9 ground"],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 196,
@@ -1959,7 +1959,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 197,
@@ -1969,7 +1969,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [18],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 198,
@@ -1979,7 +1979,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 199,
@@ -1989,7 +1989,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[13],
       "icons": [14],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 200,
@@ -1999,7 +1999,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [15],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 201,
@@ -2009,7 +2009,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [8],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 202,
@@ -2019,7 +2019,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [11],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 203,
@@ -2029,7 +2029,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 204,
@@ -2039,7 +2039,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [5],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 205,
@@ -2049,7 +2049,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [18],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 206,
@@ -2059,7 +2059,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 207,
@@ -2069,7 +2069,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [16],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 208,
@@ -2079,7 +2079,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 209,
@@ -2089,7 +2089,7 @@
       "optionalRequirements": [5, 6],
       "adjacentRequirements":[],
       "icons": [10],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 210,
@@ -2099,7 +2099,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 211,
@@ -2109,7 +2109,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 212,
@@ -2119,7 +2119,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 213,
@@ -2129,7 +2129,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 3
+      "score": 3
     },
     {
       "ID": 214,
@@ -2139,7 +2139,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 215,
@@ -2149,7 +2149,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 216,
@@ -2159,7 +2159,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [19],
-      "value": 4
+      "score": 4
     },
     {
       "ID": 217,
@@ -2169,7 +2169,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [1, 7],
-      "value": 0
+      "score": 0
     },
     {
       "ID": 218,
@@ -2179,7 +2179,7 @@
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [0, 5],
-      "value": 0
+      "score": 0
     }
   ]
 }

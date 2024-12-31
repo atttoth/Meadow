@@ -55,7 +55,7 @@ public class PlayerScoreView : ViewBase
         Transform scoreTextPrefab = GetOrCreateScoreText();
         Transform startingPoint = card.GetComponent<Transform>();
         scoreTextPrefab.SetPositionAndRotation(startingPoint.position, Quaternion.identity);
-        int score = card.Data.value;
+        int score = card.Data.score;
         scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = score.ToString();
         float cardScoreCollectingSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
 

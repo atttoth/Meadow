@@ -5,7 +5,6 @@ public class ReferenceManager : MonoBehaviour
     public static ReferenceManager Instance; // A static reference to the GameManager instance
     public GameLogicManager gameLogicManager;
     public BoardManager boardManager;
-    public DeckManager deckManager;
     public PlayerManager playerManager;
     public CampManager campManager;
     public OverlayManager overlayManager;

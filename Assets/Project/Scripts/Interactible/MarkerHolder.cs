@@ -1,10 +1,5 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.EventSystems;
-using System.Linq;
-using UnityEditor.SceneManagement;
 using UnityEngine.UI;
 
 public enum MarkerDirection

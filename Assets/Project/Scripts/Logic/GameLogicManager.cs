@@ -1,12 +1,5 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
-using Unity.VisualScripting;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using static Card;
 using static GameTask;
@@ -17,7 +10,6 @@ public class GameLogicManager : MonoBehaviour
     private GameSettings _gameSettings;
     private BoardManager _boardManager;
     private CampManager _campManager;
-    private DeckManager _deckManager;
     private PlayerManager _playerManager;
     private OverlayManager _overlayManager;
     GameTaskHandler[] _eventHandlers;
@@ -39,7 +31,6 @@ public class GameLogicManager : MonoBehaviour
         _gameSettings = new GameSettings();
         _boardManager = ReferenceManager.Instance.boardManager;
         _campManager = ReferenceManager.Instance.campManager;
-        _deckManager = ReferenceManager.Instance.deckManager;
         _playerManager = ReferenceManager.Instance.playerManager;
         _overlayManager = ReferenceManager.Instance.overlayManager;
         _eventHandlers = new GameTaskHandler[] {
@@ -55,9 +46,6 @@ public class GameLogicManager : MonoBehaviour
 
         _boardManager.CreateBoard();
         _campManager.CreateCamp();
-        _deckManager.CreateAtlasList();
-        _deckManager.CreateDecks();
-        _deckManager.CreateDummyDecks();
         _playerManager.CreatePlayer();
         _overlayManager.CreateOverlay();
     }
@@ -91,7 +79,7 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 isBoardFilled = true;
                 _playerManager.Controller.EnableTableView(false);
-                SaveTargetHoldersAndCards();
+                _boardManager.SaveTargetHoldersAndCards(GetActiveDeckType());
                 task.StartHandler(_boardManager.BoardFillHandler);
                 break;
             default:
@@ -100,35 +88,6 @@ public class GameLogicManager : MonoBehaviour
                 task.Complete();
                 break;
         }
-    }
-
-    private void SaveTargetHoldersAndCards()
-    {
-        List<CardHolder> holders = new() { };
-        List<Card> cards = new() { };
-        for (int colIndex = 0; colIndex < (int)DeckType.NUM_OF_DECKS; colIndex++)
-        {
-            DeckType deckType = colIndex switch
-            {
-                0 => DeckType.West,
-                1 or 2 => GetActiveDeckType(),
-                _ => DeckType.East,
-            };
-            List<CardHolder> emptyHolders = _boardManager.GetEmptyCardHoldersByColumn(colIndex);
-            if (emptyHolders.Count > 0)
-            {
-                emptyHolders.Reverse();
-                List<Card> selectedCards = _deckManager.GetCardsReadyToDraw(emptyHolders.Count, deckType, colIndex);
-                for (int i = 0; i < emptyHolders.Count; i++)
-                {
-                    CardHolder emptyHolder = emptyHolders[i];
-                    Card card = selectedCards[i];
-                    holders.Add(emptyHolder);
-                    cards.Add(card);
-                }
-            }
-        }
-        _boardManager.PrepareCardDrawing(holders, cards);
     }
 
     private DeckType GetActiveDeckType()
@@ -274,7 +233,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartDelayMs(1000);
                 break;
             case 1:
-                SaveTargetHoldersAndCards();
+                _boardManager.SaveTargetHoldersAndCards(GetActiveDeckType());
                 task.StartHandler(_boardManager.BoardFillHandler);
                 break;
             case 2:

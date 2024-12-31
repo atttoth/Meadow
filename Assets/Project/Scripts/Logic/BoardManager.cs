@@ -1,16 +1,14 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.U2D;
-using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
     private static readonly int _GRID_SIZE = 4;
     private Dictionary<int, List<CardHolder>> _cardHolders;
     private Dictionary<int, List<MarkerHolder>> _markerHolders;
+    private DeckController _deckController;
 
     // drawing sequence
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
@@ -56,10 +54,37 @@ public class BoardManager : MonoBehaviour
             }
             _markerHolders.Add(i, list);
         }
+
+        _deckController = transform.GetChild(2).GetComponent<DeckController>();
+        _deckController.Init();
     }
 
-    public void PrepareCardDrawing(List<CardHolder> holders, List<Card> cards)
+    public void SaveTargetHoldersAndCards(DeckType activeDeckType)
     {
+        List<CardHolder> holders = new() { };
+        List<Card> cards = new() { };
+        for (int colIndex = 0; colIndex < (int)DeckType.NUM_OF_DECKS; colIndex++)
+        {
+            DeckType deckType = colIndex switch
+            {
+                0 => DeckType.West,
+                1 or 2 => activeDeckType,
+                _ => DeckType.East,
+            };
+            List<CardHolder> emptyHolders = GetEmptyCardHoldersByColumn(colIndex);
+            if (emptyHolders.Count > 0)
+            {
+                emptyHolders.Reverse();
+                List<Card> selectedCards = _deckController.GetCardsReadyToDraw(emptyHolders.Count, deckType, colIndex);
+                for (int i = 0; i < emptyHolders.Count; i++)
+                {
+                    CardHolder emptyHolder = emptyHolders[i];
+                    Card card = selectedCards[i];
+                    holders.Add(emptyHolder);
+                    cards.Add(card);
+                }
+            }
+        }
         _emptyHolders = holders;
         _cardsToDraw = cards;
     }
@@ -90,7 +115,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public List<CardHolder> GetEmptyCardHoldersByColumn(int colIndex)
+    private List<CardHolder> GetEmptyCardHoldersByColumn(int colIndex)
     {
         List<CardHolder> list = _cardHolders[colIndex];
         List<CardHolder> emptyHolders = new();

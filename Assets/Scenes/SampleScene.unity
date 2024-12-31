@@ -696,7 +696,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameLogicManager: {fileID: 2000989460}
   boardManager: {fileID: 840271216}
-  deckManager: {fileID: 1762948496}
   playerManager: {fileID: 241775365}
   campManager: {fileID: 777678035}
   overlayManager: {fileID: 936583949}
@@ -775,7 +774,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 42466273c0f9ba84c9bd09f88cbc9f1a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isMarkerSpecialActionPending: 0
 --- !u!1 &243239140
 GameObject:
   m_ObjectHideFlags: 0
@@ -2354,7 +2352,6 @@ RectTransform:
   m_Children:
   - {fileID: 840271214}
   - {fileID: 777678032}
-  - {fileID: 1762948497}
   - {fileID: 241775362}
   - {fileID: 936583950}
   m_Father: {fileID: 0}
@@ -2690,6 +2687,7 @@ RectTransform:
   m_Children:
   - {fileID: 303605286}
   - {fileID: 1981709365}
+  - {fileID: 1762948497}
   m_Father: {fileID: 764915148}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
@@ -5569,7 +5567,7 @@ GameObject:
   - component: {fileID: 1762948496}
   - component: {fileID: 1762948499}
   m_Layer: 0
-  m_Name: DeckManager
+  m_Name: DeckController
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -5601,11 +5599,11 @@ RectTransform:
   m_Children:
   - {fileID: 1498826173}
   - {fileID: 1659919369}
-  m_Father: {fileID: 764915148}
+  m_Father: {fileID: 840271214}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 1}
   m_AnchorMax: {x: 0.5, y: 1}
-  m_AnchoredPosition: {x: 0, y: 120}
+  m_AnchoredPosition: {x: 0, y: 72.5}
   m_SizeDelta: {x: 795, y: 232}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1762948499

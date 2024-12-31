@@ -1,8 +1,6 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Random = System.Random;
-using UnityEngine.UI;
 using UnityEngine.U2D;
 
 public enum DeckType
@@ -21,22 +19,17 @@ public class Deck : MonoBehaviour
     private SpriteAtlas _atlas;
     public bool testOver;
 
-    public void CreateDeck(int index, List<CardData> cardData, SpriteAtlas atlas)
+    public void Init(int index, List<CardData> cardData, SpriteAtlas atlas)
     {
         deckType = (DeckType)index;
         _cards = new();
         _atlas = atlas;
-        foreach (CardData data in cardData)
+        cardData.ForEach(data =>
         {
-            CreateCardFromCardData(data);
-        }
-    }
-
-    private void CreateCardFromCardData(CardData data)
-    {
-        Card card = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
-        card.Init(data, _atlas.GetSprite(data.ID.ToString()), _atlas.GetSprite("back"));
-        _cards.Add(card);
+            Card card = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
+            card.Init(data, _atlas.GetSprite(data.ID.ToString()), _atlas.GetSprite("back"));
+            _cards.Add(card);
+        });
     }
 
     public Card GetRandomCard()
