@@ -1,6 +1,9 @@
 using DG.Tweening;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEditor.Timeline.Actions;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -11,12 +14,13 @@ public enum DummyType
     ACTION_ICON
 }
 
-public class OverlayManager : MonoBehaviour, IPointerClickHandler
+public class OverlayManager : GameInteractionEvent
 {
     private GameObject _dummy;
     private Image _blackOverlay;
     private Vector3 _defaultPosition;
     Sequence examineSequence;
+    private MarkerActionScreen _markerActionScreen;
 
     public void CreateOverlay()
     {
@@ -24,6 +28,13 @@ public class OverlayManager : MonoBehaviour, IPointerClickHandler
         _defaultPosition = _dummy.transform.position;
         _blackOverlay = transform.GetChild(0).GetComponent<Image>();
         EnableDummy(false);
+        _markerActionScreen = transform.GetChild(2).GetComponent<MarkerActionScreen>();
+        List<Button> actionIconButtons = _markerActionScreen.Init();
+        actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
+        {
+            button.enabled = true;
+            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = (MarkerAction)Enum.Parse(typeof(MarkerAction), button.tag, true) });
+        }));
     }
 
     public void SetDummy(Sprite sprite, bool needToRotate, DummyType type)
@@ -36,11 +47,6 @@ public class OverlayManager : MonoBehaviour, IPointerClickHandler
             _dummy.transform.eulerAngles = new Vector3(_dummy.transform.rotation.eulerAngles.x, _dummy.transform.rotation.eulerAngles.y, _dummy.transform.rotation.eulerAngles.z + 90f);
             _dummy.transform.position = new Vector3(_dummy.transform.position.x, _dummy.transform.position.y + 60f, _dummy.transform.position.z);
         }
-    }
-
-    public void SetDummies()
-    {
-
     }
 
     private int[] GetDummySize(DummyType type)
@@ -61,29 +67,6 @@ public class OverlayManager : MonoBehaviour, IPointerClickHandler
         examineSequence.Play();
     }
 
-    public void ShowActionIcon()
-    {
-
-    }
-
-    public void ShowActionIcon(bool isJoker)
-    {
-
-    }
-
-    public void OnPointerClick(PointerEventData eventData)
-    {
-        if (eventData.button == PointerEventData.InputButton.Right || eventData.button == PointerEventData.InputButton.Left)
-        {
-            EnableDummy(false);
-            _dummy.transform.localScale = new Vector2(1f, 1f);
-            _dummy.transform.eulerAngles = new Vector3(0, 0, 0);
-            _dummy.transform.position = _defaultPosition;
-            bool value = !ReferenceManager.Instance.playerManager.Controller.IsTableVisible();
-            ReferenceManager.Instance.gameLogicManager.EnableRayTargetOInteractables(value);
-        }
-    }
-
     public void EnableDummy(bool value)
     {
         _dummy.SetActive(value);
@@ -91,5 +74,10 @@ public class OverlayManager : MonoBehaviour, IPointerClickHandler
         {
             _blackOverlay.enabled = value;
         }
+    }
+
+    public void ToggleMarkerActionScreen(Marker marker, bool value)
+    {
+        _markerActionScreen.ToggleScreen(marker, value);
     }
 }

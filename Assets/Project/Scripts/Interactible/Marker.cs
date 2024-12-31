@@ -6,6 +6,8 @@ using System;
 using System.Collections.Generic;
 using UnityEngine.InputSystem;
 using System.Collections;
+using Unity.VisualScripting;
+using UnityEngine.U2D;
 
 public enum MarkerStatus
 {
@@ -14,20 +16,43 @@ public enum MarkerStatus
     USED
 }
 
+public enum MarkerAction
+{
+    TAKE_ANY_CARD_FROM_BOARD,
+    TAKE_2_ROAD_TOKENS,
+    PICK_A_CARD_FROM_CHOSEN_DECK,
+    PLAY_UP_TO_2_CARDS,
+    DO_ANY
+}
+
 public class Marker : Interactable
 {
     public int numberOnMarker;
+    public MarkerAction action;
     private TextMeshProUGUI _numberOnMarker;
     private Image _actionIcon;
     private MarkerStatus _status;
+    private Transform _parent; // used at marker action screen
+
+    public Transform Parent
+    {
+        get { return _parent; }
+        set { _parent = value; }
+    }
 
     public MarkerStatus Status {
         get { return _status; }
         set { _status = value; }
     }
 
+    public Sprite GetActionIcon()
+    {
+        return _actionIcon.sprite;
+    }
+
     public void CreateMarker(int index)
     {
+        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         name = $"marker{index}";
         ID = index;
         _status = MarkerStatus.NONE;
@@ -36,7 +61,9 @@ public class Marker : Interactable
         string value = ID < 4 ? numberOnMarker.ToString() : "?";
         _numberOnMarker.text = value;
         _mainImage = GetComponent<Image>();
+        action = (MarkerAction)ID;
         _actionIcon = transform.GetChild(1).GetComponent<Image>();
+        _actionIcon.sprite = atlas.GetSprite(index.ToString());
     }
 
     public override void OnPointerClick(PointerEventData eventData)
@@ -46,7 +73,13 @@ public class Marker : Interactable
             if(_status == MarkerStatus.PLACED)
             {
                 _status = MarkerStatus.NONE;
-                StartEventHandler(GameEventType.MARKER_CANCELLED, new GameTaskItemData() { marker = this });
+                MarkerHolder holder;
+                holder = transform.parent.GetComponent<MarkerHolder>();
+                if(holder == null)
+                {
+                    holder = _parent.GetComponent<MarkerHolder>();
+                }
+                StartEventHandler(GameEventType.MARKER_CANCELLED, new GameTaskItemData() { holder = holder, marker = this });
             }
         }
 
@@ -93,13 +126,8 @@ public class Marker : Interactable
 
     public override void ToggleRayCast(bool value)
     {
-        base._mainImage.raycastTarget = value;
+        _mainImage.raycastTarget = value;
         _numberOnMarker.raycastTarget = value;
         _actionIcon.raycastTarget = value;
-    }
-
-    public Sprite GetActionIcon()
-    {
-       return _actionIcon.sprite;
     }
 }

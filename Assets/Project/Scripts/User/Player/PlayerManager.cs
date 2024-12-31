@@ -15,10 +15,10 @@ public class PlayerManager : MonoBehaviour
 
     public void CreatePlayer()
     {
-        PlayerTableView tableView = transform.GetChild(0).GetComponent<PlayerTableView>();
-        PlayerHandView handView = transform.GetChild(1).GetComponent<PlayerHandView>();
-        PlayerMarkerView markerView = transform.GetChild(2).GetComponent<PlayerMarkerView>();
-        PlayerScoreView scoreView = transform.GetChild(3).GetComponent<PlayerScoreView>();
+        PlayerTableView tableView = transform.GetChild(1).GetComponent<PlayerTableView>();
+        PlayerHandView handView = transform.GetChild(2).GetComponent<PlayerHandView>();
+        PlayerMarkerView markerView = transform.GetChild(3).GetComponent<PlayerMarkerView>();
+        PlayerScoreView scoreView = transform.GetChild(4).GetComponent<PlayerScoreView>();
         _controller = GetComponent<PlayerController>();
         _controller.Init(tableView, handView, markerView, scoreView);
     }

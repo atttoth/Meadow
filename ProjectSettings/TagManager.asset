@@ -12,6 +12,10 @@ TagManager:
   - LeftHolder
   - RightHolder
   - MiddleHolder
+  - TAKE_ANY_CARD_FROM_BOARD
+  - TAKE_2_ROAD_TOKENS
+  - PICK_A_CARD_FROM_CHOSEN_DECK
+  - PLAY_UP_TO_2_CARDS
   layers:
   - Default
   - TransparentFX

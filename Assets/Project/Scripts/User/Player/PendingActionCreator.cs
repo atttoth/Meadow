@@ -8,9 +8,9 @@ public class PendingActionCreator
     private Dictionary<int, PendingActionItem[]> _actionItemsCollection = new();
     private Dictionary<int, GameTaskItemData> _dataCollection = new();
 
-    public bool isActionPending()
+    public int GetNumOfActions()
     {
-        return _actionItemsCollection?.Count > 0;
+        return _actionItemsCollection.Count;
     }
 
     public void Create(PendingActionItem[] postActionItems, PendingActionItem[] prevActionItems, GameTaskItemData data)
@@ -38,7 +38,7 @@ public class PendingActionCreator
 
     public void Dispose()
     {
-        _dataCollection.Clear();
         _actionItemsCollection.Clear();
+        _dataCollection.Clear();
     }
 }

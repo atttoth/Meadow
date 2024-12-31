@@ -60,7 +60,6 @@ public class Card : Interactable
     private Transform _parent;
     private int _siblingIndexInParent;
     public Image highlightFrame;
-    public GameObject drawText;
     private Sprite _cardFront;
     private Sprite _cardBack;
     private bool _canZoom;
@@ -82,7 +81,7 @@ public class Card : Interactable
     {
         ID = data.ID;
         _data = data;
-        hoverOriginY = -10f;
+        hoverOriginY = -55f;
         hoverTargetY = 100f;
         cardActionStatus = CardActionStatus.DEFAULT;
         _cardFront = cardFront;
@@ -92,8 +91,6 @@ public class Card : Interactable
         highlightFrame = transform.GetChild(0).GetComponent<Image>();
         highlightFrame.color = Color.green;
         highlightFrame.gameObject.SetActive(false);
-        drawText = transform.GetChild(1).gameObject;
-        drawText.SetActive(false);
         gameObject.SetActive(false);
     }
 
@@ -209,7 +206,6 @@ public class Card : Interactable
             _canZoom = false;
             highlightFrame.gameObject.SetActive(false);
             highlightFrame.color = Color.green;
-            drawText.SetActive(false);
             zoomSequence.Kill();
             transform.localScale = new Vector3(1f, 1f, 1f);
             StartEventHandler(GameEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
@@ -242,19 +238,14 @@ public class Card : Interactable
         highlightFrame.raycastTarget = value;
     }
 
-    public override void OnPointerEnter(PointerEventData eventData) => OnHoverEnter();
-
-    public override void OnPointerExit(PointerEventData eventData) => OnHoverExit();
-
-    private void OnHoverEnter()
+    public override void OnPointerEnter(PointerEventData eventData)
     {
-
         if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
         {
             MoveCard(hoverTargetY, 0.4f);
         }
 
-        if(Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
+        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
         {
             HighlightCard(true);
         }
@@ -263,18 +254,16 @@ public class Card : Interactable
         {
             HighlightCard(true);
             highlightFrame.GetComponent<Image>().color = Color.red;
-            drawText.SetActive(true);
         }
 
-        if(_canZoom)
+        if (_canZoom)
         {
             ZoomCard(true);
         }
     }
 
-    private void OnHoverExit()
+    public override void OnPointerExit(PointerEventData eventData)
     {
-
         if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
         {
             MoveCard(hoverOriginY, 0.2f);
@@ -288,10 +277,9 @@ public class Card : Interactable
         if (isSelected)
         {
             HighlightCard(false);
-            drawText.SetActive(false);
         }
 
-        if(_canZoom)
+        if (_canZoom)
         {
             ZoomCard(false);
         }

@@ -8,10 +8,9 @@ using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
-    private static int _GRID_SIZE = 4;
+    private static readonly int _GRID_SIZE = 4;
     private Dictionary<int, List<CardHolder>> _cardHolders;
     private Dictionary<int, List<MarkerHolder>> _markerHolders;
-    private SpriteAtlas _atlas;
 
     // drawing sequence
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
@@ -26,9 +25,9 @@ public class BoardManager : MonoBehaviour
 
     public void CreateBoard()
     {
-        _atlas = GameAssets.Instance.baseAtlas;
-        GetComponent<Image>().sprite = _atlas.GetSprite("board_frame");
-        transform.GetChild(0).GetComponent<Image>().sprite = _atlas.GetSprite("board_inside");
+        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        GetComponent<Image>().sprite = atlas.GetSprite("board_frame");
+        transform.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("board_inside");
         _cardHolders = new();
         for (int i = 0; i < _GRID_SIZE; i++)
         {
@@ -185,7 +184,7 @@ public class BoardManager : MonoBehaviour
         });
     }
 
-    public void HideMarkersAtBoard(MarkerHolder holder, List<Marker> markers)
+    public void HideMarkersAtBoard(List<Marker> markers)
     {
         markers.ForEach(marker => marker.gameObject.SetActive(false));
     }
@@ -203,7 +202,7 @@ public class BoardManager : MonoBehaviour
         if (marker.ID < 4)
         {
             int[] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker);
-            EnableOverlayOfCardHolders(true, indices);
+            ToggleBlackOverlayOfCardHolders(true, indices);
             SelectCardFromBoard(indices).Select();
         }
         else
@@ -225,9 +224,9 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void EnableOverlayOfCardHolders(bool value, int[] indices = null)
+    public void ToggleBlackOverlayOfCardHolders(bool value, int[] indices = null)
     {
-        for(int i = 0; i < _cardHolders.Count; i++)
+        for(int i = 0; i < _GRID_SIZE; i++)
         {
             List<CardHolder> holders = _cardHolders[i];
             holders.ForEach(holder => holder.EnableOverlay(value));
@@ -240,7 +239,7 @@ public class BoardManager : MonoBehaviour
 
     public void ToggleBlackOverlayOfCardHolders(bool value, int[][] indices = null)
     {
-        for (int i = 0; i < _cardHolders.Count; i++)
+        for (int i = 0; i < _GRID_SIZE; i++)
         {
             List<CardHolder> holders = _cardHolders[i];
             holders.ForEach(holder => holder.EnableOverlay(value));
