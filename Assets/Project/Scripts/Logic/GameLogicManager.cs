@@ -140,7 +140,7 @@ public class GameLogicManager : MonoBehaviour
                         break;
                     case HolderType.CampMarker:
                         _campManager.EnableCampAction(true);
-                        _overlayManager.ToggleMarkerActionScreen(marker, true);
+                        _overlayManager.ToggleMarkerActionScreen(marker);
                         task.StartDelayMs(0);
                         break;
                 }
@@ -164,7 +164,7 @@ public class GameLogicManager : MonoBehaviour
                 }
                 else if (type == HolderType.CampMarker)
                 {
-                    _overlayManager.ToggleMarkerActionScreen(task.Data.marker, false);
+                    _overlayManager.ToggleMarkerActionScreen(null);
                 }
                 _boardManager.ToggleMarkerHolders(true);
                 _campManager.ToggleMarkerHolders(true);
@@ -183,13 +183,12 @@ public class GameLogicManager : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                Marker marker = _playerManager.Controller.GetRemainingMarkers().Find(marker => marker.action == task.Data.markerAction);
-                _overlayManager.ToggleMarkerActionScreen(marker, false);
+                _overlayManager.ToggleMarkerActionScreen(null);
                 _playerManager.Controller.SetMarkerUsed();
                 task.StartDelayMs(0);
                 break;
             case 1:
-                switch(task.Data.markerAction)
+                switch(task.Data.marker.action)
                 {
                     case MarkerAction.TAKE_ANY_CARD_FROM_BOARD:
                         task.StartDelayMs(0);

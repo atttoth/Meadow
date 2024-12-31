@@ -10,6 +10,12 @@ public class MarkerActionScreen : MonoBehaviour
     private Image _blackOverlay;
     private TextMeshProUGUI _selectText;
     private List<GameObject> _actionIconObjects;
+    private Marker _currentMarker;
+
+    public Marker GetCurrentMarker()
+    {
+        return _currentMarker;
+    }
 
     public List<Button> Init()
     {
@@ -28,13 +34,14 @@ public class MarkerActionScreen : MonoBehaviour
         return _actionIconObjects.Select(item => item.GetComponent<Button>()).ToList();
     }
 
-    public void ToggleScreen(Marker marker, bool value)
+    public void ToggleScreen(Marker marker)
     {
-        if(value)
+        if(marker)
         {
+            _currentMarker = marker;
             _blackOverlay.enabled = true;
             _selectText.enabled = true;
-            if (marker.action == MarkerAction.DO_ANY)
+            if (_currentMarker.action == MarkerAction.DO_ANY)
             {
                 List<float> positions = new() { -300f, -100f, 100f, 300f };
                 _actionIconObjects.ForEach(item =>
@@ -46,20 +53,21 @@ public class MarkerActionScreen : MonoBehaviour
             }
             else
             {
-                GameObject item = _actionIconObjects.Find(item => item.CompareTag(marker.action.ToString()));
+                GameObject item = _actionIconObjects.Find(item => item.CompareTag(_currentMarker.action.ToString()));
                 item.GetComponent<RectTransform>().anchoredPosition = new(0f, 200f);
                 item.SetActive(true);
             }
-            marker.Parent = marker.transform.parent;
-            marker.transform.SetParent(transform.root);
+            _currentMarker.Parent = _currentMarker.transform.parent;
+            _currentMarker.transform.SetParent(transform.root);
         }
         else
         {
             _actionIconObjects.ForEach(item => item.SetActive(false));
             _blackOverlay.enabled = false;
             _selectText.enabled = false;
-            marker.transform.SetParent(marker.Parent);
-            marker.Parent = null;
+            _currentMarker.transform.SetParent(_currentMarker.Parent);
+            _currentMarker.Parent = null;
+            _currentMarker = null;
         }
     }
 }

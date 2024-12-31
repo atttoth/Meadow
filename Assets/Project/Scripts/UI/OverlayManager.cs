@@ -33,7 +33,7 @@ public class OverlayManager : GameInteractionEvent
         actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = (MarkerAction)Enum.Parse(typeof(MarkerAction), button.tag, true) });
+            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { marker = _markerActionScreen.GetCurrentMarker() });
         }));
     }
 
@@ -76,8 +76,8 @@ public class OverlayManager : GameInteractionEvent
         }
     }
 
-    public void ToggleMarkerActionScreen(Marker marker, bool value)
+    public void ToggleMarkerActionScreen(Marker marker)
     {
-        _markerActionScreen.ToggleScreen(marker, value);
+        _markerActionScreen.ToggleScreen(marker);
     }
 }

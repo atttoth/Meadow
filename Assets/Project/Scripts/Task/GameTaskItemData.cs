@@ -12,5 +12,4 @@ public class GameTaskItemData
     public DummyType dummyType;
 
     public Transform handTransform;
-    public MarkerAction markerAction;
 }
