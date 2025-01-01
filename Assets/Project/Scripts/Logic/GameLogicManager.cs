@@ -195,7 +195,7 @@ public class GameLogicManager : MonoBehaviour
                         task.StartHandler(_boardManager.EnableAnyCardSelectionHandler);
                         break;
                     case MarkerAction.TAKE_2_ROAD_TOKENS:
-                        task.StartDelayMs(0);
+                        task.StartHandler(_playerManager.Controller.AddRoadTokensHandler);
                         break;
                     case MarkerAction.PICK_A_CARD_FROM_CHOSEN_DECK:
                         task.StartDelayMs(0);

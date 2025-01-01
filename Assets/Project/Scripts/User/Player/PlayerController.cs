@@ -3,28 +3,24 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Linq;
 using static PendingActionCreator;
-using TMPro;
 using UnityEngine.U2D;
 
-public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, PlayerMarkerView, PlayerScoreView>
+public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, PlayerMarkerView, PlayerInfoView>
 {
     private PendingActionCreator _pendingActionCreator;
     private Button _tableToggleButton;
     private Button _tableApproveButton;
     private Button _tablePagerButton;
-    private Button _endTurnButton;
-    private int _maxCardPlacement;
-    private int _cardPlacements;
-    private TextMeshProUGUI _remainingCardPlacementText;
+    private Button _turnEndButton;
     private Dictionary<int, CardIcon[][]> _allIconsOfHoldersInOrder; //as cards are stacked in order
 
-    public override void Init(PlayerTableView tableView, PlayerHandView handView, PlayerMarkerView markerView, PlayerScoreView scoreView)
+    public override void Init(PlayerTableView tableView, PlayerHandView handView, PlayerMarkerView markerView, PlayerInfoView infoView)
     {
-        base.Init(tableView, handView, markerView, scoreView);
+        base.Init(tableView, handView, markerView, infoView);
         _tableView.Init();
         _handView.Init();
         _markerView.Init();
-        _scoreView.Init();
+        _infoView.Init();
         _pendingActionCreator = new PendingActionCreator();
 
         _tableToggleButton = _tableView.transform.GetChild(3).GetComponent<Button>();
@@ -32,20 +28,16 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _tablePagerButton = _tableView.transform.GetChild(1).GetComponent<Button>();
 
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-        Transform turnInfo = transform.GetChild(0);
-        turnInfo.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("endTurn_base");
-        _endTurnButton = turnInfo.GetChild(0).GetComponent<Button>();
-        SpriteState spriteState = _endTurnButton.spriteState;
+        Transform turnEndButtonTransform = transform.GetChild(0);
+        turnEndButtonTransform.GetComponent<Image>().sprite = atlas.GetSprite("endTurn_base");
+        _turnEndButton = turnEndButtonTransform.GetComponent<Button>();
+        SpriteState spriteState = _turnEndButton.spriteState;
         spriteState.selectedSprite = atlas.GetSprite("endTurn_base");
         spriteState.highlightedSprite = atlas.GetSprite("endTurn_highlighted");
         spriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
         spriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
-        _endTurnButton.spriteState = spriteState;
-        _remainingCardPlacementText = turnInfo.GetChild(1).GetComponent<TextMeshProUGUI>();
-        _maxCardPlacement = 1;
-        _cardPlacements = 0;
-        UpdateCardPlacementText();
-        turnInfo.GetChild(2).GetComponent<Image>().sprite = atlas.GetSprite("3");
+        _turnEndButton.spriteState = spriteState;
+        
         _tableToggleButton.onClick.AddListener(() =>
         {
             _tableView.TogglePanel();
@@ -66,7 +58,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             }
         });
         _tablePagerButton.onClick.AddListener(() => _tableView.SwitchTableContent());
-        _endTurnButton.onClick.AddListener(() => Debug.Log("turn ended"));
+        _turnEndButton.onClick.AddListener(() => Debug.Log("turn ended"));
 
         _allIconsOfHoldersInOrder = new();
     }
@@ -139,8 +131,8 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         switch(task.State)
         {
             case 0:
-                _maxCardPlacement = 2;
-                UpdateCardPlacementText();
+                _infoView.maxCardPlacements = 2;
+                _infoView.UpdateCardPlacementText();
                 task.StartDelayMs(0);
                 break;
             default:
@@ -149,9 +141,19 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         }
     }
 
-    private void UpdateCardPlacementText()
+    public void AddRoadTokensHandler(GameTask task)
     {
-        _remainingCardPlacementText.text = $"{_cardPlacements} / {_maxCardPlacement}";
+        switch (task.State)
+        {
+            case 0:
+                _infoView.roadTokens += 2;
+                _infoView.UpdateRoadTokensText();
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
     }
 
     private void UpdateCurrentIconsOfHolder(GameTaskItemData data)
@@ -261,7 +263,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
                     float delay = i * cardScoreDelay;
                     Card card = cards.First();
                     cards.RemoveAt(0);
-                    _scoreView.CollectScoreOfCard(delay, card);
+                    _infoView.CollectScoreOfCard(delay, card);
                     i++;
                 }
                 task.StartDelayMs(duration);
@@ -305,8 +307,8 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     public void ApplyPendingCardPlacement()
     {
-        _cardPlacements = _pendingActionCreator.GetNumOfActions();
-        UpdateCardPlacementText();
+        _infoView.cardPlacements = _pendingActionCreator.GetNumOfActions();
+        _infoView.UpdateCardPlacementText();
         _pendingActionCreator.Dispose();
         _tableToggleButton.enabled = true;
         _tableApproveButton.enabled = true;

@@ -1,23 +1,46 @@
 using DG.Tweening;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
+using UnityEngine.UI;
 
-public class PlayerScoreView : ViewBase
+public class PlayerInfoView : ViewBase
 {
+    private TextMeshProUGUI _roadTokensText;
+    private TextMeshProUGUI _remainingCardPlacementsText;
+    private TextMeshProUGUI _totalScoreText;
     private List<Transform> _scoreTextPool;
     private Transform _poolTransform;
-    private TextMeshProUGUI _totalScoreText;
-    private int _totalScore;
+    public int roadTokens;
+    public int maxCardPlacements;
+    public int cardPlacements;
+    public int totalScore;
 
     public override void Init()
     {
+        roadTokens = 1;
+        maxCardPlacements = 1;
+        cardPlacements = 0;
+        totalScore = 0;
+        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        Transform roadTokeItem = transform.GetChild(0);
+        _roadTokensText = roadTokeItem.GetChild(0).GetComponent<TextMeshProUGUI>();
+        roadTokeItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("1");
+
+        Transform cardPlacementItem = transform.GetChild(1);
+        _remainingCardPlacementsText = cardPlacementItem.GetChild(0).GetComponent<TextMeshProUGUI>();
+        cardPlacementItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("3");
+
         _scoreTextPool = new();
-        _totalScore = 0;
-        _poolTransform = transform.GetChild(0).GetComponent<Transform>();
-        _totalScoreText = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
+        Transform scoreItem = transform.GetChild(2);
+        //scoreItem.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("");
+        _totalScoreText = scoreItem.GetChild(1).GetComponent<TextMeshProUGUI>();
+        _poolTransform = scoreItem.GetChild(2).GetComponent<Transform>();
+
+        UpdateRoadTokensText();
+        UpdateCardPlacementText();
         RegisterScore(0);
     }
 
@@ -46,8 +69,8 @@ public class PlayerScoreView : ViewBase
 
     private void RegisterScore(int score)
     {
-        _totalScore += score;
-        _totalScoreText.text = _totalScore.ToString();
+        totalScore += score;
+        _totalScoreText.text = totalScore.ToString();
     }
 
     public void CollectScoreOfCard(float delay, Card card)
@@ -66,5 +89,15 @@ public class PlayerScoreView : ViewBase
             DisposeScoreText(scoreTextPrefab);
             RegisterScore(score);
         });
+    }
+
+    public void UpdateCardPlacementText()
+    {
+        _remainingCardPlacementsText.text = $"{cardPlacements} / {maxCardPlacements}";
+    }
+
+    public void UpdateRoadTokensText()
+    {
+        _roadTokensText.text = roadTokens.ToString();
     }
 }
