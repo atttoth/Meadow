@@ -54,9 +54,12 @@ public class PlayerMarkerView : ViewBase
     public void SetPlacedMarkerToUsed()
     {
         Marker placedMarker = _remainingMarkers.Find(marker => marker.Status == MarkerStatus.PLACED);
-        placedMarker.Status = MarkerStatus.USED;
-        _remainingMarkers.Remove(placedMarker);
-        _currentMarkerIndex = 0;
+        if (placedMarker)
+        {
+            placedMarker.Status = MarkerStatus.USED;
+            _remainingMarkers.Remove(placedMarker);
+            _currentMarkerIndex = 0;
+        }
     }
 
     public void Reset()

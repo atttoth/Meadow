@@ -13,7 +13,7 @@ public enum MarkerStatus
 
 public enum MarkerAction
 {
-    TAKE_ANY_CARD_FROM_BOARD,
+    PICK_ANY_CARD_FROM_BOARD,
     TAKE_2_ROAD_TOKENS,
     PICK_A_CARD_FROM_CHOSEN_DECK,
     PLAY_UP_TO_2_CARDS,
@@ -27,7 +27,6 @@ public class Marker : Interactable
     private TextMeshProUGUI _numberOnMarker;
     private Image _actionIcon;
     private MarkerStatus _status;
-    private Transform _parent; // used at marker action screen
 
     public Transform Parent
     {

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine.WSA;
 
 public enum CardType
 {
@@ -57,7 +56,6 @@ public class Card : Interactable
 {
     public CardActionStatus cardActionStatus;
     private CardData _data;
-    private Transform _parent;
     private int _siblingIndexInParent;
     public Image highlightFrame;
     private Sprite _cardFront;
@@ -227,9 +225,9 @@ public class Card : Interactable
         highlightFrame.gameObject.SetActive(value);
     }
 
-    public void Select()
+    public void ToggleSelection(bool value)
     {
-        isSelected = true;
+        isSelected = value;
     }
 
     public override void ToggleRayCast(bool value)
@@ -245,7 +243,7 @@ public class Card : Interactable
             MoveCard(hoverTargetY, 0.4f);
         }
 
-        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
+        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, status => status == cardActionStatus) && !canHover)
         {
             HighlightCard(true);
         }
@@ -269,7 +267,7 @@ public class Card : Interactable
             MoveCard(hoverOriginY, 0.2f);
         }
 
-        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE, CardActionStatus.STACKED_PENDING_ON_TABLE }, value => value == cardActionStatus) && !canHover)
+        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE, CardActionStatus.STACKED_PENDING_ON_TABLE }, status => status == cardActionStatus) && !canHover)
         {
             HighlightCard(false);
         }

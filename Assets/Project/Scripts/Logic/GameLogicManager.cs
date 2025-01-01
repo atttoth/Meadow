@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -156,11 +157,11 @@ public class GameLogicManager : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[] { });
+                _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 HolderType type = task.Data.holder.holderType;
                 if (type == HolderType.BoardMarker)
                 {
-                    _boardManager.DeSelectCards();
+                    _boardManager.ToggleCardsSelection(false);
                 }
                 else if (type == HolderType.CampMarker)
                 {
@@ -188,10 +189,10 @@ public class GameLogicManager : MonoBehaviour
                 task.StartDelayMs(0);
                 break;
             case 1:
-                switch(task.Data.marker.action)
+                switch(task.Data.markerAction)
                 {
-                    case MarkerAction.TAKE_ANY_CARD_FROM_BOARD:
-                        task.StartDelayMs(0);
+                    case MarkerAction.PICK_ANY_CARD_FROM_BOARD:
+                        task.StartHandler(_boardManager.EnableAnyCardSelectionHandler);
                         break;
                     case MarkerAction.TAKE_2_ROAD_TOKENS:
                         task.StartDelayMs(0);
@@ -205,8 +206,12 @@ public class GameLogicManager : MonoBehaviour
                 }
                 break;
             case 2:
-                _boardManager.ToggleMarkerHolders(true);
-                _campManager.ToggleMarkerHolders(true);
+                if(Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, markerAction => markerAction == task.Data.markerAction)) // marker action ends immediately
+                {
+                    _boardManager.ToggleMarkerHolders(true);
+                    _campManager.ToggleMarkerHolders(true);
+                    _playerManager.Controller.EnableTableView(true);
+                }
                 task.StartDelayMs(0);
                 break;
             default:
@@ -220,13 +225,13 @@ public class GameLogicManager : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                _boardManager.DeSelectCards();
+                _boardManager.ToggleCardsSelection(false);
                 task.Data.holder.RemoveItemFromContentList(task.Data.card);
                 _playerManager.Controller.SetMarkerUsed();
                 hasRemainingMarkers = _playerManager.Controller.GetRemainingMarkers().Count > 0;
                 EnableRayTargetOInteractables(false);
                 _playerManager.Controller.EnableTableView(false);
-                _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[] { });
+                _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 _playerManager.Controller.GetHandView().MoveCardsHorizontallyInHand(_playerManager.Controller.IsTableVisible(), false);
                 _playerManager.Controller.GetHandView().AddCardToHand(task.Data.card);
                 task.StartDelayMs(1000);

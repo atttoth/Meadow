@@ -11,7 +11,7 @@ using System.Reflection;
 public class CardHolder : Holder
 {
     public GameObject highlightFrame;
-    protected Image _blackOverlay;
+    private Image _blackOverlay;
 
     public override void Init(int id, HolderType type)
     {

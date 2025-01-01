@@ -33,7 +33,7 @@ public class OverlayManager : GameInteractionEvent
         actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { marker = _markerActionScreen.GetCurrentMarker() });
+            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = button.GetComponent<MarkerActionScreenItem>().markerAction });
         }));
     }
 

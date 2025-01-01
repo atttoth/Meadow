@@ -129,22 +129,13 @@ public class BoardManager : MonoBehaviour
         return emptyHolders;
     }
 
-    public Card SelectCardFromBoard(int[] indices)
+    public void SelectCardsFromBoard(int[][] indices)
     {
-        Card card = GetCardFromCardHolder(indices[0], indices[1]);
-        return card;
-    }
-
-    public List<Card> SelectCardsFromBoard(int[][] indices)
-    {
-        List<Card> cards = new();
         for(int i = 0; i < indices.Length; i++)
         {
             int[] pair = indices[i];
-            Card card = GetCardFromCardHolder(pair[0], pair[1]);
-            cards.Add(card);
+            GetCardFromCardHolder(pair[0], pair[1]).ToggleSelection(true);
         }
-        return cards;
     }
 
     private Card GetCardFromCardHolder(int col, int row)
@@ -224,45 +215,31 @@ public class BoardManager : MonoBehaviour
 
     public void SelectCard(Marker marker, MarkerHolder holder)
     {
+        int[][] indices;
         if (marker.ID < 4)
         {
-            int[] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker);
-            ToggleBlackOverlayOfCardHolders(true, indices);
-            SelectCardFromBoard(indices).Select();
+            indices = new int[1][] { GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker) };
         }
         else
         {
-            int[][] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction);
-            ToggleBlackOverlayOfCardHolders(true, indices);
-            SelectCardsFromBoard(indices).ForEach(card => card.Select());
+            indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction);
         }
+        ToggleBlackOverlayOfCardHolders(true, indices);
+        SelectCardsFromBoard(indices);
     }
 
-    public void DeSelectCards()
+    public void ToggleCardsSelection(bool value)
     {
         for(int i = 0; i < _GRID_SIZE; i++)
         {
             for(int j = 0; j < _GRID_SIZE; j++)
             {
-                GetCardFromCardHolder(i, j).isSelected = false;
+                GetCardFromCardHolder(i, j).ToggleSelection(value);
             }
         }
     }
 
-    public void ToggleBlackOverlayOfCardHolders(bool value, int[] indices = null)
-    {
-        for(int i = 0; i < _GRID_SIZE; i++)
-        {
-            List<CardHolder> holders = _cardHolders[i];
-            holders.ForEach(holder => holder.EnableOverlay(value));
-        }
-        if(value)
-        {
-            _cardHolders[indices[0]][indices[1]].EnableOverlay(!value);
-        }
-    }
-
-    public void ToggleBlackOverlayOfCardHolders(bool value, int[][] indices = null)
+    public void ToggleBlackOverlayOfCardHolders(bool value, int[][] indices)
     {
         for (int i = 0; i < _GRID_SIZE; i++)
         {
@@ -271,11 +248,25 @@ public class BoardManager : MonoBehaviour
         }
         if (value)
         {
-            for (int i = 0; i < _GRID_SIZE; i++)
+            for (int i = 0; i < indices.Length; i++)
             {
                 int[] pair = indices[i];
                 _cardHolders[pair[0]][pair[1]].EnableOverlay(!value);
             }
+        }
+    }
+
+    public void EnableAnyCardSelectionHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                ToggleCardsSelection(true);
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
         }
     }
 }

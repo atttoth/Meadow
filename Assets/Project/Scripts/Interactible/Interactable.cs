@@ -6,6 +6,7 @@ public abstract class Interactable : GameInteractionEvent, IPointerClickHandler,
 {
     public int ID;
     protected Image _mainImage; // to toggle raycast
+    protected Transform _parent; // used at marker and card hierarchy positioning
 
     public virtual void ToggleRayCast(bool value) { return; }
 

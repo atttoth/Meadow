@@ -1775,9 +1775,10 @@ GameObject:
   - component: {fileID: 573810978}
   - component: {fileID: 573810977}
   - component: {fileID: 573810976}
+  - component: {fileID: 573810979}
   m_Layer: 0
   m_Name: PickACard
-  m_TagString: PICK_A_CARD_FROM_CHOSEN_DECK
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1884,6 +1885,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 573810974}
   m_CullTransparentMesh: 1
+--- !u!114 &573810979
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 573810974}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5388b81163e4e3340a906705cdf9c8ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerAction: 0
 --- !u!850595691 &625307215
 LightingSettings:
   m_ObjectHideFlags: 0
@@ -3476,9 +3490,10 @@ GameObject:
   - component: {fileID: 1106681249}
   - component: {fileID: 1106681248}
   - component: {fileID: 1106681247}
+  - component: {fileID: 1106681250}
   m_Layer: 0
   m_Name: Take2Tokens
-  m_TagString: TAKE_2_ROAD_TOKENS
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -3585,6 +3600,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1106681245}
   m_CullTransparentMesh: 1
+--- !u!114 &1106681250
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1106681245}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5388b81163e4e3340a906705cdf9c8ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerAction: 0
 --- !u!1 &1123670504
 GameObject:
   m_ObjectHideFlags: 0
@@ -6636,9 +6664,10 @@ GameObject:
   - component: {fileID: 2035615251}
   - component: {fileID: 2035615250}
   - component: {fileID: 2035615249}
+  - component: {fileID: 2035615252}
   m_Layer: 0
   m_Name: PickAnyCard
-  m_TagString: TAKE_ANY_CARD_FROM_BOARD
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6745,6 +6774,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2035615247}
   m_CullTransparentMesh: 1
+--- !u!114 &2035615252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2035615247}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5388b81163e4e3340a906705cdf9c8ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerAction: 0
 --- !u!1 &2037316806
 GameObject:
   m_ObjectHideFlags: 0
@@ -6942,9 +6984,10 @@ GameObject:
   - component: {fileID: 2126152353}
   - component: {fileID: 2126152352}
   - component: {fileID: 2126152351}
+  - component: {fileID: 2126152354}
   m_Layer: 0
   m_Name: Play2Cards
-  m_TagString: PLAY_UP_TO_2_CARDS
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -7051,6 +7094,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2126152349}
   m_CullTransparentMesh: 1
+--- !u!114 &2126152354
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2126152349}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5388b81163e4e3340a906705cdf9c8ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  markerAction: 0
 --- !u!1 &2139167469
 GameObject:
   m_ObjectHideFlags: 0
