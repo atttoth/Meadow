@@ -121,9 +121,18 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _tableToggleButton.interactable = value;
     }
 
-    public void UpdateHandView()
+    public void UpdateHandViewHandler(GameTask task)
     {
-        _handView.MoveCardsHorizontallyInHand(IsTableVisible(), false, true);
+        switch(task.State)
+        {
+            case 0:
+                _handView.MoveCardsHorizontallyInHand(IsTableVisible(), false, true);
+                task.StartDelayMs(500);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
     }
 
     public void AddExtraCardPlacementHandler(GameTask task)

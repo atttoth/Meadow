@@ -10,7 +10,8 @@ public enum GameEventType
     CANCELLED_PENDING_CARD_PLACED,
     MARKER_PLACED,
     MARKER_CANCELLED,
-    MARKER_ACTION_SELECTED
+    MARKER_ACTION_SELECTED,
+    DECK_SELECTED
 }
 
 public class GameInteractionEvent : MonoBehaviour

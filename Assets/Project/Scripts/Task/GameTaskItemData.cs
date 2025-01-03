@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 public class GameTaskItemData
 {
@@ -12,5 +13,8 @@ public class GameTaskItemData
     public DummyType dummyType;
 
     public Transform handTransform;
+
     public MarkerAction markerAction;
+    public DeckType deckType;
+    public List<Card> topCards;
 }

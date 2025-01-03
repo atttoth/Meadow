@@ -230,6 +230,11 @@ public class Card : Interactable
         isSelected = value;
     }
 
+    public void SetParentTransform(Transform transform)
+    {
+        _parent = transform;
+    }
+
     public override void ToggleRayCast(bool value)
     {
         _mainImage.raycastTarget = value;
@@ -340,11 +345,11 @@ public class Card : Interactable
         cardDrawing.OnComplete(() => 
         {
             holder.AddToContentList(this);
-            FlipCard();
+            FlipBoardCard();
         });
     }
 
-    public void FlipCard()
+    private void FlipBoardCard()
     {
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         transform.SetParent(transform.root); // because next card should be above prev card
@@ -357,6 +362,16 @@ public class Card : Interactable
             transform.SetAsFirstSibling();
             _canZoom = true;
         });
+    }
+
+    public void FlipDeckCard(bool isReset = false)
+    {
+        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        Sprite sprite = isReset ? _cardBack : _cardFront;
+        cardFlip = DOTween.Sequence();
+        cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = sprite));
+        cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
+        cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
     }
 
     public void MoveCardHorizontally(float endPosition, bool isTableToggled = false)

@@ -9,7 +9,7 @@ public class MarkerActionScreen : MonoBehaviour
 {
     private Image _blackOverlay;
     private TextMeshProUGUI _selectText;
-    private List<MarkerActionScreenItem> _actionIconItems;
+    private List<ScreenItem> _actionIconItems;
     private Marker _currentMarker;
 
     public List<Button> Init()
@@ -22,7 +22,7 @@ public class MarkerActionScreen : MonoBehaviour
         _actionIconItems = new();
         for (int i = 0; i < numOfActions; i++)
         {
-            MarkerActionScreenItem item = transform.GetChild(1 + i).GetComponent<MarkerActionScreenItem>();
+            ScreenItem item = transform.GetChild(1 + i).GetComponent<ScreenItem>();
             item.markerAction = (MarkerAction)i;
             item.transform.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite(i.ToString());
             _actionIconItems.Add(item);
@@ -49,7 +49,7 @@ public class MarkerActionScreen : MonoBehaviour
             }
             else
             {
-                MarkerActionScreenItem item = _actionIconItems.Find(item => item.markerAction == _currentMarker.action);
+                ScreenItem item = _actionIconItems.Find(item => item.markerAction == _currentMarker.action);
                 item.GetComponent<RectTransform>().anchoredPosition = new(0f, 200f);
                 item.gameObject.SetActive(true);
             }

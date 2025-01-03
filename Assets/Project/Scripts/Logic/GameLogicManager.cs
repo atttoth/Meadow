@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 using static Card;
@@ -42,7 +43,8 @@ public class GameLogicManager : MonoBehaviour
             CancelledPendingCardPlaceHandler,
             MarkerPlaceHandler,
             MarkerCancelHandler,
-            MarkerActionSelectHandler
+            MarkerActionSelectHandler,
+            DeckSelectHandler
         };
 
         _boardManager.CreateBoard();
@@ -133,18 +135,16 @@ public class GameLogicManager : MonoBehaviour
                 _playerManager.Controller.EnableTableView(false);
                 _boardManager.ToggleMarkerHolders(false);
                 _campManager.ToggleMarkerHolders(false);
-                switch (holder.holderType)
+                if (holder.holderType == HolderType.BoardMarker)
                 {
-                    case HolderType.BoardMarker:
-                        _boardManager.SelectCard(marker, holder);
-                        task.StartDelayMs(0);
-                        break;
-                    case HolderType.CampMarker:
-                        _campManager.EnableCampAction(true);
-                        _overlayManager.ToggleMarkerActionScreen(marker);
-                        task.StartDelayMs(0);
-                        break;
+                    _boardManager.SelectCard(marker, holder);
                 }
+                else if (holder.holderType == HolderType.CampMarker)
+                {
+                    _campManager.ToggleCampAction(true);
+                    _overlayManager.ToggleMarkerActionScreen(marker);
+                }
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -165,6 +165,7 @@ public class GameLogicManager : MonoBehaviour
                 }
                 else if (type == HolderType.CampMarker)
                 {
+                    _campManager.ToggleCampAction(false);
                     _overlayManager.ToggleMarkerActionScreen(null);
                 }
                 _boardManager.ToggleMarkerHolders(true);
@@ -198,7 +199,8 @@ public class GameLogicManager : MonoBehaviour
                         task.StartHandler(_playerManager.Controller.AddRoadTokensHandler);
                         break;
                     case MarkerAction.PICK_A_CARD_FROM_CHOSEN_DECK:
-                        task.StartDelayMs(0);
+                        task.Data.deckType = GetActiveDeckType();
+                        task.StartHandler(_overlayManager.ShowDeckSelectionScreenHandler, task.Data);
                         break;
                     default:
                         task.StartHandler(_playerManager.Controller.AddExtraCardPlacementHandler);
@@ -220,14 +222,53 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void DeckSelectHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler(_overlayManager.HideDeckSelectionScreenHandler, task.Data);
+                break;
+            case 1:
+                task.Data.topCards = _boardManager.GetTopCardsOfDeck(task.Data.deckType);
+                task.StartHandler(_overlayManager.ShowCardSelectionHandler, task.Data);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private void CardPickHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                _boardManager.ToggleCardsSelection(false);
-                task.Data.holder.RemoveItemFromContentList(task.Data.card);
-                _playerManager.Controller.SetMarkerUsed();
+                if(task.Data.holder == null)
+                {
+                    List<Card> topCards = _boardManager.GetTopCards();
+                    topCards.ForEach(card => card.ToggleSelection(false));
+                    List<Card> unselectedTopCards = topCards.Where(card => card.ID != task.Data.card.ID).ToList();
+                    _boardManager.UpdateTopCards(unselectedTopCards);
+                    task.Data.topCards = unselectedTopCards;
+                    task.StartHandler(_overlayManager.HideCardSelectionHandler, task.Data);
+                }
+                else
+                {
+                    _boardManager.ToggleCardsSelection(false);
+                    task.Data.holder.RemoveItemFromContentList(task.Data.card);
+                    _playerManager.Controller.SetMarkerUsed();
+                    task.StartDelayMs(0);
+                }
+                break;
+            case 1:
+                if(task.Data.holder == null)
+                {
+                    _boardManager.CancelTopCards();
+                }
+                task.StartDelayMs(0);
+                break;
+            case 2:
                 hasRemainingMarkers = _playerManager.Controller.GetRemainingMarkers().Count > 0;
                 EnableRayTargetOInteractables(false);
                 _playerManager.Controller.EnableTableView(false);
@@ -236,11 +277,11 @@ public class GameLogicManager : MonoBehaviour
                 _playerManager.Controller.GetHandView().AddCardToHand(task.Data.card);
                 task.StartDelayMs(1000);
                 break;
-            case 1:
+            case 3:
                 _boardManager.SaveTargetHoldersAndCards(GetActiveDeckType());
                 task.StartHandler(_boardManager.BoardFillHandler);
                 break;
-            case 2:
+            case 4:
                 _playerManager.Controller.GetHandView().SetCardsReady();
                 _playerManager.Controller.EnableTableView(true);
                 EnableRayTargetOInteractables(true);
@@ -297,8 +338,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_playerManager.Controller.UpdateDisplayIconsHandler);
                 break;
             case 2:
-                _playerManager.Controller.UpdateHandView();
-                task.StartDelayMs(500);
+                task.StartHandler(_playerManager.Controller.UpdateHandViewHandler);
                 break;
             default:
                 _playerManager.Controller.ApplyPendingCardPlacement();

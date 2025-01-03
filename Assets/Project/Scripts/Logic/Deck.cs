@@ -28,8 +28,13 @@ public class Deck : MonoBehaviour
         {
             Card card = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
             card.Init(data, _atlas.GetSprite(data.ID.ToString()), _atlas.GetSprite("back"));
-            _cards.Add(card);
+            AddCard(card);
         });
+    }
+
+    public void AddCard(Card card)
+    {
+        _cards.Add(card);
     }
 
     public Card GetRandomCard()

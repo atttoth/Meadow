@@ -24,7 +24,7 @@ public class CampManager : MonoBehaviour
         _markerHolders.ForEach(holder => holder.ToggleRayCast(value));
     }
 
-    public void EnableCampAction(bool value)
+    public void ToggleCampAction(bool value)
     {
         _isActionEnabled = value;
     }

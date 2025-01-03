@@ -94,18 +94,22 @@ public class BoardManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float cardDrawDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawDelayFromDeck;
-                float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
-                float cardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard;
-                int duration = (int)(((_emptyHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
-                int i = 0;
-                while (_emptyHolders.Count > 0)
+                int duration = 0;
+                if(_emptyHolders.Count > 0)
                 {
-                    float delay = i * cardDrawDelay;
-                    CardHolder holder = GetNextItem(_emptyHolders);
-                    Card card = GetNextItem(_cardsToDraw);
-                    card.PlayDrawingAnimation(delay, holder);
-                    i++;
+                    float cardDrawDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawDelayFromDeck;
+                    float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
+                    float cardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard;
+                    duration = (int)(((_emptyHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
+                    int i = 0;
+                    while (_emptyHolders.Count > 0)
+                    {
+                        float delay = i * cardDrawDelay;
+                        CardHolder holder = GetNextItem(_emptyHolders);
+                        Card card = GetNextItem(_cardsToDraw);
+                        card.PlayDrawingAnimation(delay, holder);
+                        i++;
+                    }
                 }
                 task.StartDelayMs(duration);
                 break;
@@ -268,5 +272,31 @@ public class BoardManager : MonoBehaviour
                 task.Complete();
                 break;
         }
+    }
+
+    public List<Card> GetTopCards()
+    {
+        return _deckController.TopCards;
+    }
+
+    public void UpdateTopCards(List<Card> cards)
+    {
+        _deckController.TopCards = cards;
+    }
+
+    public List<Card> GetTopCardsOfDeck(DeckType deckType)
+    {
+        int num = 3;
+        _deckController.TopCards = new();
+        for (int i = 0; i < num; i++)
+        {
+            _deckController.TopCards.Add(_deckController.GetCardFromDeck(deckType));
+        }
+        return _deckController.TopCards;
+    }
+
+    public void CancelTopCards()
+    {
+        _deckController.CancelCards();
     }
 }

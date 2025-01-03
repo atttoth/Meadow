@@ -8,6 +8,13 @@ public class DeckController : MonoBehaviour
 {
    private Dictionary<DeckType, Deck> _decks;
    private Dictionary<int, Transform> _displayDecks;
+   private List<Card> _topCards;
+
+    public List<Card> TopCards
+    {
+        get { return _topCards; }
+        set { _topCards = value; }
+    }
 
     public void Init()
     {
@@ -86,5 +93,23 @@ public class DeckController : MonoBehaviour
             cards.Add(card);
         }
         return cards;
+    }
+
+    public Card GetCardFromDeck(DeckType deckType)
+    {
+        return GetDeckByDeckType(deckType).GetRandomCard();
+    }
+
+    public void CancelCards()
+    {
+        DeckType deckType = _topCards.First().Data.deckType;
+        Deck deck = _decks[deckType];
+        _topCards.ForEach(card =>
+        {
+            card.transform.SetParent(deck.transform);
+            card.GetComponent<RectTransform>().anchoredPosition = new(0f, 0f);
+            deck.AddCard(card);
+        });
+        _topCards.Clear();
     }
 }
