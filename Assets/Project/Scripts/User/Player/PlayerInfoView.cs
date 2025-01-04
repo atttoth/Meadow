@@ -13,17 +13,17 @@ public class PlayerInfoView : ViewBase
     private TextMeshProUGUI _totalScoreText;
     private List<Transform> _scoreTextPool;
     private Transform _poolTransform;
-    public int roadTokens;
-    public int maxCardPlacements;
-    public int cardPlacements;
-    public int totalScore;
+    private int _roadTokens;
+    private int _maxCardPlacements;
+    private int _cardPlacements;
+    private int _totalScore;
 
     public override void Init()
     {
-        roadTokens = 1;
-        maxCardPlacements = 1;
-        cardPlacements = 0;
-        totalScore = 0;
+        _roadTokens = 2;
+        _maxCardPlacements = 1;
+        _cardPlacements = 0;
+        _totalScore = 0;
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         Transform roadTokeItem = transform.GetChild(0);
         _roadTokensText = roadTokeItem.GetChild(0).GetComponent<TextMeshProUGUI>();
@@ -40,11 +40,11 @@ public class PlayerInfoView : ViewBase
         _poolTransform = scoreItem.GetChild(2).GetComponent<Transform>();
 
         UpdateRoadTokensText();
-        UpdateCardPlacementText();
+        UpdateCardPlacementsText();
         RegisterScore(0);
     }
 
-    private Transform GetOrCreateScoreText()
+    private Transform GetScoreTextObject()
     {
         Transform scoreTextPrefab;
         if (_scoreTextPool.Count > 0)
@@ -61,7 +61,7 @@ public class PlayerInfoView : ViewBase
         return scoreTextPrefab;
     }
 
-    private void DisposeScoreText(Transform scoreTextPrefab)
+    private void DisposeScoreTextObject(Transform scoreTextPrefab)
     {
         _scoreTextPool.Add(scoreTextPrefab);
         scoreTextPrefab.gameObject.SetActive(false);
@@ -69,13 +69,13 @@ public class PlayerInfoView : ViewBase
 
     private void RegisterScore(int score)
     {
-        totalScore += score;
-        _totalScoreText.text = totalScore.ToString();
+        _totalScore += score;
+        _totalScoreText.text = _totalScore.ToString();
     }
 
     public void CollectScoreOfCard(float delay, Card card)
     {
-        Transform scoreTextPrefab = GetOrCreateScoreText();
+        Transform scoreTextPrefab = GetScoreTextObject();
         Transform startingPoint = card.GetComponent<Transform>();
         scoreTextPrefab.SetPositionAndRotation(startingPoint.position, Quaternion.identity);
         int score = card.Data.score;
@@ -86,18 +86,42 @@ public class PlayerInfoView : ViewBase
         scoreCollecting.Append(scoreTextPrefab.DOMove(_poolTransform.position, cardScoreCollectingSpeed).SetEase(Ease.InOutQuart).SetDelay(delay));
         scoreCollecting.OnComplete(() =>
         {
-            DisposeScoreText(scoreTextPrefab);
+            DisposeScoreTextObject(scoreTextPrefab);
             RegisterScore(score);
         });
     }
 
-    public void UpdateCardPlacementText()
+    public void IncrementNumberOfCardPlacements(GameTaskItemData data)
     {
-        _remainingCardPlacementsText.text = $"{cardPlacements} / {maxCardPlacements}";
+        _cardPlacements++;
+        UpdateCardPlacementsText();
     }
 
-    public void UpdateRoadTokensText()
+    public void DecrementNumberOfCardPlacements(GameTaskItemData data)
     {
-        _roadTokensText.text = roadTokens.ToString();
+        _cardPlacements--;
+        UpdateCardPlacementsText();
+    }
+
+    public void SetMaxCardPlacement(int value)
+    {
+        _maxCardPlacements = value;
+        UpdateCardPlacementsText();
+    }
+
+    private void UpdateCardPlacementsText()
+    {
+        _remainingCardPlacementsText.text = $"{_cardPlacements} / {_maxCardPlacements}";
+    }
+
+    public void AddRoadTokens(int value)
+    {
+        _roadTokens += value;
+        UpdateRoadTokensText();
+    }
+
+    private void UpdateRoadTokensText()
+    {
+        _roadTokensText.text = _roadTokens.ToString();
     }
 }

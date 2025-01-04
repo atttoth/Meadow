@@ -140,8 +140,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         switch(task.State)
         {
             case 0:
-                _infoView.maxCardPlacements = 2;
-                _infoView.UpdateCardPlacementText();
+                _infoView.SetMaxCardPlacement(2);
                 task.StartDelayMs(0);
                 break;
             default:
@@ -155,8 +154,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         switch (task.State)
         {
             case 0:
-                _infoView.roadTokens += 2;
-                _infoView.UpdateRoadTokensText();
+                _infoView.AddRoadTokens(2);
                 task.StartDelayMs(0);
                 break;
             default:
@@ -223,6 +221,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _tableToggleButton.enabled = false;
         data.handTransform = _handView.transform;
         PendingActionItem[] postActionItems = new PendingActionItem[] {
+            _infoView.IncrementNumberOfCardPlacements,
             _handView.RemoveCardFromHand,
             _tableView.StackCard,
             _tableView.ExpandHolderVertically,
@@ -236,7 +235,8 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             _tableView.ExpandHolderVerticallyRewind,
             _tableView.StackCardRewind,
             CreateEntryForCurrentIconsRewind,
-            _handView.RemoveCardFromHandRewind
+            _handView.RemoveCardFromHandRewind,
+            _infoView.DecrementNumberOfCardPlacements
         };
         _tableView.UpdateApproveButton(true);
         _pendingActionCreator.Create(postActionItems, prevActionItems, data);
@@ -316,8 +316,6 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     public void ApplyPendingCardPlacement()
     {
-        _infoView.cardPlacements = _pendingActionCreator.GetNumOfActions();
-        _infoView.UpdateCardPlacementText();
         _pendingActionCreator.Dispose();
         _tableToggleButton.enabled = true;
         _tableApproveButton.enabled = true;

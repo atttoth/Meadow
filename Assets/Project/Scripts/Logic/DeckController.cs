@@ -100,7 +100,7 @@ public class DeckController : MonoBehaviour
         return GetDeckByDeckType(deckType).GetRandomCard();
     }
 
-    public void CancelCards()
+    public void ClearTopCards()
     {
         DeckType deckType = _topCards.First().Data.deckType;
         Deck deck = _decks[deckType];

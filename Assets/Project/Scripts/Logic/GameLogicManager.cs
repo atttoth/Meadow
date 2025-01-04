@@ -82,8 +82,8 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 isBoardFilled = true;
                 _playerManager.Controller.EnableTableView(false);
-                _boardManager.SaveTargetHoldersAndCards(GetActiveDeckType());
-                task.StartHandler(_boardManager.BoardFillHandler);
+                task.Data.deckType = GetActiveDeckType();
+                task.StartHandler(_boardManager.BoardFillHandler, task.Data);
                 break;
             default:
                 _playerManager.Controller.EnableTableView(true);
@@ -246,11 +246,7 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 if(task.Data.holder == null)
                 {
-                    List<Card> topCards = _boardManager.GetTopCards();
-                    topCards.ForEach(card => card.ToggleSelection(false));
-                    List<Card> unselectedTopCards = topCards.Where(card => card.ID != task.Data.card.ID).ToList();
-                    _boardManager.UpdateTopCards(unselectedTopCards);
-                    task.Data.topCards = unselectedTopCards;
+                    task.Data.topCards = _boardManager.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
                     task.StartHandler(_overlayManager.HideCardSelectionHandler, task.Data);
                 }
                 else
@@ -264,7 +260,7 @@ public class GameLogicManager : MonoBehaviour
             case 1:
                 if(task.Data.holder == null)
                 {
-                    _boardManager.CancelTopCards();
+                    _boardManager.DisposeTopCards();
                 }
                 task.StartDelayMs(0);
                 break;
@@ -278,8 +274,8 @@ public class GameLogicManager : MonoBehaviour
                 task.StartDelayMs(1000);
                 break;
             case 3:
-                _boardManager.SaveTargetHoldersAndCards(GetActiveDeckType());
-                task.StartHandler(_boardManager.BoardFillHandler);
+                task.Data.deckType = GetActiveDeckType();
+                task.StartHandler(_boardManager.BoardFillHandler, task.Data);
                 break;
             case 4:
                 _playerManager.Controller.GetHandView().SetCardsReady();

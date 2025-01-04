@@ -2,6 +2,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.U2D;
+using UnityEngine.Timeline;
+using System.Linq;
 
 public class BoardManager : MonoBehaviour
 {
@@ -59,7 +61,7 @@ public class BoardManager : MonoBehaviour
         _deckController.Init();
     }
 
-    public void SaveTargetHoldersAndCards(DeckType activeDeckType)
+    private void SaveTargetHoldersAndCards(DeckType activeDeckType)
     {
         List<CardHolder> holders = new() { };
         List<Card> cards = new() { };
@@ -94,6 +96,10 @@ public class BoardManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
+                SaveTargetHoldersAndCards(task.Data.deckType);
+                task.StartDelayMs(0);
+                break;
+            case 1:
                 int duration = 0;
                 if(_emptyHolders.Count > 0)
                 {
@@ -133,7 +139,7 @@ public class BoardManager : MonoBehaviour
         return emptyHolders;
     }
 
-    public void SelectCardsFromBoard(int[][] indices)
+    private void SelectCardsFromBoard(int[][] indices)
     {
         for(int i = 0; i < indices.Length; i++)
         {
@@ -148,29 +154,38 @@ public class BoardManager : MonoBehaviour
         return (Card)holder.GetItemFromContentListByIndex(0);
     }
 
-    public int[] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey, int numberOnMarker)
+    private int[][] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey, int numberOnMarker)
     {
-        return holderListKey switch
-        {
-            2 => new int[] { holderID, _GRID_SIZE - numberOnMarker },
-            1 => new int[] { numberOnMarker - 1, holderID },
-            _ => new int[] { _GRID_SIZE - numberOnMarker, holderID }
-        };
-    }
-
-    public int[][] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey)
-    {
-        int index = holderListKey == 2 ? 0 : 1;
-        int length = (int)DeckType.NUM_OF_DECKS;
+        int length = numberOnMarker <= 4 ? 1 : _GRID_SIZE;
         int[][] indices = new int[length][];
-        for (int i = 0; i < length; i++)
+        if (length == 1) // 1-2-3-4 markers point to a single position
         {
-            List<int> list = new();
-            list.Add(i);
-            list.Insert(index, holderID);
-            indices[i] = list.ToArray();
+            switch(holderListKey)
+            {
+                case 2:
+                    indices[0] = new int[] { holderID, _GRID_SIZE - numberOnMarker };
+                    break;
+                case 1:
+                    indices[0] = new int[] { numberOnMarker - 1, holderID };
+                    break;
+                default:
+                    indices[0] = new int[] { _GRID_SIZE - numberOnMarker, holderID };
+                    break;
+            };
+            return indices;
         }
-        return indices;
+        else
+        {
+            int index = holderListKey == 2 ? 0 : 1;
+            for (int i = 0; i < _GRID_SIZE; i++)
+            {
+                List<int> list = new();
+                list.Add(i);
+                list.Insert(index, holderID);
+                indices[i] = list.ToArray();
+            }
+            return indices;
+        }
     }
 
     public void ToggleRayTargetOfCardsAndHolders(bool value)
@@ -219,15 +234,7 @@ public class BoardManager : MonoBehaviour
 
     public void SelectCard(Marker marker, MarkerHolder holder)
     {
-        int[][] indices;
-        if (marker.ID < 4)
-        {
-            indices = new int[1][] { GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker) };
-        }
-        else
-        {
-            indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction);
-        }
+        int[][] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker);
         ToggleBlackOverlayOfCardHolders(true, indices);
         SelectCardsFromBoard(indices);
     }
@@ -274,14 +281,13 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public List<Card> GetTopCards()
+    public List<Card> GetUnselectedTopCardsOfDeck(int cardID)
     {
-        return _deckController.TopCards;
-    }
-
-    public void UpdateTopCards(List<Card> cards)
-    {
-        _deckController.TopCards = cards;
+        List<Card> topCards = _deckController.TopCards;
+        topCards.ForEach(card => card.ToggleSelection(false));
+        List<Card> unselectedTopCards = topCards.Where(card => card.ID != cardID).ToList();
+        _deckController.TopCards = unselectedTopCards;
+        return unselectedTopCards;
     }
 
     public List<Card> GetTopCardsOfDeck(DeckType deckType)
@@ -295,8 +301,8 @@ public class BoardManager : MonoBehaviour
         return _deckController.TopCards;
     }
 
-    public void CancelTopCards()
+    public void DisposeTopCards()
     {
-        _deckController.CancelCards();
+        _deckController.ClearTopCards();
     }
 }
