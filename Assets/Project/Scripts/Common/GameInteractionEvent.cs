@@ -3,6 +3,7 @@ using UnityEngine;
 
 public enum GameEventType
 {
+    CAMP_ICONS_SELECTED,
     CARD_PICKED,
     CARD_PLACED,
     CARD_EXAMINED,

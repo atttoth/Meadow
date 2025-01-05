@@ -1,7 +1,4 @@
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 
 public class PlayerMarkerView : ViewBase
 {
@@ -12,7 +9,6 @@ public class PlayerMarkerView : ViewBase
     public override void Init()
     {
         _allMarkers = new();
-        _remainingMarkers = new();
         for (int index = 0; index < 5; index++)
         {
             Marker marker = Instantiate(GameAssets.Instance.markerPrefab).GetComponent<Marker>();
@@ -20,9 +16,8 @@ public class PlayerMarkerView : ViewBase
             marker.transform.SetParent(transform);
             marker.CreateMarker(index);
             _allMarkers.Add(marker);
-            _remainingMarkers.Add(marker);
         }
-        _currentMarkerIndex = -1;
+        Reset();
     }
 
     public List<Marker> GetRemainingMarkers()
@@ -32,11 +27,11 @@ public class PlayerMarkerView : ViewBase
 
     public Marker GetCurrentMarker(int value)
     {
-        if(value == 0 && _currentMarkerIndex < 0)
+        if(value == 0 && _currentMarkerIndex < 0) // initial marker hover
         {
             _currentMarkerIndex = 0;
         }
-        else if (_currentMarkerIndex == 0 && value == -1)
+        if(_currentMarkerIndex == 0 && value == -1)
         {
             _currentMarkerIndex = _remainingMarkers.Count - 1;
         }
@@ -64,10 +59,14 @@ public class PlayerMarkerView : ViewBase
 
     public void Reset()
     {
+        _remainingMarkers = new();
         _allMarkers.ForEach(marker =>
         {
             MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
-            prevHolder.RemoveItemFromContentList(marker);
+            if (prevHolder)
+            {
+                prevHolder.RemoveItemFromContentList(marker);
+            }
             marker.gameObject.SetActive(false);
             marker.transform.SetParent(transform);
             marker.Status = MarkerStatus.NONE;

@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class PlayerManager : MonoBehaviour
 {
-    private PlayerController _controller;   
+    private PlayerController _controller;
 
     public void CreatePlayer()
     {
@@ -16,7 +16,7 @@ public class PlayerManager : MonoBehaviour
     }
 
     public PlayerController Controller
-    { 
+    {
         get { return _controller; }
     }
 }

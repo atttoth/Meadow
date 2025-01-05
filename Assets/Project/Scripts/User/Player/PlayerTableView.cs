@@ -93,7 +93,7 @@ public class PlayerTableView : ViewBase
 
     private DisplayIcon GetDisplayIconFromPool()
     {
-        if(_displayIconPool == null)
+        if (_displayIconPool == null)
         {
             _displayIconPool = new();
             _displayIconPoolTransform = transform.GetChild(3).GetChild(0).GetChild(0); // .../TableDisplayButton/IconDisplay/DisplayIconPool
@@ -233,10 +233,10 @@ public class PlayerTableView : ViewBase
         {
             List<CardIcon> groundIcons;
             groundIcons = _displayIcons.Find(icon => icon.ID == holderID)?.GroundIcons;
-            if (groundIcons == null) 
+            if (groundIcons == null)
             {
                 groundIcons = _preparedDisplayIcons.Find(icon => icon.ID == holderID)?.GroundIcons;
-                if(groundIcons == null)
+                if (groundIcons == null)
                 {
                     groundIcons = _activePrimaryCardHolders
                         .Find(holder => holder.ID == holderID)
@@ -251,149 +251,165 @@ public class PlayerTableView : ViewBase
         _preparedDisplayIcons.Add(displayIcon);
     }
 
-    public int SetDisplayIconsHorizontalPosition()
+    public void SetDisplayIconsHorizontalPositionHandler(GameTask task)
     {
-        int duration = 0;
-        if (GetDisplayIconsAmount() > 0)
+        switch(task.State)
         {
-            float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.displayIconHorizontalSlideSpeed;
-            List<int> oldHolderIDs = _displayIcons.Select(icon => icon.ID).ToList();
-            List<int> preparedHolderIDs = _preparedDisplayIcons.Select(icon => icon.ID).ToList();
-            List<int> newHolderIDs = preparedHolderIDs.Except(oldHolderIDs).ToList();
-            List<DisplayIcon> leftDisplayIcons = new();
-            List<DisplayIcon> rightDisplayIcons = new();
-            List<DisplayIcon> existingDisplayIcons = new();
-            int minSiblingIndex = _activePrimaryCardHolders
-                .Where(holder => oldHolderIDs.Contains(holder.ID))
-                .Select(holder => holder.transform.GetSiblingIndex())
-                .Min();
-
-            newHolderIDs.ForEach(holderID =>
-            {
-                DisplayIcon newDisplayIcon = _preparedDisplayIcons.Find(icon => icon.ID == holderID);
-                int siblingIndex = _activePrimaryCardHolders.Find(holder => holder.ID == holderID).transform.GetSiblingIndex();
-                if (siblingIndex < minSiblingIndex)
+            case 0:
+                int duration = 0;
+                if (GetDisplayIconsAmount() > 0)
                 {
-                    leftDisplayIcons.Add(newDisplayIcon);
+                    float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.displayIconHorizontalSlideSpeed;
+                    List<int> oldHolderIDs = _displayIcons.Select(icon => icon.ID).ToList();
+                    List<int> preparedHolderIDs = _preparedDisplayIcons.Select(icon => icon.ID).ToList();
+                    List<int> newHolderIDs = preparedHolderIDs.Except(oldHolderIDs).ToList();
+                    List<DisplayIcon> leftDisplayIcons = new();
+                    List<DisplayIcon> rightDisplayIcons = new();
+                    List<DisplayIcon> existingDisplayIcons = new();
+                    int minSiblingIndex = _activePrimaryCardHolders
+                        .Where(holder => oldHolderIDs.Contains(holder.ID))
+                        .Select(holder => holder.transform.GetSiblingIndex())
+                        .Min();
+
+                    newHolderIDs.ForEach(holderID =>
+                    {
+                        DisplayIcon newDisplayIcon = _preparedDisplayIcons.Find(icon => icon.ID == holderID);
+                        int siblingIndex = _activePrimaryCardHolders.Find(holder => holder.ID == holderID).transform.GetSiblingIndex();
+                        if (siblingIndex < minSiblingIndex)
+                        {
+                            leftDisplayIcons.Add(newDisplayIcon);
+                        }
+                        else
+                        {
+                            rightDisplayIcons.Add(newDisplayIcon);
+                        }
+                    });
+                    existingDisplayIcons = _preparedDisplayIcons.Where(icon => oldHolderIDs.Contains(icon.ID)).ToList();
+
+                    int slideDirectionValue = (leftDisplayIcons.Count * -1) + rightDisplayIcons.Count;
+
+                    // position left icons
+                    if (leftDisplayIcons.Count > 0)
+                    {
+                        float leftPosX = _displayIcons.Find(icon => icon.transform.GetSiblingIndex() == 0).transform.position.x;
+                        int modifier = leftDisplayIcons.Count;
+                        leftDisplayIcons.ForEach(icon =>
+                        {
+                            float posX = leftPosX - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            icon.transform.position = new(posX, icon.transform.position.y);
+                            modifier--;
+                        });
+                    }
+
+                    // position right icons
+                    if (rightDisplayIcons.Count > 0)
+                    {
+                        float rightPosX = _displayIcons.Find(icon => icon.transform.GetSiblingIndex() == _displayIcons.Count - 1).transform.position.x;
+                        int modifier = rightDisplayIcons.Count;
+                        rightDisplayIcons.Reverse();
+                        rightDisplayIcons.ForEach(icon =>
+                        {
+                            float posX = rightPosX + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            icon.transform.position = new(posX, icon.transform.position.y);
+                            modifier--;
+                        });
+                    }
+
+                    // position remaining (existing) icons
+                    if (existingDisplayIcons.Count > 0)
+                    {
+                        existingDisplayIcons.ForEach(icon =>
+                        {
+                            float posX = _displayIcons.Find(oldIcon => oldIcon.ID == icon.ID).transform.position.x;
+                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            icon.transform.position = new(posX, icon.transform.position.y);
+                        });
+                    }
+
+                    // slide old icons
+                    if (slideDirectionValue != 0)
+                    {
+                        duration = (int)(speed * 1000);
+                        _displayIcons.ForEach(icon =>
+                        {
+                            float posX = icon.transform.position.x - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            icon.transform.DOMoveX(posX, speed).SetEase(Ease.InOutSine);
+                        });
+                    }
                 }
                 else
                 {
-                    rightDisplayIcons.Add(newDisplayIcon);
+                    // no displayIcons present
+                    List<DisplayIcon> initialDisplayIcons = _preparedDisplayIcons;
+                    int modifier = initialDisplayIcons.Count - 1;
+                    initialDisplayIcons.Reverse();
+                    initialDisplayIcons.ForEach(icon =>
+                    {
+                        float posX = icon.transform.position.x + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                        posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * (initialDisplayIcons.Count - 1);
+                        icon.transform.position = new(posX, icon.transform.position.y);
+                        modifier--;
+                    });
                 }
-            });
-            existingDisplayIcons = _preparedDisplayIcons.Where(icon => oldHolderIDs.Contains(icon.ID)).ToList();
-
-            int slideDirectionValue = (leftDisplayIcons.Count * -1) + rightDisplayIcons.Count;
-
-            // position left icons
-            if (leftDisplayIcons.Count > 0)
-            {
-                float leftPosX = _displayIcons.Find(icon => icon.transform.GetSiblingIndex() == 0).transform.position.x;
-                int modifier = leftDisplayIcons.Count;
-                leftDisplayIcons.ForEach(icon =>
-                {
-                    float posX = leftPosX - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                    posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
-                    icon.transform.position = new(posX, icon.transform.position.y);
-                    modifier--;
-                });
-            }
-
-            // position right icons
-            if (rightDisplayIcons.Count > 0)
-            {
-                float rightPosX = _displayIcons.Find(icon => icon.transform.GetSiblingIndex() == _displayIcons.Count - 1).transform.position.x;
-                int modifier = rightDisplayIcons.Count;
-                rightDisplayIcons.Reverse();
-                rightDisplayIcons.ForEach(icon =>
-                {
-                    float posX = rightPosX + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                    posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
-                    icon.transform.position = new(posX, icon.transform.position.y);
-                    modifier--;
-                });
-            }
-
-            // position remaining (existing) icons
-            if (existingDisplayIcons.Count > 0)
-            {
-                existingDisplayIcons.ForEach(icon =>
-                {
-                    float posX = _displayIcons.Find(oldIcon => oldIcon.ID == icon.ID).transform.position.x;
-                    posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
-                    icon.transform.position = new(posX, icon.transform.position.y);
-                });
-            }
-
-            // slide old icons
-            if (slideDirectionValue != 0)
-            {
-                duration = (int)(speed * 1000);
-                _displayIcons.ForEach(icon =>
-                {
-                    float posX = icon.transform.position.x - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
-                    icon.transform.DOMoveX(posX, speed).SetEase(Ease.InOutSine);
-                });
-            }
+                task.StartDelayMs(duration);
+                break;
+            default:
+                task.Complete();
+                break;
         }
-        else
-        {
-            // no displayIcons present
-            List<DisplayIcon> initialDisplayIcons = _preparedDisplayIcons;
-            int modifier = initialDisplayIcons.Count - 1;
-            initialDisplayIcons.Reverse();
-            initialDisplayIcons.ForEach(icon =>
-            {
-                float posX = icon.transform.position.x + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * (initialDisplayIcons.Count - 1);
-                icon.transform.position = new(posX, icon.transform.position.y);
-                modifier--;
-            });
-        }
-        return duration;
     }
 
-    public int ChangeDisplayIcons()
+    public void ChangeDisplayIconsHandler(GameTask task)
     {
         // move new icons up, and old ones out
-        float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.displayIconVerticalSlideSpeed;
-        _preparedDisplayIcons.ForEach(displayIcon =>
+        switch(task.State)
         {
-            DisplayIcon oldDisplayIcon = _displayIcons.Find(icon => icon.ID == displayIcon.ID);
-            displayIcon.gameObject.SetActive(true);
+            case 0:
+                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.displayIconVerticalSlideSpeed;
+                _preparedDisplayIcons.ForEach(displayIcon =>
+                {
+                    DisplayIcon oldDisplayIcon = _displayIcons.Find(icon => icon.ID == displayIcon.ID);
+                    displayIcon.gameObject.SetActive(true);
 
-            if (displayIcon.MainIcons.Count > 1)
-            {
-                displayIcon.PlayIconToggle();
-            }
-            else if (displayIcon.MainIcons.Count == 1)
-            {
-                displayIcon.SetIconImage();
-            }
-            else
-            {
-                displayIcon.ChangeAlpha(0);
-            }
+                    if (displayIcon.MainIcons.Count > 1)
+                    {
+                        displayIcon.PlayIconToggle();
+                    }
+                    else if (displayIcon.MainIcons.Count == 1)
+                    {
+                        displayIcon.SetIconImage();
+                    }
+                    else
+                    {
+                        displayIcon.ChangeAlpha(0);
+                    }
 
-            if (displayIcon.GroundIcons.Count > 1)
-            {
-                displayIcon.PlayBackgroundToggle();
-            }
-            else
-            {
-                displayIcon.background.color = displayIcon.GetColorByGroundIcon(displayIcon.GroundIcons.First());
-            }
+                    if (displayIcon.GroundIcons.Count > 1)
+                    {
+                        displayIcon.PlayBackgroundToggle();
+                    }
+                    else
+                    {
+                        displayIcon.background.color = displayIcon.GetColorByGroundIcon(displayIcon.GroundIcons.First());
+                    }
 
-            if(oldDisplayIcon != null)
-            {
-                _displayIcons.Remove(oldDisplayIcon);
-                oldDisplayIcon.transform.DOMoveY(_displayIconPoolTransform.position.y, speed).OnComplete(() => AddDisplayIconToPool(oldDisplayIcon));
-            }
-            _displayIcons.Add(displayIcon);
-            displayIcon.transform.DOMoveY(_iconsTransform.position.y, speed).OnComplete(() => displayIcon.transform.SetParent(_iconsTransform));
-        });
-        _preparedDisplayIcons = new();
-        return (int)(speed * 1000);
+                    if (oldDisplayIcon != null)
+                    {
+                        _displayIcons.Remove(oldDisplayIcon);
+                        oldDisplayIcon.transform.DOMoveY(_displayIconPoolTransform.position.y, speed).OnComplete(() => AddDisplayIconToPool(oldDisplayIcon));
+                    }
+                    _displayIcons.Add(displayIcon);
+                    displayIcon.transform.DOMoveY(_iconsTransform.position.y, speed).OnComplete(() => displayIcon.transform.SetParent(_iconsTransform));
+                });
+                _preparedDisplayIcons = new();
+                task.StartDelayMs((int)(speed * 1000));
+                break;
+            default:
+                task.Complete();
+                break;
+        }
     }
 
     public void ReOrderDisplayIconsHierarchy()
@@ -491,7 +507,7 @@ public class PlayerTableView : ViewBase
         rect.anchoredPosition = new(0f, topPositionY);
         data.card.canMove = false;
         data.card.cardActionStatus = CardActionStatus.PENDING_ON_TABLE;
-        if(holder.GetContentListSize() > 1)
+        if (holder.GetContentListSize() > 1)
         {
             Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 2);
             if (cardBelow.cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
@@ -512,7 +528,7 @@ public class PlayerTableView : ViewBase
         rect.anchoredPosition = new(data.card.prevAnchoredPosition.x, data.card.prevAnchoredPosition.y);
         data.card.canMove = true;
         data.card.cardActionStatus = CardActionStatus.IN_HAND;
-        if(holder.GetContentListSize() > 0)
+        if (holder.GetContentListSize() > 0)
         {
             Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 1);
             if (cardBelow.cardActionStatus == CardActionStatus.STACKED_PENDING_ON_TABLE)

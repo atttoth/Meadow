@@ -9,7 +9,7 @@ public class MarkerActionScreen : MonoBehaviour
 {
     private Image _blackOverlay;
     private TextMeshProUGUI _selectText;
-    private List<ScreenItem> _actionIconItems;
+    private List<ScreenDisplayItem> _actionIconItems;
     private Marker _currentMarker;
 
     public List<Button> Init()
@@ -22,17 +22,18 @@ public class MarkerActionScreen : MonoBehaviour
         _actionIconItems = new();
         for (int i = 0; i < numOfActions; i++)
         {
-            ScreenItem item = transform.GetChild(1 + i).GetComponent<ScreenItem>();
-            item.markerAction = (MarkerAction)i;
-            item.transform.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite(i.ToString());
+            ScreenDisplayItem item = transform.GetChild(1 + i).GetComponent<ScreenDisplayItem>();
+            item.Init();
+            item.type = (MarkerAction)i;
+            item.image.sprite = atlas.GetSprite(i.ToString());
             _actionIconItems.Add(item);
         }
-        return _actionIconItems.Select(item => item.GetComponent<Button>()).ToList();
+        return _actionIconItems.Select(item => item.button).ToList();
     }
 
     public void ToggleScreen(Marker marker)
     {
-        if(marker)
+        if (marker)
         {
             _currentMarker = marker;
             _blackOverlay.enabled = true;
@@ -49,7 +50,7 @@ public class MarkerActionScreen : MonoBehaviour
             }
             else
             {
-                ScreenItem item = _actionIconItems.Find(item => item.markerAction == _currentMarker.action);
+                ScreenDisplayItem item = _actionIconItems.Find(item => (MarkerAction)item.type == _currentMarker.action);
                 item.GetComponent<RectTransform>().anchoredPosition = new(0f, 200f);
                 item.gameObject.SetActive(true);
             }

@@ -30,7 +30,7 @@ public class OverlayManager : GameInteractionEvent
         actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = button.GetComponent<ScreenItem>().markerAction });
+            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = (MarkerAction)button.GetComponent<ScreenDisplayItem>().type });
         }));
 
         _deckSelectionScreen = transform.GetChild(3).GetComponent<DeckSelectionScreen>();
@@ -38,7 +38,7 @@ public class OverlayManager : GameInteractionEvent
         deckButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.DECK_SELECTED, new GameTaskItemData() { deckType = button.GetComponent<ScreenItem>().deckType });
+            StartEventHandler(GameEventType.DECK_SELECTED, new GameTaskItemData() { deckType = (DeckType)button.GetComponent<ScreenDisplayItem>().type });
         }));
     }
 
@@ -47,7 +47,7 @@ public class OverlayManager : GameInteractionEvent
         int[] size = GetDummySize(type);
         _dummy.GetComponent<RectTransform>().sizeDelta = new(size[0], size[1]);
         _dummy.GetComponent<Image>().sprite = sprite;
-        if(needToRotate)
+        if (needToRotate)
         {
             _dummy.transform.eulerAngles = new Vector3(_dummy.transform.rotation.eulerAngles.x, _dummy.transform.rotation.eulerAngles.y, _dummy.transform.rotation.eulerAngles.z + 90f);
             _dummy.transform.position = new Vector3(_dummy.transform.position.x, _dummy.transform.position.y + 60f, _dummy.transform.position.z);
@@ -75,7 +75,7 @@ public class OverlayManager : GameInteractionEvent
     public void EnableDummy(bool value)
     {
         _dummy.SetActive(value);
-        if(_blackOverlay.enabled != value)
+        if (_blackOverlay.enabled != value)
         {
             _blackOverlay.enabled = value;
         }

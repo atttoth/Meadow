@@ -6,9 +6,9 @@ using UnityEngine.U2D;
 [System.Serializable]
 public class DeckController : MonoBehaviour
 {
-   private Dictionary<DeckType, Deck> _decks;
-   private Dictionary<int, Transform> _displayDecks;
-   private List<Card> _topCards;
+    private Dictionary<DeckType, Deck> _decks;
+    private Dictionary<int, Transform> _displayDecks;
+    private List<Card> _topCards;
 
     public List<Card> TopCards
     {
@@ -20,7 +20,7 @@ public class DeckController : MonoBehaviour
     {
         List<CardData> cardDataCollection = ParseDataFromJSON();
         _decks = new();
-        for(int index = 0; index < (int)DeckType.NUM_OF_DECKS; index++)
+        for (int index = 0; index < (int)DeckType.NUM_OF_DECKS; index++)
         {
             DeckType deckType = ((DeckType)index);
             SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());

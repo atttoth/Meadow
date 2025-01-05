@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
-using static Card;
 using static GameTask;
 using static MarkerHolder;
 
@@ -15,7 +13,6 @@ public class GameLogicManager : MonoBehaviour
     private PlayerManager _playerManager;
     private OverlayManager _overlayManager;
     GameTaskHandler[] _eventHandlers;
-    public bool isBoardFilled;
     public bool hasRemainingMarkers;
 
     private void Awake()
@@ -36,6 +33,7 @@ public class GameLogicManager : MonoBehaviour
         _playerManager = ReferenceManager.Instance.playerManager;
         _overlayManager = ReferenceManager.Instance.overlayManager;
         _eventHandlers = new GameTaskHandler[] {
+            CampIconsSelectHandler,
             CardPickHandler,
             PendingCardPlaceHandler,
             ExamineCardHandler,
@@ -44,7 +42,7 @@ public class GameLogicManager : MonoBehaviour
             MarkerPlaceHandler,
             MarkerCancelHandler,
             MarkerActionSelectHandler,
-            DeckSelectHandler
+            DeckSelectHandler,
         };
 
         _boardManager.CreateBoard();
@@ -57,14 +55,18 @@ public class GameLogicManager : MonoBehaviour
 
     private void Update()
     {
-        if (!isBoardFilled && Input.GetKeyDown(KeyCode.E)) // for testing
+        if (Input.GetKeyDown(KeyCode.E)) // for testing
         {
-            new GameTask().ExecHandler(InitialBoardFillHandler);
+            _playerManager.Controller.EnableTableView(false);
+            _boardManager.ToggleMarkerHolders(false);
+            _campManager.ToggleMarkerHolders(false);
+            new GameTask().ExecHandler(_campManager.StartViewSetup);
         }
 
-        if(!hasRemainingMarkers && Input.GetKeyDown(KeyCode.R)) // for testing
+        if (!hasRemainingMarkers && Input.GetKeyDown(KeyCode.R)) // for testing
         {
             _playerManager.Controller.ResetMarkers(); // make markers disappear in a pattern?
+            _playerManager.Controller.EnableTableView(true);
             _boardManager.ToggleMarkerHolders(true);
             _campManager.ToggleMarkerHolders(true);
         }
@@ -73,24 +75,6 @@ public class GameLogicManager : MonoBehaviour
     public void OnEvent(object eventType, GameTaskItemData data)
     {
         new GameTask().ExecHandler(_eventHandlers[(int)eventType], data);
-    }
-
-    private void InitialBoardFillHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                isBoardFilled = true;
-                _playerManager.Controller.EnableTableView(false);
-                task.Data.deckType = GetActiveDeckType();
-                task.StartHandler(_boardManager.BoardFillHandler, task.Data);
-                break;
-            default:
-                _playerManager.Controller.EnableTableView(true);
-                EnableRayTargetOInteractables(true);
-                task.Complete();
-                break;
-        }
     }
 
     private DeckType GetActiveDeckType()
@@ -105,7 +89,7 @@ public class GameLogicManager : MonoBehaviour
 
     private void AddTwoSlotsWithRoadsOnSecondaryPage()
     {
-        for(int i = 0; i < 2; i++)
+        for (int i = 0; i < 2; i++)
         {
             CardHolder holder = _playerManager.Controller.GetTableView().AddHolderOnSecondaryPage();
             Card fakeCard = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
@@ -126,7 +110,7 @@ public class GameLogicManager : MonoBehaviour
 
     public void MarkerPlaceHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 Marker marker = task.Data.marker;
@@ -154,7 +138,7 @@ public class GameLogicManager : MonoBehaviour
 
     private void MarkerCancelHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
@@ -182,7 +166,7 @@ public class GameLogicManager : MonoBehaviour
 
     private void MarkerActionSelectHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 _overlayManager.ToggleMarkerActionScreen(null);
@@ -190,7 +174,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartDelayMs(0);
                 break;
             case 1:
-                switch(task.Data.markerAction)
+                switch (task.Data.markerAction)
                 {
                     case MarkerAction.PICK_ANY_CARD_FROM_BOARD:
                         task.StartHandler(_boardManager.EnableAnyCardSelectionHandler);
@@ -208,7 +192,7 @@ public class GameLogicManager : MonoBehaviour
                 }
                 break;
             case 2:
-                if(Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, markerAction => markerAction == task.Data.markerAction)) // marker action ends immediately
+                if (Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, markerAction => markerAction == task.Data.markerAction)) // marker action ends immediately
                 {
                     _boardManager.ToggleMarkerHolders(true);
                     _campManager.ToggleMarkerHolders(true);
@@ -224,7 +208,7 @@ public class GameLogicManager : MonoBehaviour
 
     private void DeckSelectHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 task.StartHandler(_overlayManager.HideDeckSelectionScreenHandler, task.Data);
@@ -239,12 +223,33 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
-    private void CardPickHandler(GameTask task)
+    private void CampIconsSelectHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
-                if(task.Data.holder == null)
+                task.StartHandler(_campManager.EndViewSetup);
+                break;
+            case 1:
+                task.Data.deckType = GetActiveDeckType();
+                task.StartHandler(_boardManager.BoardFillHandler, task.Data);
+                break;
+            default:
+                _playerManager.Controller.EnableTableView(true);
+                _boardManager.ToggleMarkerHolders(true);
+                _campManager.ToggleMarkerHolders(true);
+                EnableRayTargetOInteractables(true);
+                task.Complete();
+                break;
+        }
+    }
+
+    private void CardPickHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                if (task.Data.holder == null)
                 {
                     task.Data.topCards = _boardManager.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
                     task.StartHandler(_overlayManager.HideCardSelectionHandler, task.Data);
@@ -258,7 +263,7 @@ public class GameLogicManager : MonoBehaviour
                 }
                 break;
             case 1:
-                if(task.Data.holder == null)
+                if (task.Data.holder == null)
                 {
                     _boardManager.DisposeTopCards();
                 }
@@ -296,7 +301,7 @@ public class GameLogicManager : MonoBehaviour
 
     public void ExamineCardHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 EnableRayTargetOInteractables(false);
@@ -387,7 +392,7 @@ public class GameLogicManager : MonoBehaviour
             }
             allRequirements = updatedRequirements.ToArray();
         }
-        
+
         List<CardIcon> adjacentHolderIcons = _playerManager.Controller.GetTableView().GetAdjacentHolderIcons(holder);
         if (PassedGlobalRequirements(allTableIcons, allRequirements) && PassedOptionalRequirements(allTableIcons, optionalRequirements))
         {
@@ -432,13 +437,13 @@ public class GameLogicManager : MonoBehaviour
 
     private bool PassedOptionalRequirements(List<CardIcon> allTableIcons, CardIcon[] optionalRequirements)
     {
-        if(optionalRequirements.Length < 1)
+        if (optionalRequirements.Length < 1)
         {
             return true;
         }
 
         List<CardIcon[]> list = new();
-        if(optionalRequirements.Length == 2)
+        if (optionalRequirements.Length == 2)
         {
             list.Add(optionalRequirements);
         }
@@ -449,13 +454,13 @@ public class GameLogicManager : MonoBehaviour
             list.Add(arr1);
             list.Add(arr2);
         }
-        
+
 
         int counter = 0;
         int value = optionalRequirements.Length == 2 ? 1 : 2;
         foreach (CardIcon icon in allTableIcons)
         {
-            for(int i = 0; i < list.Count; i++)
+            for (int i = 0; i < list.Count; i++)
             {
                 var arr = list[i];
                 if (icon == arr[0] || icon == arr[1])
@@ -468,7 +473,7 @@ public class GameLogicManager : MonoBehaviour
                     }
                 }
             }
-            
+
         }
         return false;
     }
@@ -477,9 +482,9 @@ public class GameLogicManager : MonoBehaviour
     {
         foreach (CardIcon requirement in requirements)
         {
-            foreach(CardIcon icon in iconsOfHolder)
+            foreach (CardIcon icon in iconsOfHolder)
             {
-                if(icon == requirement)
+                if (icon == requirement)
                 {
                     return true;
                 }

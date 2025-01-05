@@ -1,9 +1,8 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.U2D;
-using UnityEngine.Timeline;
 using System.Linq;
+using UnityEngine;
+using UnityEngine.U2D;
+using UnityEngine.UI;
 
 public class BoardManager : MonoBehaviour
 {
@@ -33,7 +32,7 @@ public class BoardManager : MonoBehaviour
         {
             List<CardHolder> list = new();
             Transform col = transform.GetChild(0).GetChild(i);
-            for(int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < _GRID_SIZE; j++)
             {
                 CardHolder boardCardHolder = Instantiate(GameAssets.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
                 boardCardHolder.Init(j, HolderType.BoardCard);
@@ -101,7 +100,7 @@ public class BoardManager : MonoBehaviour
                 break;
             case 1:
                 int duration = 0;
-                if(_emptyHolders.Count > 0)
+                if (_emptyHolders.Count > 0)
                 {
                     float cardDrawDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawDelayFromDeck;
                     float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
@@ -129,9 +128,9 @@ public class BoardManager : MonoBehaviour
     {
         List<CardHolder> list = _cardHolders[colIndex];
         List<CardHolder> emptyHolders = new();
-        foreach(CardHolder holder in list)
+        foreach (CardHolder holder in list)
         {
-            if(holder.IsEmpty())
+            if (holder.IsEmpty())
             {
                 emptyHolders.Add(holder);
             }
@@ -141,7 +140,7 @@ public class BoardManager : MonoBehaviour
 
     private void SelectCardsFromBoard(int[][] indices)
     {
-        for(int i = 0; i < indices.Length; i++)
+        for (int i = 0; i < indices.Length; i++)
         {
             int[] pair = indices[i];
             GetCardFromCardHolder(pair[0], pair[1]).ToggleSelection(true);
@@ -160,7 +159,7 @@ public class BoardManager : MonoBehaviour
         int[][] indices = new int[length][];
         if (length == 1) // 1-2-3-4 markers point to a single position
         {
-            switch(holderListKey)
+            switch (holderListKey)
             {
                 case 2:
                     indices[0] = new int[] { holderID, _GRID_SIZE - numberOnMarker };
@@ -176,13 +175,14 @@ public class BoardManager : MonoBehaviour
         }
         else
         {
-            int index = holderListKey == 2 ? 0 : 1;
-            for (int i = 0; i < _GRID_SIZE; i++)
+            int index1 = holderListKey == 2 ? 1 : 0;
+            int index2 = holderListKey == 2 ? 0 : 1;
+            for (int i = 0; i < length; i++)
             {
-                List<int> list = new();
-                list.Add(i);
-                list.Insert(index, holderID);
-                indices[i] = list.ToArray();
+                int[] arr = new int[2];
+                arr[index1] = i;
+                arr[index2] = holderID;
+                indices[i] = arr;
             }
             return indices;
         }
@@ -195,7 +195,7 @@ public class BoardManager : MonoBehaviour
             for (int row = 0; row < _cardHolders[col].Count; row++)
             {
                 CardHolder holder = _cardHolders[col][row];
-                if(holder.GetContentListSize() > 0)
+                if (holder.GetContentListSize() > 0)
                 {
                     holder.GetAllContent().ForEach(card => card.ToggleRayCast(value));
                 }
@@ -208,7 +208,7 @@ public class BoardManager : MonoBehaviour
         markers.ForEach(marker =>
         {
             MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
-            if(prevHolder != null && !prevHolder.IsEmpty())
+            if (prevHolder != null && !prevHolder.IsEmpty())
             {
                 prevHolder.RemoveItemFromContentList(marker);
             }
@@ -241,9 +241,9 @@ public class BoardManager : MonoBehaviour
 
     public void ToggleCardsSelection(bool value)
     {
-        for(int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < _GRID_SIZE; i++)
         {
-            for(int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < _GRID_SIZE; j++)
             {
                 GetCardFromCardHolder(i, j).ToggleSelection(value);
             }
@@ -269,7 +269,7 @@ public class BoardManager : MonoBehaviour
 
     public void EnableAnyCardSelectionHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 ToggleCardsSelection(true);

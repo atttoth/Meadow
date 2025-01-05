@@ -1,8 +1,7 @@
-using System.Collections;
+using DG.Tweening;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-using DG.Tweening;
 
 public class DisplayIcon : MonoBehaviour
 {
@@ -66,7 +65,7 @@ public class DisplayIcon : MonoBehaviour
 
     public Color32 GetColorByGroundIcon(CardIcon cardIcon)
     {
-        switch(cardIcon)
+        switch (cardIcon)
         {
             case CardIcon.Grass:
                 return new Color32(31, 255, 0, 85);
@@ -99,7 +98,7 @@ public class DisplayIcon : MonoBehaviour
 
     public void PlayIconToggle()
     {
-        if(cardIcon.color.a == 0)
+        if (cardIcon.color.a == 0)
         {
             ChangeAlpha(1);
         }

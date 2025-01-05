@@ -2,6 +2,7 @@
 public class GameSettings
 {
     // timings
+    public float campIconPositionSpeed = 0.8f;
     public float cardDrawSpeedFromDeck = 0.8f;
     public float cardDrawDelayFromDeck = 0.2f;
     public float cardRotationSpeedOnBoard = 0.8f;

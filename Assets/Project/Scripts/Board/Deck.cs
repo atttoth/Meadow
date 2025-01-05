@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using UnityEngine;
-using Random = System.Random;
 using UnityEngine.U2D;
+using Random = System.Random;
 
 public enum DeckType
 {
- West,
- South,
- East,
- North,
- NUM_OF_DECKS
+    West,
+    South,
+    East,
+    North,
+    NUM_OF_DECKS
 }
 
 public class Deck : MonoBehaviour

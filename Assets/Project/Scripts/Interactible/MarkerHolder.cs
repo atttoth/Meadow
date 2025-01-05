@@ -46,7 +46,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         foreach (Marker marker in _contentList)
         {
-            if(marker.Status == MarkerStatus.PLACED || marker.Status == MarkerStatus.USED)
+            if (marker.Status == MarkerStatus.PLACED || marker.Status == MarkerStatus.USED)
             {
                 return false;
             }
@@ -83,7 +83,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     public void ToggleRayCast(bool value)
     {
-        if(IsEmpty())
+        if (IsEmpty())
         {
             _mainImage.raycastTarget = value;
         }

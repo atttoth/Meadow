@@ -96,7 +96,7 @@ public class Card : Interactable
 
     public override void OnDrag(PointerEventData eventData)
     {
-        if(!canMove)
+        if (!canMove)
         {
             return;
         }
@@ -105,11 +105,11 @@ public class Card : Interactable
 
     public override void OnBeginDrag(PointerEventData eventData)
     {
-        if(!canMove)
+        if (!canMove)
         {
             return;
         }
-        
+
         transform.SetParent(transform.root);
         ToggleRayCast(false);
         PlayerManager playerManager = ReferenceManager.Instance.playerManager;
@@ -127,7 +127,7 @@ public class Card : Interactable
 
     public override void OnEndDrag(PointerEventData eventData)
     {
-        if(!canMove)
+        if (!canMove)
         {
             return;
         }
@@ -213,8 +213,9 @@ public class Card : Interactable
     private void ExamineCard()
     {
         transform.SetParent(_parent);
-        StartEventHandler(GameEventType.CARD_EXAMINED, new GameTaskItemData() { 
-            sprite = GetComponent<Image>().sprite, 
+        StartEventHandler(GameEventType.CARD_EXAMINED, new GameTaskItemData()
+        {
+            sprite = GetComponent<Image>().sprite,
             needToRotate = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
             dummyType = DummyType.CARD
         });
@@ -290,7 +291,7 @@ public class Card : Interactable
 
     private void ZoomCard(bool value)
     {
-        if(!value)
+        if (!value)
         {
             transform.SetParent(_parent);
             zoomSequence.Kill();
@@ -342,7 +343,7 @@ public class Card : Interactable
 
         cardDrawing = DOTween.Sequence();
         cardDrawing.Append(transform.DOMoveY(holder.transform.position.y, cardDrawSpeed).SetEase(Ease.InOutQuart).SetDelay(delay));
-        cardDrawing.OnComplete(() => 
+        cardDrawing.OnComplete(() =>
         {
             holder.AddToContentList(this);
             FlipBoardCard();

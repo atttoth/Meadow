@@ -1,8 +1,8 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.UI;
 using UnityEngine.U2D;
+using UnityEngine.UI;
 
 public enum MarkerStatus
 {
@@ -34,7 +34,8 @@ public class Marker : Interactable
         set { _parent = value; }
     }
 
-    public MarkerStatus Status {
+    public MarkerStatus Status
+    {
         get { return _status; }
         set { _status = value; }
     }
@@ -64,12 +65,12 @@ public class Marker : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            if(_status == MarkerStatus.PLACED)
+            if (_status == MarkerStatus.PLACED)
             {
                 _status = MarkerStatus.NONE;
                 MarkerHolder holder;
                 holder = transform.parent.GetComponent<MarkerHolder>();
-                if(holder == null)
+                if (holder == null)
                 {
                     holder = _parent.GetComponent<MarkerHolder>();
                 }
@@ -79,7 +80,7 @@ public class Marker : Interactable
 
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            if(_status == MarkerStatus.NONE)
+            if (_status == MarkerStatus.NONE)
             {
                 _status = MarkerStatus.PLACED;
                 MarkerHolder holder = transform.parent.GetComponent<MarkerHolder>();

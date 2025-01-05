@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
 
@@ -34,12 +32,12 @@ public class GameAssets : MonoBehaviour
     public Transform deckPrefab;
     public Transform cardPrefab;
     public Transform boardCardHolderPrefab;
-    public Transform boardMarkerHolderPrefab;
     public Transform tableCardHolderPrefab;
     public Transform markerPrefab;
     public Transform displayIconPrefab;
     public Transform dummyDisplayIconPrefab;
     public Transform cardScoreTextPrefab;
+    public Transform screenDisplayItemPrefab;
 
     public SpriteAtlas baseAtlas;
     public SpriteAtlas West;

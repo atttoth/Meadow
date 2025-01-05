@@ -1,9 +1,9 @@
 using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
 using System.Linq;
-using static PendingActionCreator;
+using UnityEngine;
 using UnityEngine.U2D;
+using UnityEngine.UI;
+using static PendingActionCreator;
 
 public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, PlayerMarkerView, PlayerInfoView>
 {
@@ -37,7 +37,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         spriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
         spriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
         _turnEndButton.spriteState = spriteState;
-        
+
         _tableToggleButton.onClick.AddListener(() =>
         {
             _tableView.TogglePanel();
@@ -123,7 +123,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     public void UpdateHandViewHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 _handView.MoveCardsHorizontallyInHand(IsTableVisible(), false, true);
@@ -137,7 +137,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
 
     public void AddExtraCardPlacementHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 _infoView.SetMaxCardPlacement(2);
@@ -297,14 +297,15 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
                     .ForEach(card => _tableView.PrepareDisplayIcon(card));
 
                 dataCollection.ForEach(data => data.card.cardActionStatus = CardActionStatus.DEFAULT);
-                int duration1 = _tableView.SetDisplayIconsHorizontalPosition();
-                task.StartDelayMs(duration1);
+                task.StartDelayMs(0);
                 break;
             case 1:
-                int duration2 = _tableView.ChangeDisplayIcons();
-                task.StartDelayMs(duration2);
+                task.StartHandler(_tableView.SetDisplayIconsHorizontalPositionHandler);
                 break;
             case 2:
+                task.StartHandler(_tableView.ChangeDisplayIconsHandler);
+                break;
+            case 3:
                 _tableView.ReOrderDisplayIconsHierarchy();
                 task.StartDelayMs(0);
                 break;

@@ -1,9 +1,7 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using static GameTask;
 
 /**
  * execute handler task - ExecHandler()
@@ -62,16 +60,16 @@ public class GameTask
 
     private async Task Execute()
     {
-        if(State == -1) // check if current handler has finished
+        if (State == -1) // check if current handler has finished
         {
             _taskItems.RemoveAt(_taskItems.Count - 1);
-            if(_taskItems.Count > 0) // check if any handlers left
+            if (_taskItems.Count > 0) // check if any handlers left
             {
                 _currentTaskItem = _taskItems[_taskItems.Count - 1];
             }
         }
 
-        if(State > -1)
+        if (State > -1)
         {
             await Task.Delay(_duration);
             GameTaskHandler handler = (GameTaskHandler)_currentTaskItem[0];
@@ -87,7 +85,7 @@ public class GameTask
     public void StartDelayMs(int duration)
     {
         State++;
-        _duration =+ duration;
+        _duration = +duration;
     }
 
     public void NextState(int state, int duration = 0)

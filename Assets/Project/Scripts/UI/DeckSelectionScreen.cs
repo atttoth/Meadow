@@ -1,15 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using System.Linq;
-using System;
 
 public class DeckSelectionScreen : MonoBehaviour
 {
     private Image _blackOverlay;
     private TextMeshProUGUI _selectText;
-    private List<ScreenItem> _deckItems;
+    private List<ScreenDisplayItem> _deckItems;
 
     public List<Button> Init()
     {
@@ -18,17 +18,18 @@ public class DeckSelectionScreen : MonoBehaviour
         _deckItems = new();
         for (int i = 0; i < (int)DeckType.NUM_OF_DECKS; i++)
         {
-            ScreenItem item = transform.GetChild(1 + i).GetComponent<ScreenItem>();
-            item.deckType = (DeckType)i;
-            item.transform.GetChild(0).GetComponent<Image>().sprite = GetBackImageOfDeck(item.deckType);
+            ScreenDisplayItem item = transform.GetChild(1 + i).GetComponent<ScreenDisplayItem>();
+            item.Init();
+            item.type = (DeckType)i;
+            item.image.sprite = GetBackImageOfDeck((DeckType)item.type);
             _deckItems.Add(item);
         }
-        return _deckItems.Select(item => item.GetComponent<Button>()).ToList();
+        return _deckItems.Select(item => item.button).ToList();
     }
 
     private Sprite GetBackImageOfDeck(DeckType deckType)
     {
-        switch(deckType)
+        switch (deckType)
         {
             case DeckType.West: return GameAssets.Instance.West.GetSprite("back");
             case DeckType.South: return GameAssets.Instance.South.GetSprite("back");
@@ -39,17 +40,17 @@ public class DeckSelectionScreen : MonoBehaviour
 
     public void ToggleDeckSelectionScreen(bool value, DeckType deckType)
     {
-        if(value)
+        if (value)
         {
             _blackOverlay.enabled = true;
             List<float> positions = new() { -300f, 0f, 300f };
             DeckType[] currentTypes = new DeckType[3] { DeckType.West, DeckType.East, deckType };
             _deckItems
-                .Where(item => Array.Exists(currentTypes, type => type == item.deckType))
+                .Where(item => Array.Exists(currentTypes, type => type == (DeckType)item.type))
                 .ToList()
                 .ForEach(item =>
                 {
-                    item.GetComponent<Button>().enabled = true;
+                    item.button.enabled = true;
                     item.GetComponent<RectTransform>().anchoredPosition = new(positions.First(), 300f);
                     positions.RemoveAt(0);
                     item.gameObject.SetActive(true);
@@ -57,15 +58,15 @@ public class DeckSelectionScreen : MonoBehaviour
         }
         else
         {
-            _deckItems.Where(item => item.deckType != deckType).ToList().ForEach(item => item.gameObject.SetActive(false));
-            _deckItems.Find(item => item.deckType == deckType).GetComponent<Button>().enabled = false;
+            _deckItems.Where(item => (DeckType)item.type != deckType).ToList().ForEach(item => item.gameObject.SetActive(false));
+            _deckItems.Find(item => (DeckType)item.type == deckType).button.enabled = false;
             _selectText.enabled = false;
         }
     }
 
     public void ShowCardSelectionHandler(GameTask task)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 List<float> positions = new() { -300f, 0f, 300f };
@@ -89,8 +90,8 @@ public class DeckSelectionScreen : MonoBehaviour
                 task.StartDelayMs(0);
                 break;
             default:
-            task.Complete();
-            break;
+                task.Complete();
+                break;
         }
     }
 
@@ -108,7 +109,7 @@ public class DeckSelectionScreen : MonoBehaviour
                 break;
             case 1:
                 task.Data.topCards.ForEach(card => card.gameObject.SetActive(false));
-                _deckItems.Find(item => item.deckType == task.Data.topCards.First().Data.deckType).gameObject.SetActive(false);
+                _deckItems.Find(item => (DeckType)item.type == task.Data.topCards.First().Data.deckType).gameObject.SetActive(false);
                 task.StartDelayMs(500);
                 break;
             case 2:

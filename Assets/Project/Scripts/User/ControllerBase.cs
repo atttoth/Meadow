@@ -1,7 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
 public abstract class ControllerBase<T, K, E, F> : GameInteractionEvent
 {
     protected T _tableView;
