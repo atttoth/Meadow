@@ -69,6 +69,7 @@ SpriteAtlas:
     - b8a950ea8c1dcb245b1e7141e74d7c1d: 21300000
     - f2170cbbe3a95c34fa1f5558aae77b8b: 21300000
     - ee02b3dbd30c8e84db2cc03c776352e3: 21300000
+    - 854a2a6c447f6404e80ea0b29783b08b: 21300000
     - a77068eca7d3c6847ace1ee5b67362a7: 21300000
     - 6db2ecfc1fe243344b75481994562fe2: 21300000
     - 0a16c46d90486c847896c2ffc705ff39: 21300000
@@ -82,6 +83,7 @@ SpriteAtlas:
     - 2995013fd676878419072ac4efd171df: 21300000
     - 73f6905f13db77641afff1d2d17fefb6: 21300000
     - 9bedb66f2f2688249a896b11bd3be151: 21300000
+    - 5da08a7fab455724c97e1c5585ef8aa4: 21300000
   m_MasterAtlas: {fileID: 0}
   m_PackedSprites:
   - {fileID: 21300000, guid: 6c51818074ebe5e4bbf70975dd9ab3d7, type: 3}
@@ -103,6 +105,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: b8a950ea8c1dcb245b1e7141e74d7c1d, type: 3}
   - {fileID: 21300000, guid: f2170cbbe3a95c34fa1f5558aae77b8b, type: 3}
   - {fileID: 21300000, guid: ee02b3dbd30c8e84db2cc03c776352e3, type: 3}
+  - {fileID: 21300000, guid: 854a2a6c447f6404e80ea0b29783b08b, type: 3}
   - {fileID: 21300000, guid: a77068eca7d3c6847ace1ee5b67362a7, type: 3}
   - {fileID: 21300000, guid: 6db2ecfc1fe243344b75481994562fe2, type: 3}
   - {fileID: 21300000, guid: 0a16c46d90486c847896c2ffc705ff39, type: 3}
@@ -116,6 +119,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 2995013fd676878419072ac4efd171df, type: 3}
   - {fileID: 21300000, guid: 73f6905f13db77641afff1d2d17fefb6, type: 3}
   - {fileID: 21300000, guid: 9bedb66f2f2688249a896b11bd3be151, type: 3}
+  - {fileID: 21300000, guid: 5da08a7fab455724c97e1c5585ef8aa4, type: 3}
   m_PackedSpriteNamesToIndex:
   - 3
   - 14
@@ -136,6 +140,7 @@ SpriteAtlas:
   - 19
   - endTurn_base
   - 18
+  - campButton_incomplete
   - 4
   - endTurn_highlighted
   - 21
@@ -149,6 +154,7 @@ SpriteAtlas:
   - board_inside
   - 15
   - 0
+  - campButton_complete
   m_RenderDataMap: {}
   m_Tag: Base
   m_IsVariant: 0

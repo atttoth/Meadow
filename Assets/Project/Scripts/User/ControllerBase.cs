@@ -1,4 +1,4 @@
-public abstract class ControllerBase<T, K, E, F> : GameInteractionEvent
+public abstract class ControllerBase<T, K, E, F> : GameLogicEvent
 {
     protected T _tableView;
     protected K _handView;

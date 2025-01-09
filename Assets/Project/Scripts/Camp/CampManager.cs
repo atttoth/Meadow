@@ -3,10 +3,9 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class CampManager : GameInteractionEvent
+public class CampManager : GameLogicEvent
 {
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
-    private bool _isCampActionEnabled;
     private List<MarkerHolder> _markerHolders;
     private CampView _view;
     private Button _campToggleButton;
@@ -25,19 +24,37 @@ public class CampManager : GameInteractionEvent
             _markerHolders.Add(markerHolder);
         }
         _view = transform.GetChild(1).GetComponent<CampView>();
-        List<Button> iconButtons = _view.Init();
-        iconButtons.ForEach(button => button.onClick.AddListener(() =>
-        {
-            button.enabled = false;
-            _view.FlipCampIcon(button.GetComponent<ScreenDisplayItem>());
-            if(_view.selectionsLeft < 1)
-            {
-                iconButtons.ForEach(button => button.enabled = false);
-                StartEventHandler(GameEventType.CAMP_ICONS_SELECTED, null);
-            }
-        }));
+        _view.Init();
         _campToggleButton = transform.GetChild(2).GetComponent<Button>();
         _campToggleButton.onClick.AddListener(() => ToggleCampView());
+    }
+
+    public void DisposeCampForRound()
+    {
+        _view.ResetCampView();
+    }
+
+    private void InitCampForRound()
+    {
+        _view.SetNumOfIconsForRound(2); // locked to 2 players for now
+        List<ScreenDisplayItem> campItems = _view.CreateCampItems();
+        campItems.ForEach(item => item.button.onClick.AddListener(() =>
+        {
+            item.button.enabled = false;
+            _view.FlipCampIcon(item);
+            if (_view.selectionsLeft < 1)
+            {
+                campItems.ForEach(item => item.button.enabled = false);
+                StartEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, null);
+            }
+        }));
+
+        List<ScreenDisplayItem> scoreButtonItems = _view.CreateItemButtons();
+        scoreButtonItems.ForEach(item => item.button.onClick.AddListener(() =>
+        {
+            _view.OnItemButtonClick(item);
+            StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, null);
+        }));
     }
 
     private void ToggleCampView()
@@ -46,11 +63,12 @@ public class CampManager : GameInteractionEvent
         _view.gameObject.SetActive(_isCampVisible);
     }
 
-    public void StartViewSetup(GameTask task)
+    public void ShowViewSetupHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
+                InitCampForRound();
                 ToggleCampView();
                 task.StartDelayMs(500);
                 break;
@@ -64,19 +82,27 @@ public class CampManager : GameInteractionEvent
         }
     }
 
-    public void EndViewSetup(GameTask task)
+    public void StartViewSetupHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                int delay = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000); // wait for last icon to flip
-                task.StartDelayMs(delay);
+                int delay1 = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000); // wait for last icon to flip
+                task.StartDelayMs(delay1);
                 break;
             case 1:
                 task.StartHandler(_view.SetIconsPositionHandler);
                 break;
             case 2:
-                task.StartHandler(_view.ShowScoreButtonshandler);
+                int delay2 = 1000;
+                task.StartDelayMs(delay2);
+                break;
+            case 3:
+                task.StartHandler(_view.ShowScoreButtonsHandler);
+                break;
+            case 4:
+                int delay3 = 2000;
+                task.StartDelayMs(delay3);
                 break;
             default:
                 ToggleCampView();
@@ -92,6 +118,6 @@ public class CampManager : GameInteractionEvent
 
     public void ToggleCampAction(bool value)
     {
-        _isCampActionEnabled = value;
+        _view.isCampActionEnabled = value;
     }
 }

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 
 public class ScreenDisplayItem : MonoBehaviour
 {
-    public Enum type;
+    public object type;
     public Image image;
     public Button button;
 

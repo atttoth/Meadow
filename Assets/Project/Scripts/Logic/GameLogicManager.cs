@@ -12,7 +12,7 @@ public class GameLogicManager : MonoBehaviour
     private CampManager _campManager;
     private PlayerManager _playerManager;
     private OverlayManager _overlayManager;
-    GameTaskHandler[] _eventHandlers;
+    GameTaskHandler[] _logicEventHandlers;
     public bool hasRemainingMarkers;
 
     private void Awake()
@@ -32,8 +32,9 @@ public class GameLogicManager : MonoBehaviour
         _campManager = ReferenceManager.Instance.campManager;
         _playerManager = ReferenceManager.Instance.playerManager;
         _overlayManager = ReferenceManager.Instance.overlayManager;
-        _eventHandlers = new GameTaskHandler[] {
+        _logicEventHandlers = new GameTaskHandler[] {
             CampIconsSelectHandler,
+            CampScoreReceiveHandler,
             CardPickHandler,
             PendingCardPlaceHandler,
             ExamineCardHandler,
@@ -60,7 +61,7 @@ public class GameLogicManager : MonoBehaviour
             _playerManager.Controller.EnableTableView(false);
             _boardManager.ToggleMarkerHolders(false);
             _campManager.ToggleMarkerHolders(false);
-            new GameTask().ExecHandler(_campManager.StartViewSetup);
+            new GameTask().ExecHandler(_campManager.ShowViewSetupHandler);
         }
 
         if (!hasRemainingMarkers && Input.GetKeyDown(KeyCode.R)) // for testing
@@ -70,11 +71,16 @@ public class GameLogicManager : MonoBehaviour
             _boardManager.ToggleMarkerHolders(true);
             _campManager.ToggleMarkerHolders(true);
         }
+
+        if(Input.GetKeyDown(KeyCode.S)) // for testing
+        {
+            _campManager.DisposeCampForRound();
+        }
     }
 
-    public void OnEvent(object eventType, GameTaskItemData data)
+    public void OnLogicEvent(object eventType, GameTaskItemData data)
     {
-        new GameTask().ExecHandler(_eventHandlers[(int)eventType], data);
+        new GameTask().ExecHandler(_logicEventHandlers[(int)eventType], data);
     }
 
     private DeckType GetActiveDeckType()
@@ -228,7 +234,7 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.StartHandler(_campManager.EndViewSetup);
+                task.StartHandler(_campManager.StartViewSetupHandler);
                 break;
             case 1:
                 task.Data.deckType = GetActiveDeckType();
@@ -239,6 +245,20 @@ public class GameLogicManager : MonoBehaviour
                 _boardManager.ToggleMarkerHolders(true);
                 _campManager.ToggleMarkerHolders(true);
                 EnableRayTargetOInteractables(true);
+                task.Complete();
+                break;
+        }
+    }
+
+    private void CampScoreReceiveHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                Debug.Log("collect score");
+                task.StartDelayMs(0);
+                break;
+            default:
                 task.Complete();
                 break;
         }

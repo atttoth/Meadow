@@ -49,7 +49,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             {
                 _tableApproveButton.enabled = false;
                 _tableView.UpdateApproveButton(false);
-                StartEventHandler(GameEventType.APPROVED_PENDING_CARD_PLACED, null);
+                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, null);
             }
             else
             {

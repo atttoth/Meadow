@@ -10,7 +10,7 @@ public enum DummyType
     ACTION_ICON
 }
 
-public class OverlayManager : GameInteractionEvent
+public class OverlayManager : GameLogicEvent
 {
     private GameObject _dummy;
     private Image _blackOverlay;
@@ -30,7 +30,7 @@ public class OverlayManager : GameInteractionEvent
         actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = (MarkerAction)button.GetComponent<ScreenDisplayItem>().type });
+            StartEventHandler(GameLogicEventType.MARKER_ACTION_SELECTED, new GameTaskItemData() { markerAction = (MarkerAction)button.GetComponent<ScreenDisplayItem>().type });
         }));
 
         _deckSelectionScreen = transform.GetChild(3).GetComponent<DeckSelectionScreen>();
@@ -38,7 +38,7 @@ public class OverlayManager : GameInteractionEvent
         deckButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
-            StartEventHandler(GameEventType.DECK_SELECTED, new GameTaskItemData() { deckType = (DeckType)button.GetComponent<ScreenDisplayItem>().type });
+            StartEventHandler(GameLogicEventType.DECK_SELECTED, new GameTaskItemData() { deckType = (DeckType)button.GetComponent<ScreenDisplayItem>().type });
         }));
     }
 

@@ -148,7 +148,7 @@ public class Card : Interactable
                 holder = uiRect ? playerManager.Controller.GetLatestTableCardHolderByTag(uiRect.tag) : holder;
                 if (holder && holder.holderType == HolderType.TableCard && ReferenceManager.Instance.gameLogicManager.CanCardBePlaced(holder, this))
                 {
-                    StartEventHandler(GameEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
+                    StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
                     break;
                 }
                 else
@@ -190,7 +190,7 @@ public class Card : Interactable
         {
             if (cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
             {
-                StartEventHandler(GameEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this });
+                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this });
             }
             else
             {
@@ -206,14 +206,14 @@ public class Card : Interactable
             highlightFrame.color = Color.green;
             zoomSequence.Kill();
             transform.localScale = new Vector3(1f, 1f, 1f);
-            StartEventHandler(GameEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
+            StartEventHandler(GameLogicEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
         }
     }
 
     private void ExamineCard()
     {
         transform.SetParent(_parent);
-        StartEventHandler(GameEventType.CARD_EXAMINED, new GameTaskItemData()
+        StartEventHandler(GameLogicEventType.CARD_EXAMINED, new GameTaskItemData()
         {
             sprite = GetComponent<Image>().sprite,
             needToRotate = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
