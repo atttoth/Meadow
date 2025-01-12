@@ -61,6 +61,11 @@ public class PlayerTableView : ViewBase
         return _activePrimaryCardHolders[index];
     }
 
+    public CardHolder GetActiveCardHolderByID(int ID)
+    {
+        return _activePrimaryCardHolders.Find(holder => holder.ID == ID);
+    }
+
     public int GetDisplayIconsAmount()
     {
         return _displayIcons.Count;

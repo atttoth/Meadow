@@ -34,6 +34,7 @@ public class GameLogicManager : MonoBehaviour
         _overlayManager = ReferenceManager.Instance.overlayManager;
         _logicEventHandlers = new GameTaskHandler[] {
             CampIconsSelectHandler,
+            CampToggleHandler,
             CampScoreReceiveHandler,
             CardPickHandler,
             PendingCardPlaceHandler,
@@ -58,6 +59,7 @@ public class GameLogicManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.E)) // for testing
         {
+            _playerManager.Controller.ResetCampScoreTokens();
             _playerManager.Controller.EnableTableView(false);
             _boardManager.ToggleMarkerHolders(false);
             _campManager.ToggleMarkerHolders(false);
@@ -250,12 +252,29 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void CampToggleHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                _campManager.SaveCampScoreToken(_playerManager.Controller.GetNextCampScoreToken());
+                _campManager.EnableScoreButtonOfFulfilledIcons(_playerManager.Controller.GetAdjacentIconPairs());
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private void CampScoreReceiveHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                Debug.Log("collect score");
+                _campManager.ToggleCampAction(false);
+                _playerManager.Controller.UpdateCampScoreTokens();
+                Debug.Log(task.Data.campScore);
                 task.StartDelayMs(0);
                 break;
             default:
@@ -319,7 +338,7 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
-    public void ExamineCardHandler(GameTask task)
+    private void ExamineCardHandler(GameTask task)
     {
         switch (task.State)
         {

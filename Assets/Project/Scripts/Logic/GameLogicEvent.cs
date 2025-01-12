@@ -4,6 +4,7 @@ using UnityEngine;
 public enum GameLogicEventType
 {
     CAMP_ICONS_SELECTED,
+    CAMP_TOGGLED,
     CAMP_SCORE_RECEIVED,
     CARD_PICKED,
     CARD_PLACED,

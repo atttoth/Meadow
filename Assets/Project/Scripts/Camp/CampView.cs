@@ -4,9 +4,10 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 using Random = System.Random;
 
-public class CampView : MonoBehaviour
+public class CampView : ViewBase
 {
     private static readonly List<CardIcon> _CAMP_ICONS = new() {
             CardIcon.Bird,
@@ -23,24 +24,44 @@ public class CampView : MonoBehaviour
             CardIcon.Deer
         };
     private static readonly Dictionary<int, int> _NUM_OF_CAMP_ICONS_PER_PLAYERS = new() { { 2, 5 }, { 3, 8 } };
-    private RectTransform _screen;
-    private List<ScreenDisplayItem> _campItems; // icons to choose from
+    private RectTransform _display;
+    private List<ScreenDisplayItem> _campItemSelection; // icons to choose from
     private List<ScreenDisplayItem> _scoreButtonItems; // score buttons
     private List<ScreenDisplayItem> _selectedItems; // active icons
-    private Dictionary<string, ScreenDisplayItem[][]> _itemGroups; // values: index0-item button, index1-adjacent icons
+    private List<int> _usedScoreButtonIDs;
+    private int _playerCampScoreToken;
     public int selectionsLeft;
     public bool isCampActionEnabled;
 
-    public void Init()
+    public override void Init()
     {
-        _campItems = new();
+        _campItemSelection = new();
+        _scoreButtonItems = new();
         _selectedItems = new();
-        _screen = transform.GetChild(1).GetComponent<RectTransform>();
+        _usedScoreButtonIDs = new();
+        _display = transform.GetChild(1).GetComponent<RectTransform>();
     }
+
+    public int PlayerCampScoreToken { get { return _playerCampScoreToken; } }
 
     public void SetNumOfIconsForRound(int value)
     {
         selectionsLeft = _NUM_OF_CAMP_ICONS_PER_PLAYERS[value];
+    }
+
+    private void ShuffleItems(List<ScreenDisplayItem> list) // shuffles both list items and objects in hierarchy
+    {
+        Random random = new Random();
+        int n = list.Count;
+        while (n > 1)
+        {
+            n--;
+            int i = random.Next(n + 1);
+            ScreenDisplayItem item = list[i];
+            list[i] = list[n];
+            list[n] = item;
+        }
+        list.ForEach(item => item.transform.SetSiblingIndex(list.IndexOf(item)));
     }
 
     public List<ScreenDisplayItem> CreateCampItems()
@@ -53,24 +74,26 @@ public class CampView : MonoBehaviour
             item.gameObject.SetActive(false);
             item.Init();
             item.type = icon;
-            item.image.sprite = atlas.GetSprite("21"); // set back img of camp icon
-            _campItems.Add(item);
+            item.mainImage.sprite = atlas.GetSprite("21"); // set back img of camp icon
+            _campItemSelection.Add(item);
         });
-        return _campItems;
+        ShuffleItems(_campItemSelection);
+
+        return _campItemSelection;
     }
 
     public List<ScreenDisplayItem> CreateItemButtons()
     {
-        _scoreButtonItems = new();
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         for (int i = 0; i < selectionsLeft; ++i)
         {
-            ScreenDisplayItem item = Instantiate(GameAssets.Instance.screenDisplayItemPrefab, _screen).GetComponent<ScreenDisplayItem>();
+            ScreenDisplayItem item = Instantiate(GameAssets.Instance.screenDisplayItemPrefab, _display).GetComponent<ScreenDisplayItem>();
             item.Init();
+            item.ID = i;
             item.button.enabled = false;
             item.GetComponent<Image>().enabled = false;
-            item.image.color = new Color(item.image.color.g, item.image.color.b, item.image.color.r, 0f);
-            item.image.sprite = atlas.GetSprite("campButton_incomplete");
+            item.mainImage.color = new Color(item.mainImage.color.g, item.mainImage.color.b, item.mainImage.color.r, 0f);
+            item.mainImage.sprite = atlas.GetSprite("campButton_incomplete");
             SpriteState spriteState = item.button.spriteState;
             spriteState.selectedSprite = atlas.GetSprite("campButton_incomplete");
             item.button.spriteState = spriteState;
@@ -80,9 +103,9 @@ public class CampView : MonoBehaviour
         return _scoreButtonItems;
     }
 
-    public void ShowCampIcons()
+    public void ShowCampIconSelection()
     {
-        _campItems.ForEach(item =>
+        _campItemSelection.ForEach(item =>
         {
             item.GetComponent<Image>().enabled = false;
             item.button.enabled = true;
@@ -97,7 +120,7 @@ public class CampView : MonoBehaviour
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         Sequence iconFlip = DOTween.Sequence();
-        iconFlip.Append(item.transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(item.transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => item.image.sprite = atlas.GetSprite(((int)((CardIcon)item.type)).ToString())));
+        iconFlip.Append(item.transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(item.transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => item.mainImage.sprite = atlas.GetSprite(((int)((CardIcon)item.type)).ToString())));
         iconFlip.Append(item.transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
         iconFlip.Append(item.transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
     }
@@ -108,13 +131,13 @@ public class CampView : MonoBehaviour
         {
             case 0:
                 float iconFadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconFadeDuration;
-                _campItems.Except(_selectedItems).ToList().ForEach(item => DOTween.Sequence().Append(item.image.DOFade(0f, iconFadeDuration)));
+                _campItemSelection.Except(_selectedItems).ToList().ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(0f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;
             case 1:
                 _selectedItems.Sort((a, b) => (a.transform.position.x).CompareTo(b.transform.position.x));
                 float iconGroupPositionSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconGroupPositionSpeed;
-                Rect screenRect = _screen.rect;
+                Rect screenRect = _display.rect;
                 Rect itemRect = _selectedItems.First().GetComponent<RectTransform>().rect;
                 float gap = 40f;
                 float itemsWidth = ((_selectedItems.Count - 1) * gap) + (_selectedItems.Count * itemRect.width);
@@ -123,15 +146,16 @@ public class CampView : MonoBehaviour
                 for(int i = 0; i < _selectedItems.Count; i++)
                 {
                     ScreenDisplayItem item = _selectedItems[i];
-                    item.transform.SetParent(_screen);
+                    item.transform.SetParent(_display);
                     float posX = startingPosX + (i * gap) + (i * itemRect.width) + (itemRect.width * 0.5f);
                     Vector3 position = new(posX, posY, 0f);
                     DOTween.Sequence().Append(item.transform.DOMove(position, iconGroupPositionSpeed));
                 }
-                _campItems.Except(_selectedItems).ToList().ForEach(item => item.gameObject.SetActive(false));
+                _campItemSelection.Except(_selectedItems).ToList().ForEach(item => item.gameObject.SetActive(false));
                 task.StartDelayMs((int)(iconGroupPositionSpeed * 1000));
                 break;
             case 2:
+                ShuffleItems(_selectedItems); // randomize icons order
                 List<Vector3> itemPositions = CreateItemPositions();
                 List<Vector3> iconPositions = new();
                 int posIndex = 0;
@@ -140,29 +164,17 @@ public class CampView : MonoBehaviour
                     iconPositions.Add(itemPositions[posIndex]);
                     posIndex += 2;
                 }
-
-                Random random = new();
-                for (int i = _selectedItems.Count - 1; i > 0; i--) // randomize icons order
-                {
-                    int indexToSwap = random.Next(i + 1);
-                    (_selectedItems[indexToSwap], _selectedItems[i]) = (_selectedItems[i], _selectedItems[indexToSwap]);
-                }
-
+                
                 List<Vector3> buttonPositions = itemPositions.Except(iconPositions).ToList();
-                _itemGroups = new();
                 for (int i = 0; i < _scoreButtonItems.Count; i++) // position and link buttons with adjacent icons
                 {
                     int idx = i == _scoreButtonItems.Count - 1 ? 0 : (i + 1);
                     string key = i.ToString();
                     ScreenDisplayItem buttonItem = _scoreButtonItems[i];
-                    buttonItem.type = key;
                     buttonItem.GetComponent<RectTransform>().position = buttonPositions[i];
-                    ScreenDisplayItem item1 = _selectedItems[i];
-                    ScreenDisplayItem item2 = _selectedItems[idx];
-                    ScreenDisplayItem[][] items = new ScreenDisplayItem[2][];
-                    items[0] = new ScreenDisplayItem[] { buttonItem };
-                    items[1] = new ScreenDisplayItem[] { item1, item2 };
-                    _itemGroups[key] = items;
+                    CardIcon icon1 = (CardIcon)_selectedItems[i].type;
+                    CardIcon icon2 = (CardIcon)_selectedItems[idx].type;
+                    buttonItem.type = new List<CardIcon>() { icon1, icon2 };
                 }
 
                 float iconPositionSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconSinglePositionSpeed;
@@ -195,7 +207,7 @@ public class CampView : MonoBehaviour
             float circleposition = (float)i / (float)length + 0.25f;
             float x = Mathf.Sin(circleposition * Mathf.PI * 2f);
             float y = Mathf.Cos(circleposition * Mathf.PI * 2f);
-            Vector3 pos = (_screen.transform.position) + new Vector3(x, y, 0f) * radius;
+            Vector3 pos = (_display.transform.position) + new Vector3(x, y, 0f) * radius;
             itemPositions.Add(pos);
         }
         return itemPositions;
@@ -207,12 +219,7 @@ public class CampView : MonoBehaviour
         {
             case 0:
                 float iconFadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconFadeDuration;
-                foreach (ScreenDisplayItem[][] items in _itemGroups.Values)
-                {
-                    ScreenDisplayItem item = items[0][0]; // item button
-                    DOTween.Sequence().Append(item.image.DOFade(1f, iconFadeDuration));
-                    item.button.enabled = true;
-                }
+                _scoreButtonItems.ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(1f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;
             default:
@@ -221,33 +228,69 @@ public class CampView : MonoBehaviour
         }
     }
 
-    public int OnItemButtonClick(ScreenDisplayItem item)
+    public void OnItemButtonClick(ScreenDisplayItem buttonItem)
     {
-        // check if adjacent icons condition fulfilled
-        // add score handler - event?
-        if(isCampActionEnabled)
+        _scoreButtonItems.ForEach(item => item.button.enabled = false);
+        buttonItem.message.text = "";
+        _usedScoreButtonIDs.Add(buttonItem.ID);
+        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        buttonItem.mainImage.sprite = atlas.GetSprite("campButton_complete");
+    }
+
+    public void UpdateCampScoreToken(int playerCampScoreToken)
+    {
+        _playerCampScoreToken = playerCampScoreToken;
+    }
+
+    public void CheckFulfilledAdjacentIcons(List<List<CardIcon>> iconPairs)
+    {
+        if(iconPairs.Count < 1 || _usedScoreButtonIDs.Count == _scoreButtonItems.Count)
         {
-            //item.button.enabled = false;
-            //SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-            //item.image.sprite = atlas.GetSprite("campButton_complete");
+            return;
         }
-        string key = item.type.ToString();
-        ScreenDisplayItem[] items = _itemGroups[key][1];
-        items.ToList().ForEach(item =>
+        else if(_playerCampScoreToken == 0)
         {
-            Debug.Log(item.type.ToString());
+            ToggleItemButtons(new List<int>());
+            return;
+        }
+
+        List<ScreenDisplayItem> availableItems = _scoreButtonItems.Where(item => !_usedScoreButtonIDs.Contains(item.ID)).ToList();
+        List<int> enabledItemIDs = new();
+        for (int i = 0; i < iconPairs.Count; i++)
+        {
+            List<CardIcon> icons = iconPairs[i];
+            CardIcon icon1 = icons[0];
+            CardIcon icon2 = icons[1];
+            for(int j = 0; j < availableItems.Count; j++)
+            {
+                ScreenDisplayItem item = availableItems[j];
+                List<CardIcon> campIcons = (List<CardIcon>)item.type;
+                if (campIcons.Contains(icon1) && campIcons.Contains(icon2))
+                {
+                    enabledItemIDs.Add(item.ID);
+                }
+            }
+        }
+        ToggleItemButtons(enabledItemIDs.Distinct().ToList());
+    }
+
+    private void ToggleItemButtons(List<int> enabledItemIDs)
+    {
+        _scoreButtonItems.ForEach(item =>
+        {
+            item.message.text = _playerCampScoreToken.ToString();
+            item.button.enabled = enabledItemIDs.Contains(item.ID);
         });
-        return 0; // return score
     }
 
     public void ResetCampView()
     {
-        _campItems.ForEach(item => Destroy(item.gameObject));
-        _campItems.Clear();
+        _campItemSelection.ForEach(item => Destroy(item.gameObject));
+        _campItemSelection.Clear();
         _scoreButtonItems.ForEach(item => Destroy(item.gameObject));
         _scoreButtonItems.Clear();
         _selectedItems.ForEach(item => Destroy(item.gameObject));
         _selectedItems.Clear();
-        _itemGroups.Clear();
+        _usedScoreButtonIDs.Clear();
     }
 }

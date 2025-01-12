@@ -2072,6 +2072,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   selectionsLeft: 0
+  isCampActionEnabled: 0
 --- !u!114 &474565985
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5341,7 +5342,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1368498229}
   m_Layer: 0
-  m_Name: IconScreenItems
+  m_Name: DisplayItems
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

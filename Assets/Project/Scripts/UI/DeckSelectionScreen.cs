@@ -21,7 +21,7 @@ public class DeckSelectionScreen : MonoBehaviour
             ScreenDisplayItem item = transform.GetChild(1 + i).GetComponent<ScreenDisplayItem>();
             item.Init();
             item.type = (DeckType)i;
-            item.image.sprite = GetBackImageOfDeck((DeckType)item.type);
+            item.mainImage.sprite = GetBackImageOfDeck((DeckType)item.type);
             _deckItems.Add(item);
         }
         return _deckItems.Select(item => item.button).ToList();

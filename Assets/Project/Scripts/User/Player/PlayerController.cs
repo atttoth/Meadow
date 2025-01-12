@@ -13,6 +13,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     private Button _tablePagerButton;
     private Button _turnEndButton;
     private Dictionary<int, CardIcon[][]> _allIconsOfHoldersInOrder; //as cards are stacked in order
+    private List<int> _campScoreTokens;
 
     public override void Init(PlayerTableView tableView, PlayerHandView handView, PlayerMarkerView markerView, PlayerInfoView infoView)
     {
@@ -63,6 +64,21 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _allIconsOfHoldersInOrder = new();
     }
 
+    public void ResetCampScoreTokens()
+    {
+        _campScoreTokens = new() { 2, 3, 4 };
+    }
+
+    public int GetNextCampScoreToken()
+    {
+        return _campScoreTokens.Count > 0 ? _campScoreTokens.First() : 0;
+    }
+
+    public void UpdateCampScoreTokens()
+    {
+        _campScoreTokens.RemoveAt(0);
+    }
+
     public bool HasHolder(int ID)
     {
         return _allIconsOfHoldersInOrder.ContainsKey(ID);
@@ -80,6 +96,22 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             }
         }
         return allCurrentIcons;
+    }
+
+    private List<CardIcon> GetTopIcons() // sorted holders (left to right)
+    {
+        List<CardIcon> topIcons = new();
+        _allIconsOfHoldersInOrder
+            .OrderBy(e => _tableView.GetActiveCardHolderByID(e.Key).transform.GetSiblingIndex())
+            .Select(e => e.Value)
+            .ToList()
+            .ForEach(values =>
+            {
+                List<CardIcon> icons = values[^1].Where(icon => (int)icon > 4).ToList();
+                topIcons.AddRange(icons);
+            });
+        
+        return topIcons;
     }
 
     public PlayerTableView GetTableView()
@@ -119,6 +151,28 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     public void EnableTableView(bool value)
     {
         _tableToggleButton.interactable = value;
+    }
+
+    public List<List<CardIcon>> GetAdjacentIconPairs()
+    {
+        List<List<CardIcon>> pairs = new();
+        List<CardIcon> topIcons = GetTopIcons();
+        if (topIcons.Count < 2)
+        {
+            return pairs;
+        }
+
+        for (int i = 0; i < topIcons.Count - 1; i++)
+        {
+            CardIcon icon1 = topIcons[i];
+            CardIcon icon2 = topIcons[i + 1];
+            if(icon1 != icon2) // ignore same icon pairs
+            {
+                List<CardIcon> pair = new() { icon1, icon2 };
+                pairs.Add(pair);
+            }
+        }
+        return pairs;
     }
 
     public void UpdateHandViewHandler(GameTask task)

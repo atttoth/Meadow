@@ -1,3 +1,4 @@
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -26,7 +27,14 @@ public class CampManager : GameLogicEvent
         _view = transform.GetChild(1).GetComponent<CampView>();
         _view.Init();
         _campToggleButton = transform.GetChild(2).GetComponent<Button>();
-        _campToggleButton.onClick.AddListener(() => ToggleCampView());
+        _campToggleButton.onClick.AddListener(() =>
+        {
+            ToggleCampView();
+            if(_isCampVisible)
+            {
+                StartEventHandler(GameLogicEventType.CAMP_TOGGLED, null);
+            }
+        });
     }
 
     public void DisposeCampForRound()
@@ -50,10 +58,19 @@ public class CampManager : GameLogicEvent
         }));
 
         List<ScreenDisplayItem> scoreButtonItems = _view.CreateItemButtons();
-        scoreButtonItems.ForEach(item => item.button.onClick.AddListener(() =>
+        scoreButtonItems.ForEach(item => 
+        item.button.onClick.AddListener(() =>
         {
-            _view.OnItemButtonClick(item);
-            StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, null);
+            int score = _view.PlayerCampScoreToken;
+            if (_view.isCampActionEnabled && score > 0)
+            {
+                _view.OnItemButtonClick(item);
+                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new GameTaskItemData { campScore = score });
+            }
+            else
+            {
+                Debug.Log("Unlock camp to get score");
+            }
         }));
     }
 
@@ -73,7 +90,7 @@ public class CampManager : GameLogicEvent
                 task.StartDelayMs(500);
                 break;
             case 1:
-                _view.ShowCampIcons();
+                _view.ShowCampIconSelection();
                 task.StartDelayMs(0);
                 break;
             default:
@@ -109,6 +126,16 @@ public class CampManager : GameLogicEvent
                 task.Complete();
                 break;
         }
+    }
+
+    public void SaveCampScoreToken(int playerCampScoreToken)
+    {
+        _view.UpdateCampScoreToken(playerCampScoreToken);
+    }
+
+    public void EnableScoreButtonOfFulfilledIcons(List<List<CardIcon>> iconPairs)
+    {
+        _view.CheckFulfilledAdjacentIcons(iconPairs);
     }
 
     public void ToggleMarkerHolders(bool value)

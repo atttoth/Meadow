@@ -1,7 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using UnityEngine;
 
 /**
  * execute handler task - ExecHandler()
@@ -47,7 +46,6 @@ public class GameTask
     {
         CreateTaskItem(handler, data);
         await Task.WhenAll(Execute());
-        Debug.Log("task finished");
     }
 
     private void CreateTaskItem(GameTaskHandler handler, GameTaskItemData data)

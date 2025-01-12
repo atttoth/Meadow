@@ -17,4 +17,6 @@ public class GameTaskItemData
     public MarkerAction markerAction;
     public DeckType deckType;
     public List<Card> topCards;
+
+    public int campScore;
 }
