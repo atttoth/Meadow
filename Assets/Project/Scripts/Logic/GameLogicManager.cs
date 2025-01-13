@@ -12,7 +12,7 @@ public class GameLogicManager : MonoBehaviour
     private CampManager _campManager;
     private PlayerManager _playerManager;
     private OverlayManager _overlayManager;
-    GameTaskHandler[] _logicEventHandlers;
+    private GameTaskHandler[] _logicEventHandlers;
     public bool hasRemainingMarkers;
 
     private void Awake()
@@ -45,6 +45,7 @@ public class GameLogicManager : MonoBehaviour
             MarkerCancelHandler,
             MarkerActionSelectHandler,
             DeckSelectHandler,
+            ScoreCollectHandler
         };
 
         _boardManager.CreateBoard();
@@ -222,8 +223,22 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_overlayManager.HideDeckSelectionScreenHandler, task.Data);
                 break;
             case 1:
-                task.Data.topCards = _boardManager.GetTopCardsOfDeck(task.Data.deckType);
+                task.Data.cards = _boardManager.GetTopCardsOfDeck(task.Data.deckType);
                 task.StartHandler(_overlayManager.ShowCardSelectionHandler, task.Data);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void ScoreCollectHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                _playerManager.Controller.UpdateScore(task.Data.score);
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -274,10 +289,11 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 _campManager.ToggleCampAction(false);
                 _playerManager.Controller.UpdateCampScoreTokens();
-                Debug.Log(task.Data.campScore);
-                task.StartDelayMs(0);
+                task.Data.targetTransform = _playerManager.Controller.GetScoreTransform();
+                task.StartHandler(_overlayManager.CollectCampScoreHandler, task.Data);
                 break;
             default:
+                _campManager.ToggleCampView();
                 task.Complete();
                 break;
         }
@@ -290,7 +306,7 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 if (task.Data.holder == null)
                 {
-                    task.Data.topCards = _boardManager.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
+                    task.Data.cards = _boardManager.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
                     task.StartHandler(_overlayManager.HideCardSelectionHandler, task.Data);
                 }
                 else
@@ -372,7 +388,9 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.StartHandler(_playerManager.Controller.UpdateScoreHandler);
+                task.Data.cards = _playerManager.Controller.GetPlacedCards();
+                task.Data.targetTransform = _playerManager.Controller.GetScoreTransform();
+                task.StartHandler(_overlayManager.CollectCardScoreHandler, task.Data);
                 break;
             case 1:
                 task.StartHandler(_playerManager.Controller.UpdateDisplayIconsHandler);

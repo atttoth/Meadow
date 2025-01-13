@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -18,6 +19,7 @@ public class OverlayManager : GameLogicEvent
     Sequence examineSequence;
     private MarkerActionScreen _markerActionScreen;
     private DeckSelectionScreen _deckSelectionScreen;
+    private ScoreCollectionScreen _scoreCollectionScreen;
 
     public void CreateOverlay()
     {
@@ -40,6 +42,9 @@ public class OverlayManager : GameLogicEvent
             button.enabled = true;
             StartEventHandler(GameLogicEventType.DECK_SELECTED, new GameTaskItemData() { deckType = (DeckType)button.GetComponent<ScreenDisplayItem>().type });
         }));
+
+        _scoreCollectionScreen = transform.GetChild(4).GetComponent<ScoreCollectionScreen>();
+        _scoreCollectionScreen.Init();
     }
 
     public void SetDummy(Sprite sprite, bool needToRotate, DummyType type)
@@ -133,6 +138,66 @@ public class OverlayManager : GameLogicEvent
         {
             case 0:
                 task.StartHandler(_deckSelectionScreen.HideCardSelectionHandler, task.Data);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void CollectCardScoreHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                List<Card> cards = task.Data.cards;
+                float cardScoreDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreDelay;
+                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
+                int duration = (int)(((cards.Count - 1) * cardScoreDelay + speed) * 1000);
+                int i = 0;
+                while (cards.Count > 0)
+                {
+                    float delay = i * cardScoreDelay;
+                    Card card = cards.First();
+                    cards.RemoveAt(0);
+                    Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
+                    scoreTextPrefab.SetPositionAndRotation(card.GetComponent<Transform>().position, Quaternion.identity);
+                    scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.Data.score.ToString();
+                    Sequence scoreCollecting = DOTween.Sequence();
+                    scoreCollecting.Append(scoreTextPrefab.DOMove(task.Data.targetTransform.position, speed).SetEase(Ease.InOutQuart).SetDelay(delay));
+                    scoreCollecting.OnComplete(() =>
+                    {
+                        StartEventHandler(GameLogicEventType.SCORE_COLLECTED, new GameTaskItemData() { score = card.Data.score });
+                        _scoreCollectionScreen.DisposeScoreTextObject(scoreTextPrefab);
+                    });
+                    i++;
+                }
+                task.StartDelayMs(duration);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void CollectCampScoreHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
+                int duration = (int)(speed * 1000);
+                Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
+                scoreTextPrefab.SetPositionAndRotation(task.Data.originTransform.position, Quaternion.identity);
+                scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = task.Data.score.ToString();
+                Sequence scoreCollecting = DOTween.Sequence();
+                scoreCollecting.Append(scoreTextPrefab.DOMove(task.Data.targetTransform.position, speed).SetEase(Ease.InOutQuart));
+                scoreCollecting.OnComplete(() =>
+                {
+                    StartEventHandler(GameLogicEventType.SCORE_COLLECTED, task.Data);
+                    _scoreCollectionScreen.DisposeScoreTextObject(scoreTextPrefab);
+                });
+                task.StartDelayMs(duration);
                 break;
             default:
                 task.Complete();

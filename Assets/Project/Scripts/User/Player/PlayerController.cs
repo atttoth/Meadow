@@ -273,7 +273,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     public void CreatePendingCardPlacement(GameTaskItemData data)
     {
         _tableToggleButton.enabled = false;
-        data.handTransform = _handView.transform;
+        data.targetTransform = _handView.transform;
         PendingActionItem[] postActionItems = new PendingActionItem[] {
             _infoView.IncrementNumberOfCardPlacements,
             _handView.RemoveCardFromHand,
@@ -306,35 +306,23 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         }
     }
 
-    public void UpdateScoreHandler(GameTask task)
+    public Transform GetScoreTransform()
     {
-        switch (task.State)
-        {
-            case 0:
-                List<Card> cards = _pendingActionCreator.GetDataCollection()
+        return _infoView.scoreTransform;
+    }
+
+    public List<Card> GetPlacedCards()
+    {
+        return _pendingActionCreator.GetDataCollection()
                     .Select(data => data.card)
                     .Where(card => card.Data.cardType != CardType.Ground)
                     .OrderBy(card => card.transform.parent.GetSiblingIndex())
                     .ToList();
+    }
 
-                float cardScoreDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreDelay;
-                float cardScoreCollectingSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
-                int duration = (int)(((cards.Count - 1) * cardScoreDelay + cardScoreCollectingSpeed) * 1000);
-                int i = 0;
-                while (cards.Count > 0)
-                {
-                    float delay = i * cardScoreDelay;
-                    Card card = cards.First();
-                    cards.RemoveAt(0);
-                    _infoView.CollectScoreOfCard(delay, card);
-                    i++;
-                }
-                task.StartDelayMs(duration);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
+    public void UpdateScore(int score)
+    {
+        _infoView.RegisterScore(score);
     }
 
     public void UpdateDisplayIconsHandler(GameTask task)

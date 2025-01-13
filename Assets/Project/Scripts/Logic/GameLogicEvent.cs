@@ -14,7 +14,8 @@ public enum GameLogicEventType
     MARKER_PLACED,
     MARKER_CANCELLED,
     MARKER_ACTION_SELECTED,
-    DECK_SELECTED
+    DECK_SELECTED,
+    SCORE_COLLECTED
 }
 
 public class GameLogicEvent : MonoBehaviour

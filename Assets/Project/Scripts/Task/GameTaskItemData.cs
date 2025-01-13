@@ -12,11 +12,12 @@ public class GameTaskItemData
     public bool needToRotate;
     public DummyType dummyType;
 
-    public Transform handTransform;
+    public Transform originTransform;
+    public Transform targetTransform;
 
     public MarkerAction markerAction;
     public DeckType deckType;
-    public List<Card> topCards;
+    public List<Card> cards;
 
-    public int campScore;
+    public int score;
 }

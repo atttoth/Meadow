@@ -527,7 +527,7 @@ public class PlayerTableView : ViewBase
         CardHolder holder = (CardHolder)data.holder;
         holder.RemoveItemFromContentList(data.card);
         RectTransform rect = data.card.GetComponent<RectTransform>();
-        data.card.transform.SetParent(data.handTransform);
+        data.card.transform.SetParent(data.targetTransform);
         rect.anchorMin = new(0.5f, 0.5f);
         rect.anchorMax = new(0.5f, 0.5f);
         rect.anchoredPosition = new(data.card.prevAnchoredPosition.x, data.card.prevAnchoredPosition.y);

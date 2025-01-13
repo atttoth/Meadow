@@ -70,7 +70,7 @@ public class DeckSelectionScreen : MonoBehaviour
         {
             case 0:
                 List<float> positions = new() { -300f, 0f, 300f };
-                task.Data.topCards.ForEach(card =>
+                task.Data.cards.ForEach(card =>
                 {
                     card.SetParentTransform(transform);
                     card.transform.SetParent(transform);
@@ -82,11 +82,11 @@ public class DeckSelectionScreen : MonoBehaviour
                 break;
             case 1:
                 int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
-                task.Data.topCards.ForEach(card => card.FlipDeckCard());
+                task.Data.cards.ForEach(card => card.FlipDeckCard());
                 task.StartDelayMs(duration);
                 break;
             case 2:
-                task.Data.topCards.ForEach(card => card.ToggleSelection(true));
+                task.Data.cards.ForEach(card => card.ToggleSelection(true));
                 task.StartDelayMs(0);
                 break;
             default:
@@ -101,15 +101,15 @@ public class DeckSelectionScreen : MonoBehaviour
         {
             case 0:
                 int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
-                task.Data.topCards.ForEach(card =>
+                task.Data.cards.ForEach(card =>
                 {
                     card.FlipDeckCard(true);
                 });
                 task.StartDelayMs(duration);
                 break;
             case 1:
-                task.Data.topCards.ForEach(card => card.gameObject.SetActive(false));
-                _deckItems.Find(item => (DeckType)item.type == task.Data.topCards.First().Data.deckType).gameObject.SetActive(false);
+                task.Data.cards.ForEach(card => card.gameObject.SetActive(false));
+                _deckItems.Find(item => (DeckType)item.type == task.Data.cards.First().Data.deckType).gameObject.SetActive(false);
                 task.StartDelayMs(500);
                 break;
             case 2:

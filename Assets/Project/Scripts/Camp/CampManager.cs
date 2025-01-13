@@ -65,7 +65,7 @@ public class CampManager : GameLogicEvent
             if (_view.isCampActionEnabled && score > 0)
             {
                 _view.OnItemButtonClick(item);
-                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new GameTaskItemData { campScore = score });
+                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new GameTaskItemData { score = score, originTransform = item.GetComponent<Transform>() });
             }
             else
             {
@@ -74,7 +74,7 @@ public class CampManager : GameLogicEvent
         }));
     }
 
-    private void ToggleCampView()
+    public void ToggleCampView()
     {
         _isCampVisible = !_isCampVisible;
         _view.gameObject.SetActive(_isCampVisible);
