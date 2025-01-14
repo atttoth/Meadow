@@ -98,17 +98,17 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         return allCurrentIcons;
     }
 
-    private List<CardIcon> GetTopIcons() // sorted holders (left to right)
+    private List<CardIcon[]> GetTopIcons() // sorted holders (left to right)
     {
-        List<CardIcon> topIcons = new();
+        List<CardIcon[]> topIcons = new();
         _allIconsOfHoldersInOrder
             .OrderBy(e => _tableView.GetActiveCardHolderByID(e.Key).transform.GetSiblingIndex())
             .Select(e => e.Value)
             .ToList()
             .ForEach(values =>
             {
-                List<CardIcon> icons = values[^1].Where(icon => (int)icon > 4).ToList();
-                topIcons.AddRange(icons);
+                CardIcon[] icons = values[^1].Where(icon => (int)icon > 4).ToArray();
+                topIcons.Add(icons);
             });
         
         return topIcons;
@@ -153,23 +153,39 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _tableToggleButton.interactable = value;
     }
 
-    public List<List<CardIcon>> GetAdjacentIconPairs()
+    public List<List<CardIcon>> GetAdjacentIconPairs() 
     {
         List<List<CardIcon>> pairs = new();
-        List<CardIcon> topIcons = GetTopIcons();
+        List<CardIcon[]> topIcons = GetTopIcons();
         if (topIcons.Count < 2)
         {
             return pairs;
         }
 
-        for (int i = 0; i < topIcons.Count - 1; i++)
+        for (int i = 0; i < topIcons.Count - 1; i++) // create pairs for every posible adjacent icon combinations
         {
-            CardIcon icon1 = topIcons[i];
-            CardIcon icon2 = topIcons[i + 1];
-            if(icon1 != icon2) // ignore same icon pairs
+            CardIcon[] icons1 = topIcons[i];
+            CardIcon[] icons2 = topIcons[i + 1];
+            int length = icons1.Length * icons2.Length;
+            CardIcon[][] adjacentIcons = new CardIcon[][] { icons1, icons2 };
+            adjacentIcons.OrderBy(icons => icons.Length).Reverse();
+            int index1 = 0;
+            int index2 = 0;
+            for (int j = 0; j < length; j++)
             {
-                List<CardIcon> pair = new() { icon1, icon2 };
-                pairs.Add(pair);
+                CardIcon icon1 = adjacentIcons[0][index1];
+                CardIcon icon2 = adjacentIcons[1][index2];
+                if (icon1 != icon2) // ignore same icon pairs
+                {
+                    List<CardIcon> pair = new() { icon1, icon2 };
+                    pairs.Add(pair);
+                }
+                index1++;
+                if(index1 > adjacentIcons[0].Length - 1)
+                {
+                    index1 = 0;
+                    index2++;
+                }
             }
         }
         return pairs;
