@@ -1,3 +1,4 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,8 +13,10 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     private Button _tableApproveButton;
     private Button _tablePagerButton;
     private Button _turnEndButton;
+    private Button _campToggleButton;
     private Dictionary<int, CardIcon[][]> _allIconsOfHoldersInOrder; //as cards are stacked in order
     private List<int> _campScoreTokens;
+    private bool _isCampVisible;
 
     public override void Init(PlayerTableView tableView, PlayerHandView handView, PlayerMarkerView markerView, PlayerInfoView infoView)
     {
@@ -38,12 +41,9 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         spriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
         spriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
         _turnEndButton.spriteState = spriteState;
+        _campToggleButton = infoView.transform.GetChild(3).GetComponent<Button>();
 
-        _tableToggleButton.onClick.AddListener(() =>
-        {
-            _tableView.TogglePanel();
-            _handView.ToggleHand();
-        });
+        _tableToggleButton.onClick.AddListener(() => ToggleTable());
         _tableApproveButton.onClick.AddListener(() =>
         {
             if (_pendingActionCreator.GetNumOfActions() > 0)
@@ -54,14 +54,36 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             }
             else
             {
-                _tableView.TogglePanel();
-                _handView.ToggleHand();
+                ToggleTable();
             }
         });
         _tablePagerButton.onClick.AddListener(() => _tableView.SwitchTableContent());
         _turnEndButton.onClick.AddListener(() => Debug.Log("turn ended"));
+        _campToggleButton.onClick.AddListener(() => 
+        {
+            _isCampVisible = !_isCampVisible;
+            StartEventHandler(GameLogicEventType.CAMP_TOGGLED, new GameTaskItemData() { value = _isCampVisible });
+            Transform parent = _isCampVisible ? transform.root : infoView.transform;
+            _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
+        });
 
         _allIconsOfHoldersInOrder = new();
+    }
+
+    private void ToggleTable()
+    {
+        _tableView.TogglePanel();
+        _handView.ToggleHand();
+        _markerView.Fade(_tableView.isTableVisible);
+        FadeTurnEndButton(_tableView.isTableVisible);
+        StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new GameTaskItemData() { value = _tableView.isTableVisible });
+    }
+
+    private void FadeTurnEndButton(bool value)
+    {
+        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 0f : 1f;
+        DOTween.Sequence().Append(_turnEndButton.GetComponent<Image>().DOFade(targetValue, fadeDuration));
     }
 
     public void ResetCampScoreTokens()
@@ -378,8 +400,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         _pendingActionCreator.Dispose();
         _tableToggleButton.enabled = true;
         _tableApproveButton.enabled = true;
-        _tableView.TogglePanel();
-        _handView.ToggleHand();
+        ToggleTable();
     }
 
     public List<Marker> GetRemainingMarkers()

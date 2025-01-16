@@ -24,8 +24,8 @@ public class Marker : Interactable
 {
     public int numberOnMarker;
     public MarkerAction action;
-    private TextMeshProUGUI _numberOnMarker;
-    private Image _actionIcon;
+    public TextMeshProUGUI numberOnMarkerText;
+    public Image actionIcon;
     private MarkerStatus _status;
 
     public Transform Parent
@@ -42,7 +42,7 @@ public class Marker : Interactable
 
     public Sprite GetActionIcon()
     {
-        return _actionIcon.sprite;
+        return actionIcon.sprite;
     }
 
     public void CreateMarker(int index)
@@ -51,14 +51,14 @@ public class Marker : Interactable
         name = $"marker{index}";
         ID = index;
         _status = MarkerStatus.NONE;
-        _numberOnMarker = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+        numberOnMarkerText = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         numberOnMarker = ID + 1;
         string value = ID < 4 ? numberOnMarker.ToString() : "?";
-        _numberOnMarker.text = value;
+        numberOnMarkerText.text = value;
         _mainImage = GetComponent<Image>();
         action = (MarkerAction)ID;
-        _actionIcon = transform.GetChild(1).GetComponent<Image>();
-        _actionIcon.sprite = atlas.GetSprite(index.ToString());
+        actionIcon = transform.GetChild(1).GetComponent<Image>();
+        actionIcon.sprite = atlas.GetSprite(index.ToString());
     }
 
     public override void OnPointerClick(PointerEventData eventData)
@@ -92,8 +92,8 @@ public class Marker : Interactable
     public void Rotate(MarkerDirection direction)
     {
         RectTransform markerTransform = GetComponent<RectTransform>();
-        RectTransform valueTransform = _numberOnMarker.gameObject.GetComponent<RectTransform>();
-        RectTransform iconTransform = _actionIcon.gameObject.GetComponent<RectTransform>();
+        RectTransform valueTransform = numberOnMarkerText.gameObject.GetComponent<RectTransform>();
+        RectTransform iconTransform = actionIcon.gameObject.GetComponent<RectTransform>();
         float zRot;
         switch (direction)
         {
@@ -122,7 +122,7 @@ public class Marker : Interactable
     public override void ToggleRayCast(bool value)
     {
         _mainImage.raycastTarget = value;
-        _numberOnMarker.raycastTarget = value;
-        _actionIcon.raycastTarget = value;
+        numberOnMarkerText.raycastTarget = value;
+        actionIcon.raycastTarget = value;
     }
 }

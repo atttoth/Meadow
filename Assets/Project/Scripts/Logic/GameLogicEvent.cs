@@ -3,6 +3,7 @@ using UnityEngine;
 
 public enum GameLogicEventType
 {
+    TABLE_TOGGLED,
     CAMP_ICONS_SELECTED,
     CAMP_TOGGLED,
     CAMP_SCORE_RECEIVED,

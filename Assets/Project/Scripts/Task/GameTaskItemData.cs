@@ -9,7 +9,7 @@ public class GameTaskItemData
     public Marker marker;
 
     public Sprite sprite;
-    public bool needToRotate;
+    public bool value;
     public DummyType dummyType;
 
     public Transform originTransform;

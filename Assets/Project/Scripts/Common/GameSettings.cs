@@ -2,6 +2,7 @@
 public class GameSettings
 {
     // timings
+    public float gameUIFadeDuration = 0.5f;
     public float campIconFadeDuration = 0.8f;
     public float campIconGroupPositionSpeed = 0.6f;
     public float campIconSinglePositionSpeed = 0.6f;

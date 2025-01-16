@@ -1,4 +1,7 @@
+using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
+using UnityEngine.UI;
 
 public class PlayerMarkerView : ViewBase
 {
@@ -73,5 +76,21 @@ public class PlayerMarkerView : ViewBase
             _remainingMarkers.Add(marker);
         });
         _currentMarkerIndex = -1;
+    }
+
+    public void Fade(bool value)
+    {
+        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 0f : 1f;
+        _allMarkers
+            .Where(marker => marker.Status == MarkerStatus.USED)
+            .ToList()
+            .ForEach(marker =>
+            {
+                DOTween.Sequence()
+                .Append(marker.GetComponent<Image>().DOFade(targetValue, fadeDuration))
+                .Join(marker.actionIcon.DOFade(targetValue, fadeDuration))
+                .Join(marker.numberOnMarkerText.DOFade(targetValue, fadeDuration));
+            });
     }
 }

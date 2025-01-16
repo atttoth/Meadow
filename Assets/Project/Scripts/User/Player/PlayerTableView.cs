@@ -428,7 +428,6 @@ public class PlayerTableView : ViewBase
 
     public void TogglePanel()
     {
-        ReferenceManager.Instance.gameLogicManager.EnableRayTargetOInteractables(isTableVisible);
         isTableVisible = !isTableVisible;
         float target = isTableVisible ? _targetY : _originY;
         transform.DOMoveY(target, 0.5f).SetEase(Ease.InOutExpo);

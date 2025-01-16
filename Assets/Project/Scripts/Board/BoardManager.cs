@@ -1,8 +1,10 @@
+using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using static UnityEditor.Progress;
 
 public class BoardManager : MonoBehaviour
 {
@@ -26,7 +28,6 @@ public class BoardManager : MonoBehaviour
     {
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         GetComponent<Image>().sprite = atlas.GetSprite("board_frame");
-        transform.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("board_inside");
         _cardHolders = new();
         for (int i = 0; i < _GRID_SIZE; i++)
         {
@@ -188,7 +189,7 @@ public class BoardManager : MonoBehaviour
         }
     }
 
-    public void ToggleRayTargetOfCardsAndHolders(bool value)
+    public void ToggleRayCastOfCards(bool value)
     {
         for (int col = 0; col < _cardHolders.Count; col++)
         {
@@ -224,7 +225,7 @@ public class BoardManager : MonoBehaviour
         markers.ForEach(marker => marker.gameObject.SetActive(false));
     }
 
-    public void ToggleMarkerHolders(bool value)
+    public void ToggleRayCastOfMarkerHolders(bool value)
     {
         foreach (List<MarkerHolder> holders in _markerHolders.Values)
         {
@@ -304,5 +305,23 @@ public class BoardManager : MonoBehaviour
     public void DisposeTopCards()
     {
         _deckController.ClearTopCards();
+    }
+
+    public void Fade(bool value)
+    {
+        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 0f : 1f;
+        DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
+        _cardHolders.Select(e => e.Value).ToList().ForEach(holders =>
+        {
+            holders.ForEach(holder =>
+            {
+                if (!holder.IsEmpty())
+                {
+                    Card card = (Card)holder.GetItemFromContentListByIndex(0);
+                    DOTween.Sequence().Append(card.GetComponent<Image>().DOFade(targetValue, fadeDuration));
+                }
+            });
+        });
     }
 }

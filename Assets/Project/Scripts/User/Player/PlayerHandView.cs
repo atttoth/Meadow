@@ -43,6 +43,7 @@ public class PlayerHandView : ViewBase
                 tasks.Add(card.MoveCardWithAsyncDelay(value));
             }
             card.canHover = !card.canHover;
+            card.canMove = !card.canMove;
         }
 
         await Task.WhenAll(tasks);

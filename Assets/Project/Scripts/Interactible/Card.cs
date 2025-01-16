@@ -114,13 +114,6 @@ public class Card : Interactable
         ToggleRayCast(false);
         PlayerManager playerManager = ReferenceManager.Instance.playerManager;
         playerManager.Controller.GetHandView().draggingCardType = _data.cardType;
-        if (!playerManager.Controller.IsTableVisible())
-        {
-            playerManager.Controller.GetTableView().TogglePanel();
-            playerManager.Controller.GetHandView().ToggleHand(this);
-            HighlightCard(true);
-        }
-
         bool val = _data.cardType == CardType.Ground && playerManager.Controller.GetTableView().GetActiveCardHoldersAmount() < 10;
         playerManager.Controller.GetTableView().ToggleUIHitArea(val);
     }
@@ -171,7 +164,6 @@ public class Card : Interactable
     public void SetCardReadyInHand()
     {
         cardActionStatus = CardActionStatus.IN_HAND;
-        canMove = true;
         canHover = true;
     }
 
@@ -216,7 +208,7 @@ public class Card : Interactable
         StartEventHandler(GameLogicEventType.CARD_EXAMINED, new GameTaskItemData()
         {
             sprite = GetComponent<Image>().sprite,
-            needToRotate = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
+            value = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
             dummyType = DummyType.CARD
         });
     }
@@ -338,7 +330,6 @@ public class Card : Interactable
         float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
         _parent = holder.transform;
         gameObject.SetActive(true);
-        canMove = false;
         canHover = false;
 
         cardDrawing = DOTween.Sequence();

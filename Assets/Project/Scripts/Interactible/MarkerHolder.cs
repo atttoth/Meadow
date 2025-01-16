@@ -83,9 +83,6 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     public void ToggleRayCast(bool value)
     {
-        if (IsEmpty())
-        {
-            _mainImage.raycastTarget = value;
-        }
+        _mainImage.raycastTarget = value;
     }
 }

@@ -1,5 +1,6 @@
-using System.Collections;
+using DG.Tweening;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
@@ -9,8 +10,6 @@ public class CampManager : GameLogicEvent
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
     private List<MarkerHolder> _markerHolders;
     private CampView _view;
-    private Button _campToggleButton;
-    private bool _isCampVisible;
 
     public void CreateCamp()
     {
@@ -26,15 +25,6 @@ public class CampManager : GameLogicEvent
         }
         _view = transform.GetChild(1).GetComponent<CampView>();
         _view.Init();
-        _campToggleButton = transform.GetChild(2).GetComponent<Button>();
-        _campToggleButton.onClick.AddListener(() =>
-        {
-            ToggleCampView();
-            if(_isCampVisible)
-            {
-                StartEventHandler(GameLogicEventType.CAMP_TOGGLED, null);
-            }
-        });
     }
 
     public void DisposeCampForRound()
@@ -74,10 +64,9 @@ public class CampManager : GameLogicEvent
         }));
     }
 
-    public void ToggleCampView()
+    public void ToggleCampView(bool value)
     {
-        _isCampVisible = !_isCampVisible;
-        _view.gameObject.SetActive(_isCampVisible);
+        _view.gameObject.SetActive(value);
     }
 
     public void ShowViewSetupHandler(GameTask task)
@@ -86,7 +75,7 @@ public class CampManager : GameLogicEvent
         {
             case 0:
                 InitCampForRound();
-                ToggleCampView();
+                ToggleCampView(true);
                 task.StartDelayMs(500);
                 break;
             case 1:
@@ -122,7 +111,7 @@ public class CampManager : GameLogicEvent
                 task.StartDelayMs(delay3);
                 break;
             default:
-                ToggleCampView();
+                ToggleCampView(false);
                 task.Complete();
                 break;
         }
@@ -138,7 +127,7 @@ public class CampManager : GameLogicEvent
         _view.CheckFulfilledAdjacentIcons(iconPairs);
     }
 
-    public void ToggleMarkerHolders(bool value)
+    public void ToggleRayCastOfMarkerHolders(bool value)
     {
         _markerHolders.ForEach(holder => holder.ToggleRayCast(value));
     }
@@ -146,5 +135,12 @@ public class CampManager : GameLogicEvent
     public void ToggleCampAction(bool value)
     {
         _view.isCampActionEnabled = value;
+    }
+
+    public void Fade(bool value)
+    {
+        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 0f : 1f;
+        DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
     }
 }

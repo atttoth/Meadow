@@ -33,6 +33,7 @@ public class GameLogicManager : MonoBehaviour
         _playerManager = ReferenceManager.Instance.playerManager;
         _overlayManager = ReferenceManager.Instance.overlayManager;
         _logicEventHandlers = new GameTaskHandler[] {
+            TableToggleHandler,
             CampIconsSelectHandler,
             CampToggleHandler,
             CampScoreReceiveHandler,
@@ -62,8 +63,8 @@ public class GameLogicManager : MonoBehaviour
         {
             _playerManager.Controller.ResetCampScoreTokens();
             _playerManager.Controller.EnableTableView(false);
-            _boardManager.ToggleMarkerHolders(false);
-            _campManager.ToggleMarkerHolders(false);
+            _boardManager.ToggleRayCastOfMarkerHolders(false);
+            _campManager.ToggleRayCastOfMarkerHolders(false);
             new GameTask().ExecHandler(_campManager.ShowViewSetupHandler);
         }
 
@@ -71,8 +72,8 @@ public class GameLogicManager : MonoBehaviour
         {
             _playerManager.Controller.ResetMarkers(); // make markers disappear in a pattern?
             _playerManager.Controller.EnableTableView(true);
-            _boardManager.ToggleMarkerHolders(true);
-            _campManager.ToggleMarkerHolders(true);
+            _boardManager.ToggleRayCastOfMarkerHolders(true);
+            _campManager.ToggleRayCastOfMarkerHolders(true);
         }
 
         if(Input.GetKeyDown(KeyCode.S)) // for testing
@@ -112,11 +113,6 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
-    public void EnableRayTargetOInteractables(bool value)
-    {
-        _boardManager.ToggleRayTargetOfCardsAndHolders(value);
-    }
-
     public void MarkerPlaceHandler(GameTask task)
     {
         switch (task.State)
@@ -126,8 +122,8 @@ public class GameLogicManager : MonoBehaviour
                 MarkerHolder holder = (MarkerHolder)task.Data.holder;
                 marker.AdjustAlpha(true);
                 _playerManager.Controller.EnableTableView(false);
-                _boardManager.ToggleMarkerHolders(false);
-                _campManager.ToggleMarkerHolders(false);
+                _boardManager.ToggleRayCastOfMarkerHolders(false);
+                _campManager.ToggleRayCastOfMarkerHolders(false);
                 if (holder.holderType == HolderType.BoardMarker)
                 {
                     _boardManager.SelectCard(marker, holder);
@@ -161,8 +157,8 @@ public class GameLogicManager : MonoBehaviour
                     _campManager.ToggleCampAction(false);
                     _overlayManager.ToggleMarkerActionScreen(null);
                 }
-                _boardManager.ToggleMarkerHolders(true);
-                _campManager.ToggleMarkerHolders(true);
+                _boardManager.ToggleRayCastOfMarkerHolders(true);
+                _campManager.ToggleRayCastOfMarkerHolders(true);
                 _playerManager.Controller.GetRemainingMarkers().ForEach(marker => marker.AdjustAlpha(false));
                 _playerManager.Controller.EnableTableView(true);
                 task.StartDelayMs(0);
@@ -203,8 +199,8 @@ public class GameLogicManager : MonoBehaviour
             case 2:
                 if (Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, markerAction => markerAction == task.Data.markerAction)) // marker action ends immediately
                 {
-                    _boardManager.ToggleMarkerHolders(true);
-                    _campManager.ToggleMarkerHolders(true);
+                    _boardManager.ToggleRayCastOfMarkerHolders(true);
+                    _campManager.ToggleRayCastOfMarkerHolders(true);
                     _playerManager.Controller.EnableTableView(true);
                 }
                 task.StartDelayMs(0);
@@ -246,6 +242,25 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void TableToggleHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                bool value = task.Data.value;
+                _boardManager.ToggleRayCastOfCards(!value);
+                _boardManager.ToggleRayCastOfMarkerHolders(!value);
+                _boardManager.Fade(value);
+                _campManager.ToggleRayCastOfMarkerHolders(!value);
+                _campManager.Fade(value);
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private void CampIconsSelectHandler(GameTask task)
     {
         switch (task.State)
@@ -259,9 +274,9 @@ public class GameLogicManager : MonoBehaviour
                 break;
             default:
                 _playerManager.Controller.EnableTableView(true);
-                _boardManager.ToggleMarkerHolders(true);
-                _campManager.ToggleMarkerHolders(true);
-                EnableRayTargetOInteractables(true);
+                _boardManager.ToggleRayCastOfCards(true);
+                _boardManager.ToggleRayCastOfMarkerHolders(true);
+                _campManager.ToggleRayCastOfMarkerHolders(true);
                 task.Complete();
                 break;
         }
@@ -272,8 +287,13 @@ public class GameLogicManager : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                _campManager.SaveCampScoreToken(_playerManager.Controller.GetNextCampScoreToken());
-                _campManager.EnableScoreButtonOfFulfilledIcons(_playerManager.Controller.GetAdjacentIconPairs());
+                bool value = task.Data.value;
+                if(value)
+                {
+                    _campManager.SaveCampScoreToken(_playerManager.Controller.GetNextCampScoreToken());
+                    _campManager.EnableScoreButtonOfFulfilledIcons(_playerManager.Controller.GetAdjacentIconPairs());
+                }
+                _campManager.ToggleCampView(value);
                 task.StartDelayMs(0);
                 break;
             default:
@@ -293,7 +313,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_overlayManager.CollectCampScoreHandler, task.Data);
                 break;
             default:
-                _campManager.ToggleCampView();
+                _campManager.ToggleCampView(false);
                 task.Complete();
                 break;
         }
@@ -326,7 +346,7 @@ public class GameLogicManager : MonoBehaviour
                 break;
             case 2:
                 hasRemainingMarkers = _playerManager.Controller.GetRemainingMarkers().Count > 0;
-                EnableRayTargetOInteractables(false);
+                _boardManager.ToggleRayCastOfCards(false);
                 _playerManager.Controller.EnableTableView(false);
                 _boardManager.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 _playerManager.Controller.GetHandView().MoveCardsHorizontallyInHand(_playerManager.Controller.IsTableVisible(), false);
@@ -340,11 +360,11 @@ public class GameLogicManager : MonoBehaviour
             case 4:
                 _playerManager.Controller.GetHandView().SetCardsReady();
                 _playerManager.Controller.EnableTableView(true);
-                EnableRayTargetOInteractables(true);
+                _boardManager.ToggleRayCastOfCards(true);
                 if (hasRemainingMarkers)
                 {
-                    _boardManager.ToggleMarkerHolders(true);
-                    _campManager.ToggleMarkerHolders(true);
+                    _boardManager.ToggleRayCastOfMarkerHolders(true);
+                    _campManager.ToggleRayCastOfMarkerHolders(true);
                 }
                 task.StartDelayMs(0);
                 break;
@@ -359,8 +379,8 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                EnableRayTargetOInteractables(false);
-                _overlayManager.SetDummy(task.Data.sprite, task.Data.needToRotate, task.Data.dummyType);
+                _boardManager.ToggleRayCastOfCards(false);
+                _overlayManager.SetDummy(task.Data.sprite, task.Data.value, task.Data.dummyType);
                 _overlayManager.EnableDummy(true);
                 _overlayManager.StartCardShowSequence();
                 task.StartDelayMs(0);
