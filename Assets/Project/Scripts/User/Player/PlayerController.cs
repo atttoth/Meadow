@@ -6,9 +6,13 @@ using UnityEngine.U2D;
 using UnityEngine.UI;
 using static PendingActionCreator;
 
-public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, PlayerMarkerView, PlayerInfoView>
+public class PlayerController : GameLogicEvent
 {
     private PendingActionCreator _pendingActionCreator;
+    private PlayerTableView _tableView;
+    private PlayerHandView _handView;
+    private PlayerMarkerView _markerView;
+    private PlayerInfoView _infoView;
     private Button _tableToggleButton;
     private Button _tableApproveButton;
     private Button _tablePagerButton;
@@ -17,10 +21,14 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
     private Dictionary<int, CardIcon[][]> _allIconsOfHoldersInOrder; //as cards are stacked in order
     private List<int> _campScoreTokens;
     private bool _isCampVisible;
+    public CardType draggingCardType;
 
-    public override void Init(PlayerTableView tableView, PlayerHandView handView, PlayerMarkerView markerView, PlayerInfoView infoView)
+    public void CreatePlayer()
     {
-        base.Init(tableView, handView, markerView, infoView);
+        _tableView = transform.GetChild(1).GetComponent<PlayerTableView>();
+        _handView = transform.GetChild(2).GetComponent<PlayerHandView>();
+        _markerView = transform.GetChild(3).GetComponent<PlayerMarkerView>();
+        _infoView = _tableView.transform.GetChild(4).GetComponent<PlayerInfoView>();
         _tableView.Init();
         _handView.Init();
         _markerView.Init();
@@ -41,7 +49,7 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         spriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
         spriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
         _turnEndButton.spriteState = spriteState;
-        _campToggleButton = infoView.transform.GetChild(3).GetComponent<Button>();
+        _campToggleButton = _infoView.transform.GetChild(3).GetComponent<Button>();
 
         _tableToggleButton.onClick.AddListener(() => ToggleTable());
         _tableApproveButton.onClick.AddListener(() =>
@@ -63,12 +71,17 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
         {
             _isCampVisible = !_isCampVisible;
             StartEventHandler(GameLogicEventType.CAMP_TOGGLED, new GameTaskItemData() { value = _isCampVisible });
-            Transform parent = _isCampVisible ? transform.root : infoView.transform;
+            Transform parent = _isCampVisible ? transform.root : _infoView.transform;
             _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
         });
 
         _allIconsOfHoldersInOrder = new();
+        draggingCardType = CardType.None;
     }
+
+    public PlayerTableView TableView { get { return _tableView; } }
+
+    public PlayerHandView HandView { get { return _handView; } }
 
     private void ToggleTable()
     {
@@ -134,16 +147,6 @@ public class PlayerController : ControllerBase<PlayerTableView, PlayerHandView, 
             });
         
         return topIcons;
-    }
-
-    public PlayerTableView GetTableView()
-    {
-        return _tableView;
-    }
-
-    public PlayerHandView GetHandView()
-    {
-        return _handView;
     }
 
     public bool IsTableVisible()

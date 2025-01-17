@@ -5,19 +5,19 @@ public class TableCardUI : MonoBehaviour, IPointerEnterHandler, IPointerExitHand
 {
     public void OnPointerEnter(PointerEventData eventData)
     {
-        PlayerManager playerManager = ReferenceManager.Instance.playerManager;
-        if (playerManager.Controller.GetHandView().draggingCardType == CardType.Ground)
+        PlayerController playerController = ReferenceManager.Instance.playerController;
+        if (playerController.draggingCardType == CardType.Ground)
         {
-            playerManager.Controller.UpdateTableCardUI(tag);
+            playerController.UpdateTableCardUI(tag);
         }
     }
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        PlayerManager playerManager = ReferenceManager.Instance.playerManager;
-        if (playerManager.Controller.GetHandView().draggingCardType == CardType.Ground)
+        PlayerController playerController = ReferenceManager.Instance.playerController;
+        if (playerController.draggingCardType == CardType.Ground)
         {
-            playerManager.Controller.UpdateTableCardUI();
+            playerController.UpdateTableCardUI();
         }
     }
 }

@@ -4,17 +4,15 @@ using System.Linq;
 using System.Threading.Tasks;
 using UnityEngine;
 
-public class PlayerHandView : ViewBase
+public class PlayerHandView : MonoBehaviour
 {
     private Transform _handTransform;
     private List<Card> _cardListInHand;
-    public CardType draggingCardType;
 
-    public override void Init()
+    public void Init()
     {
         _handTransform = GetComponent<Transform>();
         _cardListInHand = new();
-        draggingCardType = CardType.None;
     }
 
     public async void AddCardToHand(Card card)

@@ -6,7 +6,7 @@ using UnityEngine.U2D;
 using UnityEngine.UI;
 using static UnityEditor.Progress;
 
-public class BoardManager : MonoBehaviour
+public class BoardController : MonoBehaviour
 {
     private static readonly int _GRID_SIZE = 4;
     private Dictionary<int, List<CardHolder>> _cardHolders;

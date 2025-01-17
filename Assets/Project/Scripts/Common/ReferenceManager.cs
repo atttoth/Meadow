@@ -4,10 +4,10 @@ public class ReferenceManager : MonoBehaviour
 {
     public static ReferenceManager Instance; // A static reference to the GameManager instance
     public GameLogicManager gameLogicManager;
-    public BoardManager boardManager;
-    public PlayerManager playerManager;
-    public CampManager campManager;
-    public OverlayManager overlayManager;
+    public BoardController boardController;
+    public PlayerController playerController;
+    public CampController campController;
+    public OverlayController overlayController;
 
     void Awake()
     {

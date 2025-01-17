@@ -5,7 +5,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerTableView : ViewBase
+public class PlayerTableView : MonoBehaviour
 {
     private static int _MAX_HOLDER_NUM = 10;
     private static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
@@ -32,7 +32,7 @@ public class PlayerTableView : ViewBase
     private Image _approveButtonImage;
     private RectTransform[] _uiHitAreas; // table left and right
 
-    public override void Init()
+    public void Init()
     {
         _originY = transform.position.y;
         _targetY = _originY + transform.GetComponent<RectTransform>().rect.height;

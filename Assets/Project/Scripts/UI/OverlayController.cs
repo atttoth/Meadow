@@ -11,7 +11,7 @@ public enum DummyType
     ACTION_ICON
 }
 
-public class OverlayManager : GameLogicEvent
+public class OverlayController : GameLogicEvent
 {
     private GameObject _dummy;
     private Image _blackOverlay;

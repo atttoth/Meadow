@@ -7,7 +7,7 @@ using UnityEngine.UI;
 using static UnityEditor.Progress;
 using Random = System.Random;
 
-public class CampView : ViewBase
+public class CampView : MonoBehaviour
 {
     private static readonly List<CardIcon> _CAMP_ICONS = new() {
             CardIcon.Bird,
@@ -33,7 +33,7 @@ public class CampView : ViewBase
     public int selectionsLeft;
     public bool isCampActionEnabled;
 
-    public override void Init()
+    public void Init()
     {
         _campItemSelection = new();
         _scoreButtonItems = new();

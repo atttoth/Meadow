@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class PlayerInfoView : ViewBase
+public class PlayerInfoView : MonoBehaviour
 {
     public Transform scoreTransform;
     private TextMeshProUGUI _roadTokensText;
@@ -14,7 +14,7 @@ public class PlayerInfoView : ViewBase
     private int _cardPlacements;
     private int _totalScore;
 
-    public override void Init()
+    public void Init()
     {
         _roadTokens = 2;
         _maxCardPlacements = 1;

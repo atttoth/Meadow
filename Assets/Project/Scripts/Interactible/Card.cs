@@ -112,10 +112,10 @@ public class Card : Interactable
 
         transform.SetParent(transform.root);
         ToggleRayCast(false);
-        PlayerManager playerManager = ReferenceManager.Instance.playerManager;
-        playerManager.Controller.GetHandView().draggingCardType = _data.cardType;
-        bool val = _data.cardType == CardType.Ground && playerManager.Controller.GetTableView().GetActiveCardHoldersAmount() < 10;
-        playerManager.Controller.GetTableView().ToggleUIHitArea(val);
+        PlayerController playerController = ReferenceManager.Instance.playerController;
+        playerController.draggingCardType = _data.cardType;
+        bool val = _data.cardType == CardType.Ground && playerController.TableView.GetActiveCardHoldersAmount() < 10;
+        playerController.TableView.ToggleUIHitArea(val);
     }
 
     public override void OnEndDrag(PointerEventData eventData)
@@ -125,7 +125,7 @@ public class Card : Interactable
             return;
         }
 
-        PlayerManager playerManager = ReferenceManager.Instance.playerManager;
+        PlayerController playerController = ReferenceManager.Instance.playerController;
         var raycastResults = new List<RaycastResult>();
         EventSystem.current.RaycastAll(eventData, raycastResults);
         if (raycastResults.Count < 1) // card dropped outside of table
@@ -138,7 +138,7 @@ public class Card : Interactable
             {
                 CardHolder holder = result.gameObject.GetComponent<CardHolder>();
                 TableCardUI uiRect = result.gameObject.GetComponent<TableCardUI>();
-                holder = uiRect ? playerManager.Controller.GetLatestTableCardHolderByTag(uiRect.tag) : holder;
+                holder = uiRect ? playerController.GetLatestTableCardHolderByTag(uiRect.tag) : holder;
                 if (holder && holder.holderType == HolderType.TableCard && ReferenceManager.Instance.gameLogicManager.CanCardBePlaced(holder, this))
                 {
                     StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
@@ -151,8 +151,8 @@ public class Card : Interactable
             }
         }
         ToggleRayCast(true);
-        playerManager.Controller.GetTableView().ToggleUIHitArea(false);
-        playerManager.Controller.GetHandView().draggingCardType = CardType.None;
+        playerController.TableView.ToggleUIHitArea(false);
+        playerController.draggingCardType = CardType.None;
     }
 
     public void SavePosition(float posX)
@@ -169,11 +169,11 @@ public class Card : Interactable
 
     private void MoveCardBackToHand()
     {
-        PlayerController playerController = ReferenceManager.Instance.playerManager.Controller;
-        transform.SetParent(playerController.GetHandView().transform);
+        PlayerController playerController = ReferenceManager.Instance.playerController;
+        transform.SetParent(playerController.HandView.transform);
         GetComponent<RectTransform>().anchoredPosition = new(originXInParent, hoverTargetY);
         transform.SetSiblingIndex(_siblingIndexInParent);
-        canHover = !playerController.IsTableVisible();
+        canHover = false;
     }
 
     public override void OnPointerClick(PointerEventData eventData)

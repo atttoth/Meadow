@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class CampManager : GameLogicEvent
+public class CampController : GameLogicEvent
 {
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
     private List<MarkerHolder> _markerHolders;

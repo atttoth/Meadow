@@ -1,15 +1,16 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerMarkerView : ViewBase
+public class PlayerMarkerView : MonoBehaviour
 {
     private List<Marker> _allMarkers;
     private List<Marker> _remainingMarkers;
     private int _currentMarkerIndex;
 
-    public override void Init()
+    public void Init()
     {
         _allMarkers = new();
         for (int index = 0; index < 5; index++)
