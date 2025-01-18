@@ -39,7 +39,8 @@ public class GameLogicManager : MonoBehaviour
             CampScoreReceiveHandler,
             CardPickHandler,
             PendingCardPlaceHandler,
-            ExamineCardHandler,
+            CardInspectionStartHandler,
+            CardInspectionEndHandler,
             ApprovedPendingCardPlaceHandler,
             CancelledPendingCardPlaceHandler,
             MarkerPlaceHandler,
@@ -374,18 +375,41 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
-    private void ExamineCardHandler(GameTask task)
+    private void CardInspectionStartHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                _boardController.ToggleRayCastOfCards(false);
-                _overlayController.SetDummy(task.Data.sprite, task.Data.value, task.Data.dummyType);
-                _overlayController.EnableDummy(true);
-                _overlayController.StartCardShowSequence();
-                task.StartDelayMs(0);
+                if(!_playerController.TableView.isTableVisible)
+                {
+                    _playerController.EnableTableView(false);
+                    _boardController.ToggleRayCastOfCards(false);
+                    _boardController.ToggleRayCastOfMarkerHolders(false);
+                    _campController.ToggleRayCastOfMarkerHolders(false);
+                }
+                task.StartHandler(_overlayController.ShowCardInspectionScreenHandler, task.Data);
                 break;
             default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void CardInspectionEndHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                task.StartHandler(_overlayController.HideCardInspectionScreenHandler);
+                break;
+            default:
+                if(!_playerController.TableView.isTableVisible)
+                {
+                    _playerController.EnableTableView(true);
+                    _boardController.ToggleRayCastOfCards(true);
+                    _boardController.ToggleRayCastOfMarkerHolders(true);
+                    _campController.ToggleRayCastOfMarkerHolders(true);
+                }
                 task.Complete();
                 break;
         }

@@ -44,17 +44,18 @@ public enum CardIcon
     Landscape // 22
 }
 
-public enum CardActionStatus
+public enum CardStatus
 {
-    DEFAULT,
+    NONE,
     IN_HAND,
     PENDING_ON_TABLE,
-    STACKED_PENDING_ON_TABLE
+    STACKED_PENDING_ON_TABLE,
+    USED
 }
 
 public class Card : Interactable
 {
-    public CardActionStatus cardActionStatus;
+    public CardStatus cardStatus;
     private CardData _data;
     private int _siblingIndexInParent;
     public Image highlightFrame;
@@ -81,7 +82,7 @@ public class Card : Interactable
         _data = data;
         hoverOriginY = -55f;
         hoverTargetY = 100f;
-        cardActionStatus = CardActionStatus.DEFAULT;
+        cardStatus = CardStatus.NONE;
         _cardFront = cardFront;
         _cardBack = cardBack;
         _mainImage = GetComponent<Image>();
@@ -93,6 +94,10 @@ public class Card : Interactable
     }
 
     public CardData Data { get { return _data; } }
+
+    public Sprite CardFront { get { return _cardFront; } }
+
+    public Sprite CardBack { get { return _cardBack; } }
 
     public override void OnDrag(PointerEventData eventData)
     {
@@ -163,7 +168,7 @@ public class Card : Interactable
 
     public void SetCardReadyInHand()
     {
-        cardActionStatus = CardActionStatus.IN_HAND;
+        cardStatus = CardStatus.IN_HAND;
         canHover = true;
     }
 
@@ -180,13 +185,17 @@ public class Card : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            if (cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
+            if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
                 StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this });
             }
-            else
+            else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus))
             {
-                ExamineCard();
+                if(cardStatus == CardStatus.NONE)
+                {
+                    transform.SetParent(_parent);
+                }
+                StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new GameTaskItemData() { card = this });
             }
         }
 
@@ -200,17 +209,6 @@ public class Card : Interactable
             transform.localScale = new Vector3(1f, 1f, 1f);
             StartEventHandler(GameLogicEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
         }
-    }
-
-    private void ExamineCard()
-    {
-        transform.SetParent(_parent);
-        StartEventHandler(GameLogicEventType.CARD_EXAMINED, new GameTaskItemData()
-        {
-            sprite = GetComponent<Image>().sprite,
-            value = _data.cardType == CardType.Landscape || _data.cardType == CardType.Discovery,
-            dummyType = DummyType.CARD
-        });
     }
 
     public void HighlightCard(bool value)
@@ -236,12 +234,12 @@ public class Card : Interactable
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
-        if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
+        if (cardStatus == CardStatus.IN_HAND && canHover)
         {
             MoveCard(hoverTargetY, 0.4f);
         }
 
-        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE }, status => status == cardActionStatus) && !canHover)
+        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
         {
             HighlightCard(true);
         }
@@ -260,12 +258,12 @@ public class Card : Interactable
 
     public override void OnPointerExit(PointerEventData eventData)
     {
-        if (cardActionStatus == CardActionStatus.IN_HAND && canHover)
+        if (cardStatus == CardStatus.IN_HAND && canHover)
         {
             MoveCard(hoverOriginY, 0.2f);
         }
 
-        if (Array.Exists(new[] { CardActionStatus.IN_HAND, CardActionStatus.PENDING_ON_TABLE, CardActionStatus.STACKED_PENDING_ON_TABLE }, status => status == cardActionStatus) && !canHover)
+        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE, CardStatus.STACKED_PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
         {
             HighlightCard(false);
         }

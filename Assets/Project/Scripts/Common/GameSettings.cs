@@ -13,6 +13,7 @@ public class GameSettings
     public float cardDrawSpeedFromBoard = 1f;
     public float cardScoreDelay = 0.5f;
     public float cardScoreCollectingSpeed = 0.8f;
+    public float cardInspectionFlipDuration = 1f;
     public float displayIconHorizontalSlideSpeed = 0.5f;
     public float displayIconVerticalSlideSpeed = 0.5f;
 }

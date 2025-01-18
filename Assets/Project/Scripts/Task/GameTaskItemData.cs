@@ -8,9 +8,7 @@ public class GameTaskItemData
     public Holder holder;
     public Marker marker;
 
-    public Sprite sprite;
     public bool value;
-    public DummyType dummyType;
 
     public Transform originTransform;
     public Transform targetTransform;

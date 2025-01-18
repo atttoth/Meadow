@@ -374,12 +374,12 @@ public class PlayerController : GameLogicEvent
                 List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
                 dataCollection
                     .Select(data => data.card)
-                    .Where(card => card.cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
+                    .Where(card => card.cardStatus == CardStatus.PENDING_ON_TABLE)
                     .OrderBy(card => card.transform.parent.GetSiblingIndex())
                     .ToList()
                     .ForEach(card => _tableView.PrepareDisplayIcon(card));
 
-                dataCollection.ForEach(data => data.card.cardActionStatus = CardActionStatus.DEFAULT);
+                dataCollection.ForEach(data => data.card.cardStatus = CardStatus.USED);
                 task.StartDelayMs(0);
                 break;
             case 1:

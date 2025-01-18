@@ -510,13 +510,13 @@ public class PlayerTableView : MonoBehaviour
         rect.anchorMax = new(0.5f, 0f);
         rect.anchoredPosition = new(0f, topPositionY);
         data.card.canMove = false;
-        data.card.cardActionStatus = CardActionStatus.PENDING_ON_TABLE;
+        data.card.cardStatus = CardStatus.PENDING_ON_TABLE;
         if (holder.GetContentListSize() > 1)
         {
             Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 2);
-            if (cardBelow.cardActionStatus == CardActionStatus.PENDING_ON_TABLE)
+            if (cardBelow.cardStatus == CardStatus.PENDING_ON_TABLE)
             {
-                cardBelow.cardActionStatus = CardActionStatus.STACKED_PENDING_ON_TABLE;
+                cardBelow.cardStatus = CardStatus.STACKED_PENDING_ON_TABLE;
             }
         }
     }
@@ -531,13 +531,13 @@ public class PlayerTableView : MonoBehaviour
         rect.anchorMax = new(0.5f, 0.5f);
         rect.anchoredPosition = new(data.card.prevAnchoredPosition.x, data.card.prevAnchoredPosition.y);
         data.card.canMove = true;
-        data.card.cardActionStatus = CardActionStatus.IN_HAND;
+        data.card.cardStatus = CardStatus.IN_HAND;
         if (holder.GetContentListSize() > 0)
         {
             Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 1);
-            if (cardBelow.cardActionStatus == CardActionStatus.STACKED_PENDING_ON_TABLE)
+            if (cardBelow.cardStatus == CardStatus.STACKED_PENDING_ON_TABLE)
             {
-                cardBelow.cardActionStatus = CardActionStatus.PENDING_ON_TABLE;
+                cardBelow.cardStatus = CardStatus.PENDING_ON_TABLE;
             }
         }
     }
