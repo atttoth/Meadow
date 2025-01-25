@@ -1,11 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEngine.UI;
+
+public enum HolderSubType
+{
+    NONE,
+    PRIMARY,
+    SECONDARY
+}
 
 public class CardHolder : Holder
 {
-    public GameObject highlightFrame;
+    public HolderSubType holderSubType;
     private Image _blackOverlay;
 
     public override void Init(int id, HolderType type)
@@ -17,7 +23,7 @@ public class CardHolder : Holder
     public List<CardIcon> GetAllIconsOfHolder()
     {
         List<CardIcon> allIcons = ((Card)GetItemFromContentListByIndex(_contentList.Count - 1)).Data.icons.ToList();
-        if (_contentList.Count > 1)
+        if (_contentList.Count > 1 && holderSubType == HolderSubType.PRIMARY)
         {
             CardIcon[] groundIcons = ((Card)GetItemFromContentListByIndex(0)).Data.icons;
 

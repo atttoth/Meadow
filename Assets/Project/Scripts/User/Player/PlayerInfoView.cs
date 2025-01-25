@@ -39,6 +39,8 @@ public class PlayerInfoView : MonoBehaviour
         RegisterScore(0);
     }
 
+    public int RoadTokens { get { return _roadTokens; } }
+
     public void RegisterScore(int score)
     {
         _totalScore += score;

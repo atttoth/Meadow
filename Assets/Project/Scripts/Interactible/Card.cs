@@ -40,7 +40,7 @@ public enum CardIcon
     Eagle, // 18
     Deer, // 19
     Bag, // 20
-    Road, // 21
+    RoadToken, // 21
     Landscape // 22
 }
 
@@ -119,8 +119,14 @@ public class Card : Interactable
         ToggleRayCast(false);
         PlayerController playerController = ReferenceManager.Instance.playerController;
         playerController.draggingCardType = _data.cardType;
-        bool val = _data.cardType == CardType.Ground && playerController.TableView.GetActiveCardHoldersAmount() < 10;
-        playerController.TableView.ToggleUIHitArea(val);
+        if(_data.cardType == CardType.Ground)
+        {
+            playerController.TableView.TogglePrimaryHitAreas(true);
+        }
+        else if(_data.cardType == CardType.Landscape)
+        {
+            playerController.TableView.ToggleSecondaryHitArea(true);
+        }
     }
 
     public override void OnEndDrag(PointerEventData eventData)
@@ -142,8 +148,8 @@ public class Card : Interactable
             foreach (RaycastResult result in raycastResults)
             {
                 CardHolder holder = result.gameObject.GetComponent<CardHolder>();
-                TableCardUI uiRect = result.gameObject.GetComponent<TableCardUI>();
-                holder = uiRect ? playerController.GetLatestTableCardHolderByTag(uiRect.tag) : holder;
+                TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
+                holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
                 if (holder && holder.holderType == HolderType.TableCard && ReferenceManager.Instance.gameLogicManager.CanCardBePlaced(holder, this))
                 {
                     StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
@@ -156,8 +162,9 @@ public class Card : Interactable
             }
         }
         ToggleRayCast(true);
-        playerController.TableView.ToggleUIHitArea(false);
         playerController.draggingCardType = CardType.None;
+        playerController.TableView.TogglePrimaryHitAreas(false);
+        playerController.TableView.ToggleSecondaryHitArea(false);
     }
 
     public void SavePosition(float posX)
@@ -175,6 +182,10 @@ public class Card : Interactable
     private void MoveCardBackToHand()
     {
         PlayerController playerController = ReferenceManager.Instance.playerController;
+        if (Data.cardType == CardType.Landscape) // unfulfilled icon/road token requirements
+        {
+            playerController.TableView.RemoveSecondaryHolder();
+        }
         transform.SetParent(playerController.HandView.transform);
         GetComponent<RectTransform>().anchoredPosition = new(originXInParent, hoverTargetY);
         transform.SetSiblingIndex(_siblingIndexInParent);

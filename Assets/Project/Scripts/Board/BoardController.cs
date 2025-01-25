@@ -4,6 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using UnityEngine.WSA;
 using static UnityEditor.Progress;
 
 public class BoardController : MonoBehaviour
@@ -37,6 +38,7 @@ public class BoardController : MonoBehaviour
             {
                 CardHolder boardCardHolder = Instantiate(GameAssets.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
                 boardCardHolder.Init(j, HolderType.BoardCard);
+                boardCardHolder.holderSubType = HolderSubType.NONE;
                 boardCardHolder.EnableOverlay(false);
                 list.Add(boardCardHolder);
             }

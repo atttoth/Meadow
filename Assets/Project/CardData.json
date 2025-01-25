@@ -25,7 +25,7 @@
       "ID": 3,
       "deckType": 0,
       "cardType": 3,
-      "requirements": [15],
+      "requirements": [15, 22],
       "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [20],

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using static GameTask;
 using static MarkerHolder;
 
@@ -18,11 +18,6 @@ public class GameLogicManager : MonoBehaviour
     private void Awake()
     {
         InitGame();
-    }
-
-    private void Start()
-    {
-        SetNewRound();
     }
 
     private void InitGame()
@@ -91,27 +86,6 @@ public class GameLogicManager : MonoBehaviour
     private DeckType GetActiveDeckType()
     {
         return DeckType.South; // changes to North after half-time
-    }
-
-    private void SetNewRound()
-    {
-        //AddTwoSlotsWithRoadsOnSecondaryPage(); debug this holder Init() missing
-    }
-
-    private void AddTwoSlotsWithRoadsOnSecondaryPage()
-    {
-        for (int i = 0; i < 2; i++)
-        {
-            CardHolder holder = _playerController.TableView.AddHolderOnSecondaryPage();
-            Card fakeCard = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
-            fakeCard.transform.parent = _playerController.transform;
-            Image image = fakeCard.GetComponent<Image>();
-            image.color = new Color(image.color.r, image.color.g, image.color.b, 0f);
-            CardIcon[] cardIcons = { CardIcon.Road };
-            //fakeCard.Data = new(-1, default, CardType.None, null, null, null, cardIcons, 0);
-            holder.AddToContentList(fakeCard);
-            //_playerController.CurrentIcons.Add(holder.ID, fakeCard.Data.icons); debug this
-        }
     }
 
     public void MarkerPlaceHandler(GameTask task)
@@ -292,7 +266,7 @@ public class GameLogicManager : MonoBehaviour
                 if(value)
                 {
                     _campController.SaveCampScoreToken(_playerController.GetNextCampScoreToken());
-                    _campController.EnableScoreButtonOfFulfilledIcons(_playerController.GetAdjacentIconPairs());
+                    _campController.EnableScoreButtonOfFulfilledIcons(_playerController.GetAdjacentPrimaryIconPairs());
                 }
                 _campController.ToggleCampView(value);
                 task.StartDelayMs(0);
@@ -432,7 +406,7 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.Data.cards = _playerController.GetPlacedCards();
+                task.Data.cards = _playerController.GetPlacedCardsWithScore();
                 task.Data.targetTransform = _playerController.GetScoreTransform();
                 task.StartHandler(_overlayController.CollectCardScoreHandler, task.Data);
                 break;
@@ -469,42 +443,75 @@ public class GameLogicManager : MonoBehaviour
 
     public bool CanCardBePlaced(CardHolder holder, Card card)
     {
-        if (holder.IsEmpty())
-        {
-            return card.Data.cardType == CardType.Ground && !_playerController.HasHolder(holder.ID);
-        }
-
-        if (card.Data.icons[0] == CardIcon.Deer)
-        {
-            return false;
-        }
-
-        List<CardIcon> iconsOfHolder = holder.GetAllIconsOfHolder();
-        List<CardIcon> allTableIcons = _playerController.GetAllCurrentIcons();
-
+        List<CardIcon> allTableIcons = _playerController.GetAllCurrentIcons(HolderSubType.PRIMARY);
         CardIcon[] allRequirements = card.Data.requirements;
-        CardIcon[] optionalRequirements = card.Data.optionalRequirements;
-        if (optionalRequirements.Length > 0)
+        if(holder.holderSubType == HolderSubType.PRIMARY)
         {
-            List<CardIcon> updatedRequirements = new(allRequirements);
-            foreach (CardIcon cardIcon in optionalRequirements)
+            if (holder.IsEmpty() && card.Data.cardType == CardType.Ground)
             {
-                updatedRequirements.Add(cardIcon);
+                return true;
             }
-            allRequirements = updatedRequirements.ToArray();
-        }
 
-        List<CardIcon> adjacentHolderIcons = _playerController.TableView.GetAdjacentHolderIcons(holder);
-        if (PassedGlobalRequirements(allTableIcons, allRequirements) && PassedOptionalRequirements(allTableIcons, optionalRequirements))
-        {
-            CardIcon[] adjacentRequirements = card.Data.adjacentRequirements;
-            CardIcon[] requirements = adjacentRequirements.Length < 1 ? allRequirements : adjacentRequirements;
-            CardIcon[] holderIcons = adjacentRequirements.Length < 1 ? iconsOfHolder.ToArray() : adjacentHolderIcons.ToArray();
-            return PassedTopCardRequirements(requirements, holderIcons);
+            List<CardIcon> iconsOfHolder = holder.GetAllIconsOfHolder();
+            if (iconsOfHolder.Contains(CardIcon.Deer))
+            {
+                return false;
+            }
+
+            CardIcon[] optionalRequirements = card.Data.optionalRequirements;
+            if (optionalRequirements.Length > 0)
+            {
+                List<CardIcon> updatedRequirements = new(allRequirements);
+                foreach (CardIcon cardIcon in optionalRequirements)
+                {
+                    updatedRequirements.Add(cardIcon);
+                }
+                allRequirements = updatedRequirements.ToArray();
+            }
+
+            List<CardIcon> adjacentHolderIcons = _playerController.TableView.GetAdjacentHolderIcons(holder);
+            if (PassedGlobalRequirements(allTableIcons, allRequirements) && PassedOptionalRequirements(allTableIcons, optionalRequirements))
+            {
+                CardIcon[] adjacentRequirements = card.Data.adjacentRequirements;
+                CardIcon[] requirements = adjacentRequirements.Length < 1 ? allRequirements : adjacentRequirements;
+                CardIcon[] holderIcons = adjacentRequirements.Length < 1 ? iconsOfHolder.ToArray() : adjacentHolderIcons.ToArray();
+                return PassedTopCardRequirements(requirements, holderIcons);
+            }
+            else
+            {
+                return false;
+            }
         }
         else
         {
-            return false;
+            int numOfIcons = allRequirements.Length;
+            allRequirements = allRequirements.ToList().Where(icon => icon != CardIcon.RoadToken).ToArray();
+            if(!_playerController.HasEnoughRoadTokens(numOfIcons - allRequirements.Length))
+            {
+                return false;
+            }
+
+            if (holder.IsEmpty() && card.Data.cardType == CardType.Landscape && card.Data.requirements.Length == 1) // card has only road token requirement
+            {
+                return true;
+            }
+
+            allTableIcons.AddRange(_playerController.GetAllCurrentIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
+            if(PassedGlobalRequirements(allTableIcons, allRequirements))
+            {
+                if(card.Data.cardType == CardType.Landscape)
+                {
+                    return true;
+                }
+                else
+                {
+                    return PassedTopCardRequirements(allRequirements, holder.GetAllIconsOfHolder().ToArray());
+                }
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 
@@ -514,23 +521,24 @@ public class GameLogicManager : MonoBehaviour
         {
             return true;
         }
-
+        
         List<CardIcon> remainingIcons = new(allIcons);
-        int count = 0;
-        foreach (CardIcon requirement in requirements)
+        List<CardIcon> remainingRequirements = new(requirements);
+        for (int i = remainingRequirements.Count - 1; i >= 0; i--)
         {
-            for (int i = remainingIcons.Count - 1; i >= 0; i--)
+            CardIcon requirement = remainingRequirements[i];
+            for(int j = remainingIcons.Count - 1; j >= 0; j--)
             {
-                CardIcon icon = remainingIcons[i];
-                if (icon == requirement)
+                if(requirement == remainingIcons[j])
                 {
-                    count++;
-                    remainingIcons.Remove(icon);
-                    if (count == requirements.Length)
-                    {
-                        return true;
-                    }
+                    remainingRequirements.RemoveAt(i);
+                    remainingIcons.RemoveAt(j);
+                    break;
                 }
+            }
+            if(remainingRequirements.Count == 0)
+            {
+                return true;
             }
         }
         return false;
