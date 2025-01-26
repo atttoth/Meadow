@@ -318,7 +318,7 @@ public class PlayerController : GameLogicEvent
 
     public void CreateEntryForCurrentIcons(GameTaskItemData data)
     {
-        if (data.card.Data.cardType == CardType.Ground && _tableView.HasPrimaryTableMoreSpace())
+        if (data.card.Data.cardType == CardType.Ground)
         {
             _allIconsOfPrimaryHoldersInOrder.Add(data.holder.ID, new CardIcon[][] { });
         }

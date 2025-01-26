@@ -52,11 +52,10 @@ public class Deck : MonoBehaviour
         Card card = null;
         if (type == deckType && !testOver)
         {
-            testOver = true;
             card = _cards.Find(c => c.Data.ID == id);
+            testOver = true;
         }
-
-        if (card == null)
+        else
         {
             card = GetRandomCard();
         }

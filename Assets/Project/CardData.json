@@ -476,7 +476,7 @@
       "deckType": 0,
       "cardType": 1,
       "requirements": [16],
-      "optionalRequirements": [],
+      "optionalRequirements": [12, 13],
       "adjacentRequirements":[12, 13],
       "icons": [13],
       "score": 3
@@ -1715,8 +1715,8 @@
       "ID": 172,
       "deckType": 3,
       "cardType": 2,
-      "requirements": [21],
-      "optionalRequirements": ["4 of the same ground"],
+      "requirements": [21, 23, 23, 23, 23],
+      "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [22],
       "score": 4
@@ -1945,8 +1945,8 @@
       "ID": 195,
       "deckType": 3,
       "cardType": 1,
-      "requirements": [],
-      "optionalRequirements": ["9 ground"],
+      "requirements": [24, 24, 24, 24, 24, 24, 24, 24, 24],
+      "optionalRequirements": [],
       "adjacentRequirements":[],
       "icons": [17],
       "score": 4

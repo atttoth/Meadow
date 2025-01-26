@@ -87,6 +87,7 @@ public class DeckController : MonoBehaviour
         for (int i = 0; i < emptyHoldersCount; i++)
         {
             Card card = deck.GetRandomCard();
+            //Card card = deck.GetCardByID(195, DeckType.North); //for testing!
             card.transform.SetParent(parent);
             card.transform.position = parent.position;
             card.ToggleRayCast(false);

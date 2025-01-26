@@ -18,4 +18,15 @@ public class GameTaskItemData
     public List<Card> cards;
 
     public int score;
+
+    /*public void DoSomething(params object[] theObjects) //try this as task param
+{
+    foreach (object o in theObjects)
+    {
+        // Something with the Objects…
+    }
+}
+
+ DoSomething(this, that, theOther);
+ */
 }

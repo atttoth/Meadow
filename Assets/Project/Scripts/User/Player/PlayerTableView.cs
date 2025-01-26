@@ -72,8 +72,6 @@ public class PlayerTableView : MonoBehaviour
         AddFirstPrimaryHolder();
     }
 
-    public bool HasPrimaryTableMoreSpace() => _activePrimaryCardHolders.Count < _MAX_HOLDER_NUM;
-
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)
     {
         int index = tagName == "RectLeft" ? 0 : _activePrimaryCardHolders.Count - 1;
@@ -499,33 +497,23 @@ public class PlayerTableView : MonoBehaviour
         }
     }
 
-    public List<CardIcon> GetAdjacentHolderIcons(CardHolder holder)
+    public List<List<CardIcon>> GetAdjacentHolderIcons(CardHolder holder)
     {
-        List<CardIcon> collection = new();
-        int index = _activePrimaryCardHolders.IndexOf(holder);
-        int leftIndex = index - 1;
-        int rightIndex = index + 1;
-        CardHolder leftHolder = index > 1 ? _activePrimaryCardHolders[leftIndex] : null;
-        CardHolder rightHolder = index < _activePrimaryCardHolders.Count - 1 ? _activePrimaryCardHolders[rightIndex] : null;
+        List<List<CardIcon>> adjacentHolderIcons = new() { new(), new() };
+        int index = holder.transform.GetSiblingIndex();
+        CardHolder leftHolder = index > 0 ? _activePrimaryCardHolders[index - 1] : null;
+        CardHolder rightHolder = index < _activePrimaryCardHolders.Count - 1 ? _activePrimaryCardHolders[index + 1] : null;
 
         if (leftHolder != null && !leftHolder.IsEmpty())
         {
-            List<CardIcon> leftIcons = leftHolder.GetAllIconsOfHolder();
-            foreach (CardIcon cardIcon in leftIcons)
-            {
-                collection.Add(cardIcon);
-            }
+            adjacentHolderIcons[0] = leftHolder.GetAllIconsOfHolder();
         }
 
         if (rightHolder != null && !rightHolder.IsEmpty())
         {
-            List<CardIcon> rightIcons = rightHolder.GetAllIconsOfHolder();
-            foreach (CardIcon cardIcon in rightIcons)
-            {
-                collection.Add(cardIcon);
-            }
+            adjacentHolderIcons[1] = rightHolder.GetAllIconsOfHolder();
         }
-        return collection;
+        return adjacentHolderIcons;
     }
 
     public void StackCard(GameTaskItemData data)
