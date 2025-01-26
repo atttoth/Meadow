@@ -7,19 +7,15 @@ using UnityEngine.U2D;
 using UnityEngine.UI;
 using static PendingActionCreator;
 
-public class PlayerController : GameLogicEvent
+public class PlayerController : UserController<PlayerTableView>
 {
-    private PendingActionCreator _pendingActionCreator;
-    private PlayerTableView _tableView;
     private PlayerHandView _handView;
     private PlayerMarkerView _markerView;
-    private PlayerInfoView _infoView;
+    private PendingActionCreator _pendingActionCreator;
     private Button _tableToggleButton;
     private Button _tableApproveButton;
     private Button _turnEndButton;
     private Button _campToggleButton;
-    private Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
-    private Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
     private List<int> _campScoreTokens;
     private bool _isCampVisible;
     public CardType draggingCardType;
@@ -27,13 +23,13 @@ public class PlayerController : GameLogicEvent
     public void CreatePlayer()
     {
         _tableView = transform.GetChild(1).GetComponent<PlayerTableView>();
+        _infoView = _tableView.transform.GetChild(3).GetComponent<InfoView>();
         _handView = transform.GetChild(2).GetComponent<PlayerHandView>();
         _markerView = transform.GetChild(3).GetComponent<PlayerMarkerView>();
-        _infoView = _tableView.transform.GetChild(3).GetComponent<PlayerInfoView>();
         _tableView.Init();
+        _infoView.Init();
         _handView.Init();
         _markerView.Init();
-        _infoView.Init();
         _pendingActionCreator = new PendingActionCreator();
 
         _tableToggleButton = _tableView.transform.GetChild(2).GetComponent<Button>();
@@ -112,22 +108,6 @@ public class PlayerController : GameLogicEvent
     public void UpdateCampScoreTokens()
     {
         _campScoreTokens.RemoveAt(0);
-    }
-
-    public List<CardIcon> GetAllCurrentIcons(HolderSubType holderSubType)
-    {
-        Dictionary<int, CardIcon[][]> collection = holderSubType == HolderSubType.PRIMARY ? _allIconsOfPrimaryHoldersInOrder : _allIconsOfSecondaryHoldersInOrder;
-        List<CardIcon> allCurrentIcons = new();
-        foreach (CardIcon[][] items in collection.Values)
-        {
-            allCurrentIcons.AddRange(items[items.Length - 1]);
-            if (items.Length > 1)
-            {
-                List<CardIcon> groundIcons = items[0].Where(icon => (int)icon < 5).ToList();
-                allCurrentIcons.AddRange(groundIcons);
-            }
-        }
-        return allCurrentIcons;
     }
 
     private List<CardIcon[]> GetTopPrimaryIcons() // sorted primary holders (left to right)
@@ -273,11 +253,6 @@ public class PlayerController : GameLogicEvent
                 task.Complete();
                 break;
         }
-    }
-
-    public bool HasEnoughRoadTokens(int required)
-    {
-        return required <= _infoView.RoadTokens;
     }
 
     private void UpdateCurrentIconsOfHolder(GameTaskItemData data)

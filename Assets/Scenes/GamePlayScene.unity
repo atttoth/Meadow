@@ -1465,7 +1465,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   isTableVisible: 0
-  isPrimaryPage: 0
 --- !u!1 &387045277
 GameObject:
   m_ObjectHideFlags: 0
@@ -4539,7 +4538,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 975607628}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a148dc981fdd1984ba84a62466903ae5, type: 3}
+  m_Script: {fileID: 11500000, guid: dc42754a82c11bb46848f3ccdc4e4f5b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   scoreTransform: {fileID: 0}

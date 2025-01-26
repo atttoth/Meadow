@@ -152,7 +152,7 @@ public class Card : Interactable
                 CardHolder holder = result.gameObject.GetComponent<CardHolder>();
                 TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
                 holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                if (holder && holder.holderType == HolderType.TableCard && ReferenceManager.Instance.gameLogicManager.CanCardBePlaced(holder, this))
+                if (holder && holder.holderType == HolderType.TableCard && playerController.CanCardBePlaced(holder, this))
                 {
                     StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
                     break;

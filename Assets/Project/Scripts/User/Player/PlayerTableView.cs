@@ -5,39 +5,23 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class PlayerTableView : MonoBehaviour
+public class PlayerTableView : TableView
 {
-    private static int _MAX_HOLDER_NUM = 10;
     private static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
     private static float _SLIDE_X_DISTANCE_OF_DISPLAY_ICON = 30f;
     private float _originY;
     private float _targetY;
     public bool isTableVisible;
-    public bool isPrimaryPage;
 
     // Primary - ground and observation cards
-    private ScrollRect _primaryTableContentScroll;
     private List<CardHolder> _primaryCardHolderPool;
-    private List<CardHolder> _activePrimaryCardHolders;
     private Transform _primaryCardHolderPoolContainer;
-    private Transform _primaryCardHolderContainer;
     private List<RectTransform> _primaryHitAreas; // left and right sides
 
     // Secondary - landscape and discovery cards
-    private ScrollRect _secondaryTableContentScroll;
     private List<CardHolder> _secondaryCardHolderPool;
-    private List<CardHolder> _activeSecondaryCardHolders;
     private Transform _secondaryCardHolderPoolContainer;
-    private Transform _secondaryCardHolderContainer;
     private RectTransform _secondaryHitArea; // right side
-
-    // Icon display
-    private Transform _iconsTransform;
-    private Transform _preparedIconsTransform;
-    private Transform _displayIconPoolTransform;
-    private List<DisplayIcon> _displayIconPool;
-    private List<DisplayIcon> _displayIcons;
-    private List<DisplayIcon> _preparedDisplayIcons;
     
     private TextMeshProUGUI _approveButtonText;
     private Image _approveButtonImage;
@@ -495,25 +479,6 @@ public class PlayerTableView : MonoBehaviour
             holder.transform.position += new Vector3(0f, _Y_GAP_BETWEEN_STACKED_CARDS * 0.5f * modifier, 0f);
             rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.sizeDelta.y + (_Y_GAP_BETWEEN_STACKED_CARDS * modifier));
         }
-    }
-
-    public List<List<CardIcon>> GetAdjacentHolderIcons(CardHolder holder)
-    {
-        List<List<CardIcon>> adjacentHolderIcons = new() { new(), new() };
-        int index = holder.transform.GetSiblingIndex();
-        CardHolder leftHolder = index > 0 ? _activePrimaryCardHolders[index - 1] : null;
-        CardHolder rightHolder = index < _activePrimaryCardHolders.Count - 1 ? _activePrimaryCardHolders[index + 1] : null;
-
-        if (leftHolder != null && !leftHolder.IsEmpty())
-        {
-            adjacentHolderIcons[0] = leftHolder.GetAllIconsOfHolder();
-        }
-
-        if (rightHolder != null && !rightHolder.IsEmpty())
-        {
-            adjacentHolderIcons[1] = rightHolder.GetAllIconsOfHolder();
-        }
-        return adjacentHolderIcons;
     }
 
     public void StackCard(GameTaskItemData data)

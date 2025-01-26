@@ -3,16 +3,21 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class PlayerInfoView : MonoBehaviour
+public class InfoView : MonoBehaviour
 {
     public Transform scoreTransform;
-    private TextMeshProUGUI _roadTokensText;
-    private TextMeshProUGUI _remainingCardPlacementsText;
-    private TextMeshProUGUI _totalScoreText;
-    private int _roadTokens;
-    private int _maxCardPlacements;
-    private int _cardPlacements;
-    private int _totalScore;
+    protected TextMeshProUGUI _roadTokensText;
+    protected TextMeshProUGUI _remainingCardPlacementsText;
+    protected TextMeshProUGUI _totalScoreText;
+    protected int _roadTokens;
+    protected int _maxCardPlacements;
+    protected int _cardPlacements;
+    protected int _totalScore;
+
+    public bool HasEnoughRoadTokens(int required)
+    {
+        return required <= _roadTokens;
+    }
 
     public void Init()
     {
@@ -38,8 +43,6 @@ public class PlayerInfoView : MonoBehaviour
         UpdateCardPlacementsText();
         RegisterScore(0);
     }
-
-    public int RoadTokens { get { return _roadTokens; } }
 
     public void RegisterScore(int score)
     {
