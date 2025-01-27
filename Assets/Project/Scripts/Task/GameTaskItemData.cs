@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 public class GameTaskItemData
 {
     public int pendingCardDataID = -1; // only used at Pending card actions
@@ -7,6 +8,7 @@ public class GameTaskItemData
     public Card card;
     public Holder holder;
     public Marker marker;
+    public List<RaycastResult> raycastResults;
 
     public bool value;
 

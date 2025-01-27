@@ -53,7 +53,6 @@ public class PlayerTableView : TableView
 
         CreateCardHolderPools();
         CreateUIHitAreas();
-        AddFirstPrimaryHolder();
     }
 
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)
@@ -77,17 +76,19 @@ public class PlayerTableView : TableView
         return _displayIcons.Count;
     }
 
-    public void AddPrimaryHolder(string tag)
+    public void AddEmptyPrimaryHolder(string tag)
     {
-        if (_activePrimaryCardHolders.Count == 1 && _activePrimaryCardHolders[0].IsEmpty())
+        int listIndex = 0;
+        float targetPosX = 0f;
+        if(_activePrimaryCardHolders.Count > 0)
         {
-            return;
+            int direction = tag == "RectLeft" ? -1 : 1;
+            listIndex = direction == -1 ? 0 : _activePrimaryCardHolders.Count;
+            int prevHolderIndex = _activePrimaryCardHolders.Count == 1 ? 0 : direction == -1 ? 0 : _activePrimaryCardHolders.Count - 1;
+            CardHolder prevHolder = _activePrimaryCardHolders[prevHolderIndex];
+            targetPosX = prevHolder.GetComponent<RectTransform>().anchoredPosition.x + 190 * direction;
         }
-
-        int direction = tag == "RectLeft" ? -1 : 1;
-        int listIndex = direction == -1 ? 0 : _activePrimaryCardHolders.Count;
-        int prevHolderIndex = _activePrimaryCardHolders.Count == 1 ? 0 : direction == -1 ? 0 : _activePrimaryCardHolders.Count - 1;
-        CardHolder prevHolder = _activePrimaryCardHolders[prevHolderIndex];
+        
         CardHolder holder = _primaryCardHolderPool[0];
         holder.Init(-1, HolderType.TableCard);
         holder.holderSubType = HolderSubType.PRIMARY;
@@ -95,12 +96,12 @@ public class PlayerTableView : TableView
         holder.transform.SetSiblingIndex(listIndex);
         holder.gameObject.SetActive(true);
         RectTransform rect = holder.GetComponent<RectTransform>();
-        rect.anchoredPosition = new Vector2(prevHolder.GetComponent<RectTransform>().anchoredPosition.x + 190 * direction, rect.anchoredPosition.y);
+        rect.anchoredPosition = new Vector2(targetPosX, rect.anchoredPosition.y);
         _primaryCardHolderPool.Remove(holder);
         _activePrimaryCardHolders.Insert(listIndex, holder);
     }
 
-    public void AddSecondaryHolder()
+    public void AddEmptySecondaryHolder()
     {
         CardHolder holder = _secondaryCardHolderPool[0];
         holder.Init(-1, HolderType.TableCard);
@@ -159,19 +160,6 @@ public class PlayerTableView : TableView
             holder.gameObject.SetActive(false);
             _secondaryCardHolderPool.Add(holder);
         }
-    }
-
-    private void AddFirstPrimaryHolder()
-    {
-        CardHolder holder = _primaryCardHolderPool[0];
-        holder.Init(-1, HolderType.TableCard);
-        holder.holderSubType = HolderSubType.PRIMARY;
-        holder.gameObject.SetActive(true);
-        holder.transform.SetParent(_primaryCardHolderContainer);
-        RectTransform rect = holder.GetComponent<RectTransform>();
-        rect.anchoredPosition = new Vector2(0f, rect.anchoredPosition.y);
-        _primaryCardHolderPool.Remove(holder);
-        _activePrimaryCardHolders.Add(holder);
     }
 
     private void CreateUIHitAreas()
@@ -525,51 +513,36 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void RemovePrimaryHolder()
+    public void RemoveEmptyHolder(HolderSubType holderSubType)
     {
-        if (_activePrimaryCardHolders.Count == 1 && _activePrimaryCardHolders[0].IsEmpty())
+        List<CardHolder> activeCardHolders = holderSubType == HolderSubType.PRIMARY ? _activePrimaryCardHolders : _activeSecondaryCardHolders;
+        List<CardHolder> cardHolderPool = holderSubType == HolderSubType.PRIMARY ? _primaryCardHolderPool : _secondaryCardHolderPool;
+        Transform cardHolderPoolContainer = holderSubType == HolderSubType.PRIMARY ? _primaryCardHolderPoolContainer : _secondaryCardHolderPoolContainer;
+        for (int i = 0; i < activeCardHolders.Count; i++)
         {
-            return;
-        }
-
-        for(int i = 0; i < _activePrimaryCardHolders.Count; i++)
-        {
-            CardHolder holder = _activePrimaryCardHolders[i];
+            CardHolder holder = activeCardHolders[i];
             if (holder.IsEmpty())
             {
-                holder.transform.SetParent(_primaryCardHolderPoolContainer);
+                holder.transform.SetParent(cardHolderPoolContainer);
                 holder.gameObject.SetActive(false);
-                _activePrimaryCardHolders.Remove(holder);
-                _primaryCardHolderPool.Add(holder);
+                activeCardHolders.Remove(holder);
+                cardHolderPool.Add(holder);
                 break;
             }
         }
     }
 
-    public void RemoveSecondaryHolder()
+    public void CenterPrimaryCardHolders()
     {
-        for (int i = 0; i < _activeSecondaryCardHolders.Count; i++)
+        if(_activePrimaryCardHolders.Count > 0)
         {
-            CardHolder holder = _activeSecondaryCardHolders[i];
-            if (holder.IsEmpty())
+            float[] positions = GetCardHolderLayout();
+            for (int i = 0; i < positions.Length; i++)
             {
-                holder.transform.SetParent(_secondaryCardHolderPoolContainer);
-                holder.gameObject.SetActive(false);
-                _activeSecondaryCardHolders.Remove(holder);
-                _secondaryCardHolderPool.Add(holder);
-                break;
+                Transform holderTransform = _activePrimaryCardHolders[i].transform;
+                float posX = positions[i];
+                holderTransform.DOLocalMoveX(posX, 0.3f).SetEase(Ease.InOutSine);
             }
-        }
-    }
-
-    public void CenterCardHolders()
-    {
-        float[] positions = GetCardHolderLayout();
-        for (int i = 0; i < positions.Length; i++)
-        {
-            Transform holderTransform = _activePrimaryCardHolders[i].transform;
-            float posX = positions[i];
-            holderTransform.DOLocalMoveX(posX, 0.3f).SetEase(Ease.InOutSine);
         }
     }
 

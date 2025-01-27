@@ -63,7 +63,7 @@ public class Card : Interactable
     public Image highlightFrame;
     private Sprite _cardFront;
     private Sprite _cardBack;
-    private bool _canZoom;
+    private bool _canInspect;
     private bool _isDragging;
     public bool isSelected;
     public bool canMove;
@@ -138,35 +138,9 @@ public class Card : Interactable
             return;
         }
 
-        PlayerController playerController = ReferenceManager.Instance.playerController;
-        var raycastResults = new List<RaycastResult>();
+        List<RaycastResult> raycastResults = new();
         EventSystem.current.RaycastAll(eventData, raycastResults);
-        if (raycastResults.Count < 1) // card dropped outside of table
-        {
-            MoveCardBackToHand();
-        }
-        else
-        {
-            foreach (RaycastResult result in raycastResults)
-            {
-                CardHolder holder = result.gameObject.GetComponent<CardHolder>();
-                TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
-                holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                if (holder && holder.holderType == HolderType.TableCard && playerController.CanCardBePlaced(holder, this))
-                {
-                    StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this, holder = holder });
-                    break;
-                }
-                else
-                {
-                    MoveCardBackToHand();
-                }
-            }
-        }
-        ToggleRayCast(true);
-        playerController.draggingCardType = CardType.None;
-        playerController.TableView.TogglePrimaryHitAreas(false);
-        playerController.TableView.ToggleSecondaryHitArea(false);
+        StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { raycastResults = raycastResults, card = this });
     }
 
     public void SavePosition(float posX)
@@ -181,14 +155,9 @@ public class Card : Interactable
         canHover = true;
     }
 
-    private void MoveCardBackToHand()
+    public void MoveCardBackToHand(Transform handViewTransform)
     {
-        PlayerController playerController = ReferenceManager.Instance.playerController;
-        if (Data.cardType == CardType.Landscape) // unfulfilled icon/road token requirements
-        {
-            playerController.TableView.RemoveSecondaryHolder();
-        }
-        transform.SetParent(playerController.HandView.transform);
+        transform.SetParent(handViewTransform);
         GetComponent<RectTransform>().anchoredPosition = new(originXInParent, hoverTargetY);
         transform.SetSiblingIndex(_siblingIndexInParent);
         canHover = false;
@@ -215,7 +184,7 @@ public class Card : Interactable
         if (eventData.button == PointerEventData.InputButton.Left && isSelected)
         {
             transform.SetParent(_parent);
-            _canZoom = false;
+            _canInspect = false;
             highlightFrame.gameObject.SetActive(false);
             highlightFrame.color = Color.green;
             zoomSequence.Kill();
@@ -263,7 +232,7 @@ public class Card : Interactable
             highlightFrame.GetComponent<Image>().color = Color.red;
         }
 
-        if (_canZoom)
+        if (_canInspect)
         {
             ZoomCard(true);
         }
@@ -286,7 +255,7 @@ public class Card : Interactable
             HighlightCard(false);
         }
 
-        if (_canZoom)
+        if (_canInspect)
         {
             ZoomCard(false);
         }
@@ -363,7 +332,7 @@ public class Card : Interactable
         {
             transform.SetParent(_parent);
             transform.SetAsFirstSibling();
-            _canZoom = true;
+            _canInspect = true;
         });
     }
 

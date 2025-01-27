@@ -143,29 +143,29 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
-    public void UpdateTableCardHitArea(HolderSubType subType, string hitAreaTag)
+    public void UpdateActiveCardHolders(HolderSubType subType, string hitAreaTag)
     {
         if(subType == HolderSubType.PRIMARY)
         {
             if (string.IsNullOrEmpty(hitAreaTag))
             {
-                _tableView.RemovePrimaryHolder();
+                _tableView.RemoveEmptyHolder(HolderSubType.PRIMARY);
             }
             else
             {
-                _tableView.AddPrimaryHolder(hitAreaTag);
+                _tableView.AddEmptyPrimaryHolder(hitAreaTag);
             }
-            _tableView.CenterCardHolders();
+            _tableView.CenterPrimaryCardHolders();
         }
         else if(subType == HolderSubType.SECONDARY)
         {
             if (string.IsNullOrEmpty(hitAreaTag))
             {
-                _tableView.RemoveSecondaryHolder();
+                _tableView.RemoveEmptyHolder(HolderSubType.SECONDARY);
             }
             else
             {
-                _tableView.AddSecondaryHolder();
+                _tableView.AddEmptySecondaryHolder();
             }
         }
     }
@@ -309,13 +309,13 @@ public class PlayerController : UserController<PlayerTableView>
         {
             _allIconsOfPrimaryHoldersInOrder.Remove(data.holder.ID);
             CardHolder holder = (CardHolder)data.holder;
-            UpdateTableCardHitArea(holder.holderSubType, null);
+            UpdateActiveCardHolders(holder.holderSubType, null);
         }
         else if(data.card.Data.cardType == CardType.Landscape)
         {
             _allIconsOfSecondaryHoldersInOrder.Remove(data.holder.ID);
             CardHolder holder = (CardHolder)data.holder;
-            UpdateTableCardHitArea(holder.holderSubType, null);
+            UpdateActiveCardHolders(holder.holderSubType, null);
         }
     }
 

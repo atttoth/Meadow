@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using static GameTask;
 using static MarkerHolder;
 
@@ -390,8 +391,45 @@ public class GameLogicManager : MonoBehaviour
 
     private void PendingCardPlaceHandler(GameTask task)
     {
-        _playerController.CreatePendingCardPlacement(task.Data);
-        task.Complete();
+        switch(task.State)
+        {
+            case 0:
+                List<RaycastResult> raycastResults = task.Data.raycastResults;
+                Card card = task.Data.card;
+                CardHolder holder = null;
+                foreach (RaycastResult result in raycastResults)
+                {
+                    holder = result.gameObject.GetComponent<CardHolder>();
+                    TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
+                    holder = hitArea ? _playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
+                    if (holder && holder.holderType == HolderType.TableCard && _playerController.CanCardBePlaced(holder, card))
+                    {
+                        task.Data.raycastResults = null;
+                        task.Data.pendingCardDataID = card.Data.ID;
+                        task.Data.holder = holder;
+                        _playerController.CreatePendingCardPlacement(task.Data);
+                        break;
+                    }
+                }
+
+                if (holder == null)
+                {
+                    if (card.Data.cardType == CardType.Landscape) // unfulfilled icon/road token requirements
+                    {
+                        _playerController.TableView.RemoveEmptyHolder(HolderSubType.SECONDARY);
+                    }
+                    card.MoveCardBackToHand(_playerController.HandView.transform);
+                }
+                task.StartDelayMs(0);
+                break;
+            default:
+                _playerController.draggingCardType = CardType.None;
+                _playerController.TableView.TogglePrimaryHitAreas(false);
+                _playerController.TableView.ToggleSecondaryHitArea(false);
+                task.Data.card.ToggleRayCast(true);
+                task.Complete();
+                break;
+        }
     }
 
     private void CancelledPendingCardPlaceHandler(GameTask task)

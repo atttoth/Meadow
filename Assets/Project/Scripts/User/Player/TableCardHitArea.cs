@@ -21,7 +21,7 @@ public class TableCardHitArea : MonoBehaviour, IPointerEnterHandler, IPointerExi
         PlayerController playerController = ReferenceManager.Instance.playerController;
         if ((playerController.draggingCardType == CardType.Ground && type == HolderSubType.PRIMARY) || (playerController.draggingCardType == CardType.Landscape && type == HolderSubType.SECONDARY))
         {
-            playerController.UpdateTableCardHitArea(type, hitAreaTag);
+            playerController.UpdateActiveCardHolders(type, hitAreaTag);
         }
     }
 }
