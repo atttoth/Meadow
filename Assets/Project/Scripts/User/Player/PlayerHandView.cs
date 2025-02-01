@@ -1,80 +1,70 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using UnityEngine;
 
 public class PlayerHandView : MonoBehaviour
 {
-    private Transform _handTransform;
-    private List<Card> _cardListInHand;
+    private List<Card> _cards;
 
     public void Init()
     {
-        _handTransform = GetComponent<Transform>();
-        _cardListInHand = new();
+        _cards = new();
     }
 
-    public async void AddCardToHand(Card card)
+    public void AddCardHandler(GameTask task)
     {
-        float[] endPositions = GetHandLayout();
-        Sequence sequence = DOTween.Sequence();
-
-        card.transform.SetParent(_handTransform);
-        float endPosition = endPositions.Length > 1 ? endPositions[^1] : endPositions[0];
-        Vector3 targetPosition = _cardListInHand.Count < 1 ? new(0f, card.hoverOriginY, 0f) : new(endPosition, card.hoverOriginY, 0f);
-        sequence.Append(card.transform.DOLocalMove(targetPosition, ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard).SetEase(Ease.InOutBack));
-        sequence.Play();
-        await sequence.AsyncWaitForCompletion();
-        card.SavePosition(endPosition);
-        _cardListInHand.Add(card);
-    }
-
-    public async void ToggleHand(Card currentCard = null)
-    {
-        List<Task> tasks = new();
-        foreach (Card card in _cardListInHand)
+        switch(task.State)
         {
-            if (currentCard != card)
-            {
-                float value = card.canHover ? card.hoverTargetY : card.hoverOriginY;
-                tasks.Add(card.MoveCardWithAsyncDelay(value));
-            }
-            card.canHover = !card.canHover;
-            card.canMove = !card.canMove;
+            case 0:
+                MoveCardsHorizontallyInHand(false, false);
+                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard;
+                Card card = task.Data.card;
+                float[] endPositions = GetHandLayout();
+                card.transform.SetParent(transform);
+                float endPosition = endPositions.Length > 1 ? endPositions[^1] : endPositions[0];
+                Vector3 targetPosition = _cards.Count < 1 ? new(0f, card.hoverOriginY, 0f) : new(endPosition, card.hoverOriginY, 0f);
+                DOTween.Sequence().Append(card.transform.DOLocalMove(targetPosition, speed).SetEase(Ease.InOutBack));
+                card.SavePosition(endPosition);
+                _cards.Add(card);
+                task.StartDelayMs((int)(speed * 1000));
+                break;
+            default:
+                task.Complete();
+                break;
         }
-
-        await Task.WhenAll(tasks);
-        MoveCardsHorizontallyInHand(true, true, true);
     }
 
     public void SetCardsReady()
     {
-        foreach (Card card in _cardListInHand)
-        {
-            card.SetCardReadyInHand();
-        }
+        _cards.ForEach(card => card.SetCardReadyInHand());
+    }
+
+    public void ToggleHand()
+    {
+        _cards.ForEach(card => card.ToggleCard());
+        MoveCardsHorizontallyInHand(true, true, true);
     }
 
     public void RemoveCardFromHand(GameTaskItemData data)
     {
-        _cardListInHand.Remove(data.card);
+        _cards.Remove(data.card);
     }
 
     public void RemoveCardFromHandRewind(GameTaskItemData data)
     {
-        _cardListInHand.Add(data.card);
+        _cards.Add(data.card);
     }
 
     public void MoveCardsHorizontallyInHand(bool isVisible, bool isTableToggled, bool isUpdating = false)
     {
-        if (_cardListInHand.Count < 1)
+        if (_cards.Count < 1)
         {
             return;
         }
 
         float[] endPositions = isVisible ? GetSpreadedHandLayout() : GetHandLayout(isUpdating);
-        foreach (Card card in _cardListInHand)
+        foreach (Card card in _cards)
         {
             float endPosition = endPositions.Length > 1 ? endPositions[card.transform.GetSiblingIndex()] : endPositions[0];
             card.MoveCardHorizontally(endPosition, isTableToggled);
@@ -84,7 +74,7 @@ public class PlayerHandView : MonoBehaviour
 
     private float[] GetHandLayout(bool isUpdating = false)
     {
-        int layout = isUpdating ? _cardListInHand.Count - 1 : _cardListInHand.Count;
+        int layout = isUpdating ? _cards.Count - 1 : _cards.Count;
         return layout switch
         {
             1 => new float[] { -80, 80 },
@@ -101,7 +91,7 @@ public class PlayerHandView : MonoBehaviour
 
     private float[] GetSpreadedHandLayout()
     {
-        return _cardListInHand.Count switch
+        return _cards.Count switch
         {
             2 => new float[] { -80, 80 },
             3 => new float[] { -160, 0, 160 },

@@ -61,7 +61,8 @@ public class GameLogicManager : MonoBehaviour
             _playerController.EnableTableView(false);
             _boardController.ToggleRayCastOfMarkerHolders(false);
             _campController.ToggleRayCastOfMarkerHolders(false);
-            new GameTask().ExecHandler(_campController.ShowViewSetupHandler);
+            //new GameTask().ExecHandler(_campController.ShowViewSetupHandler);
+            new GameTask().ExecHandler(TestHandler);
         }
 
         if (!hasRemainingMarkers && Input.GetKeyDown(KeyCode.R)) // for testing
@@ -75,6 +76,24 @@ public class GameLogicManager : MonoBehaviour
         if(Input.GetKeyDown(KeyCode.S)) // for testing
         {
             _campController.DisposeCampForRound();
+        }
+    }
+
+    private void TestHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.Data.deckType = GetActiveDeckType();
+                task.StartHandler(_boardController.BoardFillHandler, task.Data);
+                break;
+            default:
+                _playerController.EnableTableView(true);
+                _boardController.ToggleRayCastOfCards(true);
+                _boardController.ToggleRayCastOfMarkerHolders(true);
+                _campController.ToggleRayCastOfMarkerHolders(true);
+                task.Complete();
+                break;
         }
     }
 
@@ -299,7 +318,10 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                if (task.Data.holder == null)
+                _boardController.ToggleRayCastOfCards(false);
+                _playerController.EnableTableView(false);
+                _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
+                if (task.Data.holder == null) // card-pick from deck selection action
                 {
                     task.Data.cards = _boardController.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
                     task.StartHandler(_overlayController.HideCardSelectionHandler, task.Data);
@@ -320,23 +342,16 @@ public class GameLogicManager : MonoBehaviour
                 task.StartDelayMs(0);
                 break;
             case 2:
-                hasRemainingMarkers = _playerController.GetRemainingMarkers().Count > 0;
-                _boardController.ToggleRayCastOfCards(false);
-                _playerController.EnableTableView(false);
-                _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
-                _playerController.HandView.MoveCardsHorizontallyInHand(_playerController.IsTableVisible(), false);
-                _playerController.HandView.AddCardToHand(task.Data.card);
-                task.StartDelayMs(1000);
+                task.StartHandler(_playerController.AddCardToHandHandler, task.Data);
                 break;
             case 3:
                 task.Data.deckType = GetActiveDeckType();
                 task.StartHandler(_boardController.BoardFillHandler, task.Data);
                 break;
             case 4:
-                _playerController.HandView.SetCardsReady();
                 _playerController.EnableTableView(true);
                 _boardController.ToggleRayCastOfCards(true);
-                if (hasRemainingMarkers)
+                if (_playerController.GetRemainingMarkers().Count > 0)
                 {
                     _boardController.ToggleRayCastOfMarkerHolders(true);
                     _campController.ToggleRayCastOfMarkerHolders(true);
@@ -402,7 +417,7 @@ public class GameLogicManager : MonoBehaviour
                     holder = result.gameObject.GetComponent<CardHolder>();
                     TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
                     holder = hitArea ? _playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                    if (holder && holder.holderType == HolderType.TableCard && _playerController.CanCardBePlaced(holder, card))
+                    if (holder && _playerController.CanCardBePlaced(holder, card))
                     {
                         task.Data.raycastResults = null;
                         task.Data.pendingCardDataID = card.Data.ID;
@@ -419,13 +434,18 @@ public class GameLogicManager : MonoBehaviour
                         _playerController.TableView.RemoveEmptyHolder(HolderSubType.SECONDARY);
                     }
                     card.MoveCardBackToHand(_playerController.HandView.transform);
+                    task.StartDelayMs(0);
                 }
-                task.StartDelayMs(0);
-                break;
-            default:
+                else
+                {
+                    task.Data.value = true;
+                    task.StartHandler(_playerController.SnapCardHandler, task.Data);
+                }
                 _playerController.draggingCardType = CardType.None;
                 _playerController.TableView.TogglePrimaryHitAreas(false);
                 _playerController.TableView.ToggleSecondaryHitArea(false);
+                break;
+            default:
                 task.Data.card.ToggleRayCast(true);
                 task.Complete();
                 break;
@@ -434,8 +454,19 @@ public class GameLogicManager : MonoBehaviour
 
     private void CancelledPendingCardPlaceHandler(GameTask task)
     {
-        _playerController.CancelPendingCardPlacement(task.Data);
-        task.Complete();
+        switch(task.State)
+        {
+            case 0:
+                task.Data.card.ToggleRayCast(false);
+                task.Data.value = false;
+                task.StartHandler(_playerController.SnapCardHandler, task.Data);
+                _playerController.CancelPendingCardPlacement(task.Data);
+                break;
+            default:
+                task.Data.card.ToggleRayCast(true);
+                task.Complete();
+                break;
+        }
     }
 
     private void ApprovedPendingCardPlaceHandler(GameTask task)

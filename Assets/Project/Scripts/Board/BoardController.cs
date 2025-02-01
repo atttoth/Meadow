@@ -13,6 +13,7 @@ public class BoardController : MonoBehaviour
     private Dictionary<int, List<CardHolder>> _cardHolders;
     private Dictionary<int, List<MarkerHolder>> _markerHolders;
     private DeckController _deckController;
+    private Transform _cardDrawContainer;
 
     // drawing sequence
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
@@ -61,6 +62,7 @@ public class BoardController : MonoBehaviour
 
         _deckController = transform.GetChild(2).GetComponent<DeckController>();
         _deckController.Init();
+        _cardDrawContainer = transform.GetChild(3).transform;
     }
 
     private void SaveTargetHoldersAndCards(DeckType activeDeckType)
@@ -115,7 +117,7 @@ public class BoardController : MonoBehaviour
                         float delay = i * cardDrawDelay;
                         CardHolder holder = GetNextItem(_emptyHolders);
                         Card card = GetNextItem(_cardsToDraw);
-                        card.PlayDrawingAnimation(delay, holder);
+                        card.PlayDrawingAnimation(delay, holder, _cardDrawContainer);
                         i++;
                     }
                 }

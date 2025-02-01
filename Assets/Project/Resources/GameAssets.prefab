@@ -48,7 +48,8 @@ MonoBehaviour:
   deckPrefab: {fileID: 507146776534277429, guid: 5c7562ab37821bd4dadba068928a28a2, type: 3}
   cardPrefab: {fileID: 6090333228907795711, guid: 3cf8631f39959c3498134d201016f7eb, type: 3}
   boardCardHolderPrefab: {fileID: 911632800280658922, guid: efafd4edac6ba354a8cf691d34f5f2e3, type: 3}
-  tableCardHolderPrefab: {fileID: 6220129483715313968, guid: 9694b7a706bfb354c96111d34fa4acba, type: 3}
+  tablePrimaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 9694b7a706bfb354c96111d34fa4acba, type: 3}
+  tableSecondaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 7bb290dc78c988045b20bbdf14a062ba, type: 3}
   markerPrefab: {fileID: 7310574253820092359, guid: c216b656b1a24644797daed882869f50, type: 3}
   displayIconPrefab: {fileID: 8597923760973663733, guid: bd36c87be2d7a8445bf06b449df2affc, type: 3}
   dummyDisplayIconPrefab: {fileID: 8393196153097624382, guid: ebbe0b7235d15fe4c81fdcf458c8cec8, type: 3}

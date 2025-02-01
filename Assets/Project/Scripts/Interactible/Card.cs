@@ -1,7 +1,6 @@
 using DG.Tweening;
 using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
@@ -64,19 +63,16 @@ public class Card : Interactable
     private Sprite _cardFront;
     private Sprite _cardBack;
     private bool _canInspect;
-    private bool _isDragging;
     public bool isSelected;
     public bool canMove;
     public bool canHover;
     public float originXInParent;
     public float hoverOriginY;
     public float hoverTargetY;
-    public Vector2 prevAnchoredPosition; // for pending action
+    public Vector2 prevPosition; // for pending action
 
     Sequence hoverSequence;
     Sequence zoomSequence;
-    Sequence cardDrawing;
-    Sequence cardFlip;
 
     public void Init(CardData data, Sprite cardFront, Sprite cardBack)
     {
@@ -117,6 +113,7 @@ public class Card : Interactable
             return;
         }
 
+        prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
         PlayerController playerController = ReferenceManager.Instance.playerController;
@@ -153,14 +150,14 @@ public class Card : Interactable
     {
         cardStatus = CardStatus.IN_HAND;
         canHover = true;
+        ToggleRayCast(true);
     }
 
     public void MoveCardBackToHand(Transform handViewTransform)
     {
         transform.SetParent(handViewTransform);
-        GetComponent<RectTransform>().anchoredPosition = new(originXInParent, hoverTargetY);
+        GetComponent<RectTransform>().anchoredPosition = prevPosition;
         transform.SetSiblingIndex(_siblingIndexInParent);
-        canHover = false;
     }
 
     public override void OnPointerClick(PointerEventData eventData)
@@ -290,42 +287,37 @@ public class Card : Interactable
         hoverSequence.Append(transform.DOLocalMoveY(endYvalue, duration)).OnComplete(() => hoverSequence.Kill());
     }
 
-    public async Task MoveCardWithAsyncDelay(float endYvalue)
+    public void ToggleCard()
     {
-        float delay = Time.time + 0.3f;
-        hoverSequence.Kill();
-        hoverSequence = DOTween.Sequence();
-
-        hoverSequence.Append(transform.DOLocalMoveY(endYvalue, 0.4f)).OnComplete(() => hoverSequence.Kill());
-
-        while (Time.time < delay)
-        {
-            prevAnchoredPosition = GetComponent<RectTransform>().anchoredPosition;
-            await Task.Yield();
-        }
+        float posY = canHover ? hoverTargetY : hoverOriginY;
+        canHover = !canHover;
+        canMove = !canMove;
+        DOTween.Sequence().Append(transform.DOLocalMoveY(posY, 0.4f));
     }
 
-    public void PlayDrawingAnimation(float delay, CardHolder holder)
+    public void PlayDrawingAnimation(float delay, CardHolder holder, Transform cardDrawContainer)
     {
         float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
         _parent = holder.transform;
         gameObject.SetActive(true);
         canHover = false;
 
-        cardDrawing = DOTween.Sequence();
-        cardDrawing.Append(transform.DOMoveY(holder.transform.position.y, cardDrawSpeed).SetEase(Ease.InOutQuart).SetDelay(delay));
-        cardDrawing.OnComplete(() =>
-        {
-            holder.AddToContentList(this);
-            FlipBoardCard();
-        });
+        DOTween.Sequence()
+            .Append(transform.DOMoveY(holder.transform.position.y, cardDrawSpeed)
+            .SetEase(Ease.InOutQuart)
+            .SetDelay(delay))
+            .OnComplete(() =>
+            {
+                holder.AddToContentList(this);
+                FlipBoardCard(cardDrawContainer);
+            });
     }
 
-    private void FlipBoardCard()
+    private void FlipBoardCard(Transform cardDrawContainer)
     {
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
-        transform.SetParent(transform.root); // because next card should be above prev card
-        cardFlip = DOTween.Sequence();
+        transform.SetParent(cardDrawContainer);
+        Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardFront));
         cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
         cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear).OnComplete(() =>
@@ -340,7 +332,7 @@ public class Card : Interactable
     {
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         Sprite sprite = isReset ? _cardBack : _cardFront;
-        cardFlip = DOTween.Sequence();
+        Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = sprite));
         cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
         cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
@@ -349,8 +341,7 @@ public class Card : Interactable
     public void MoveCardHorizontally(float endPosition, bool isTableToggled = false)
     {
         float duration = isTableToggled ? 0.2f : 0.4f;
-        Sequence sequence = DOTween.Sequence();
         Ease ease = isTableToggled ? Ease.Linear : Ease.InOutBack;
-        sequence.Append(transform.DOLocalMoveX(endPosition, duration).SetEase(ease));
+        DOTween.Sequence().Append(transform.DOLocalMoveX(endPosition, duration).SetEase(ease));
     }
 }

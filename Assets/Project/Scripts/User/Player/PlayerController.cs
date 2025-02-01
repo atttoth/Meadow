@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using UnityEngine.WSA;
 using static PendingActionCreator;
 
 public class PlayerController : UserController<PlayerTableView>
@@ -255,6 +256,20 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
+    public void AddCardToHandHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler(_handView.AddCardHandler, task.Data);
+                break;
+            default:
+                _handView.SetCardsReady();
+                task.Complete();
+                break;
+        }
+    }
+
     private void UpdateCurrentIconsOfHolder(GameTaskItemData data)
     {
         CardHolder holder = (CardHolder)data.holder;
@@ -322,7 +337,6 @@ public class PlayerController : UserController<PlayerTableView>
     public void CreatePendingCardPlacement(GameTaskItemData data)
     {
         _tableToggleButton.enabled = false;
-        data.targetTransform = _handView.transform;
         PendingActionItem[] postActionItems = new PendingActionItem[] {
             _infoView.IncrementNumberOfCardPlacements,
             _handView.RemoveCardFromHand,
@@ -352,6 +366,24 @@ public class PlayerController : UserController<PlayerTableView>
         {
             _tableView.UpdateApproveButton(false);
             _tableToggleButton.enabled = true;
+        }
+    }
+
+    public void SnapCardHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                CardHolder holder = (CardHolder)task.Data.holder;
+                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardPlacementSpeed;
+                Transform handTransform = task.Data.value ? null : _handView.transform;
+                int contentCount = task.Data.value ? holder.GetContentListSize() - 1 : -1;
+                _tableView.PositionTableCard(task.Data.card, contentCount, speed, handTransform);
+                task.StartDelayMs((int)(speed * 1000));
+                break;
+            default:
+                task.Complete();
+                break;
         }
     }
 

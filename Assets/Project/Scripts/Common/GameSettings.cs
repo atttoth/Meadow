@@ -16,4 +16,7 @@ public class GameSettings
     public float cardInspectionFlipDuration = 1f;
     public float displayIconHorizontalSlideSpeed = 0.5f;
     public float displayIconVerticalSlideSpeed = 0.5f;
+    public float tableViewOpenSpeed = 0.5f;
+    public float tableHolderCenteringSpeed = 0.3f;
+    public float cardPlacementSpeed = 0.3f;
 }

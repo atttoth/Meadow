@@ -5,7 +5,7 @@ using UnityEngine.UI;
 
 public abstract class TableView : MonoBehaviour
 {
-    protected static int _MAX_HOLDER_NUM = 10;
+    protected static int _MAX_PRIMARY_HOLDER_NUM = 10;
 
     // Primary - ground and observation cards
     protected ScrollRect _primaryTableContentScroll;

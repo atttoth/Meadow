@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using TMPro;
@@ -7,12 +8,6 @@ using UnityEngine.UI;
 
 public class PlayerTableView : TableView
 {
-    private static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
-    private static float _SLIDE_X_DISTANCE_OF_DISPLAY_ICON = 30f;
-    private float _originY;
-    private float _targetY;
-    public bool isTableVisible;
-
     // Primary - ground and observation cards
     private List<CardHolder> _primaryCardHolderPool;
     private Transform _primaryCardHolderPoolContainer;
@@ -25,12 +20,11 @@ public class PlayerTableView : TableView
     
     private TextMeshProUGUI _approveButtonText;
     private Image _approveButtonImage;
-    
+    private TableLayout _tableLayout;
+    public bool isTableVisible;
+
     public void Init()
     {
-        _originY = transform.position.y;
-        _targetY = _originY + transform.GetComponent<RectTransform>().rect.height;
-        isTableVisible = false;
         _primaryTableContentScroll = transform.GetChild(0).GetChild(0).GetComponent<ScrollRect>();
         _primaryCardHolderPoolContainer = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1); // .../TableContents/Primary/Content/CardHolderPool
         _primaryCardHolderContainer = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0); // .../TableContents/PrimaryPage/Content/CardHolders
@@ -53,6 +47,10 @@ public class PlayerTableView : TableView
 
         CreateCardHolderPools();
         CreateUIHitAreas();
+        float closedPosY = transform.position.y;
+        float openPosY = closedPosY + transform.GetComponent<RectTransform>().rect.height;
+        _tableLayout = new TableLayout(closedPosY, openPosY);
+        isTableVisible = false;
     }
 
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)
@@ -120,7 +118,7 @@ public class PlayerTableView : TableView
         DisplayIcon displayIcon;
         if (_displayIconPool.Count < 1)
         {
-            displayIcon = Object.Instantiate(GameAssets.Instance.displayIconPrefab, _displayIconPoolTransform).GetComponent<DisplayIcon>();
+            displayIcon = Instantiate(GameAssets.Instance.displayIconPrefab, _displayIconPoolTransform).GetComponent<DisplayIcon>();
             displayIcon.gameObject.SetActive(false);
         }
         else
@@ -142,9 +140,9 @@ public class PlayerTableView : TableView
     private void CreateCardHolderPools()
     {
         _primaryCardHolderPool = new();
-        for (int i = 0; i < _MAX_HOLDER_NUM; i++)
+        for (int i = 0; i < _MAX_PRIMARY_HOLDER_NUM; i++)
         {
-            CardHolder holder = Object.Instantiate(GameAssets.Instance.tableCardHolderPrefab, _primaryCardHolderPoolContainer).GetComponent<CardHolder>();
+            CardHolder holder = Instantiate(GameAssets.Instance.tablePrimaryCardHolderPrefab, _primaryCardHolderPoolContainer).GetComponent<CardHolder>();
             holder.ID = i;
             holder.holderType = HolderType.TableCard;
             holder.gameObject.SetActive(false);
@@ -152,10 +150,10 @@ public class PlayerTableView : TableView
         }
 
         _secondaryCardHolderPool = new();
-        for (int i = 0; i < _MAX_HOLDER_NUM; i++)
+        for (int i = 0; i < _MAX_PRIMARY_HOLDER_NUM; i++)
         {
-            CardHolder holder = Object.Instantiate(GameAssets.Instance.tableCardHolderPrefab, _secondaryCardHolderPoolContainer).GetComponent<CardHolder>();
-            holder.ID = _MAX_HOLDER_NUM + i;
+            CardHolder holder = Instantiate(GameAssets.Instance.tableSecondaryCardHolderPrefab, _secondaryCardHolderPoolContainer).GetComponent<CardHolder>();
+            holder.ID = _MAX_PRIMARY_HOLDER_NUM + i;
             holder.holderType = HolderType.TableCard;
             holder.gameObject.SetActive(false);
             _secondaryCardHolderPool.Add(holder);
@@ -185,7 +183,7 @@ public class PlayerTableView : TableView
         // decrease size above 2 holders
         // decrease size only at ground cards
         // ignore updating size at max (10) holders
-        if (_activePrimaryCardHolders.Count < 2 || data.card.Data.cardType != CardType.Ground || _activePrimaryCardHolders.Count == _MAX_HOLDER_NUM)
+        if (_activePrimaryCardHolders.Count < 2 || data.card.Data.cardType != CardType.Ground || _activePrimaryCardHolders.Count == _MAX_PRIMARY_HOLDER_NUM)
         {
             return;
         }
@@ -219,7 +217,7 @@ public class PlayerTableView : TableView
 
     public void TogglePrimaryHitAreas(bool value)
     {
-        if(value && _activePrimaryCardHolders.Count == _MAX_HOLDER_NUM) return;
+        if(value && _activePrimaryCardHolders.Count == _MAX_PRIMARY_HOLDER_NUM) return;
 
         _primaryHitAreas.ForEach(rect => rect.gameObject.SetActive(value));
     }
@@ -304,8 +302,8 @@ public class PlayerTableView : TableView
                         int modifier = leftDisplayIcons.Count;
                         leftDisplayIcons.ForEach(icon =>
                         {
-                            float posX = leftPosX - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            float posX = leftPosX - TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                            posX -= TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
                             icon.transform.position = new(posX, icon.transform.position.y);
                             modifier--;
                         });
@@ -319,8 +317,8 @@ public class PlayerTableView : TableView
                         rightDisplayIcons.Reverse();
                         rightDisplayIcons.ForEach(icon =>
                         {
-                            float posX = rightPosX + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            float posX = rightPosX + TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                            posX -= TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
                             icon.transform.position = new(posX, icon.transform.position.y);
                             modifier--;
                         });
@@ -332,7 +330,7 @@ public class PlayerTableView : TableView
                         existingDisplayIcons.ForEach(icon =>
                         {
                             float posX = _displayIcons.Find(oldIcon => oldIcon.ID == icon.ID).transform.position.x;
-                            posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            posX -= TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
                             icon.transform.position = new(posX, icon.transform.position.y);
                         });
                     }
@@ -343,7 +341,7 @@ public class PlayerTableView : TableView
                         duration = (int)(speed * 1000);
                         _displayIcons.ForEach(icon =>
                         {
-                            float posX = icon.transform.position.x - _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
+                            float posX = icon.transform.position.x - TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * slideDirectionValue;
                             icon.transform.DOMoveX(posX, speed).SetEase(Ease.InOutSine);
                         });
                     }
@@ -356,8 +354,8 @@ public class PlayerTableView : TableView
                     initialDisplayIcons.Reverse();
                     initialDisplayIcons.ForEach(icon =>
                     {
-                        float posX = icon.transform.position.x + _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
-                        posX -= _SLIDE_X_DISTANCE_OF_DISPLAY_ICON * (initialDisplayIcons.Count - 1);
+                        float posX = icon.transform.position.x + TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * 2 * modifier;
+                        posX -= TableLayout.SLIDE_X_DISTANCE_OF_DISPLAY_ICON * (initialDisplayIcons.Count - 1);
                         icon.transform.position = new(posX, icon.transform.position.y);
                         modifier--;
                     });
@@ -432,14 +430,15 @@ public class PlayerTableView : TableView
 
     public void TogglePanel()
     {
+        float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableViewOpenSpeed;
         isTableVisible = !isTableVisible;
-        float target = isTableVisible ? _targetY : _originY;
-        transform.DOMoveY(target, 0.5f).SetEase(Ease.InOutExpo);
+        float target = _tableLayout.GetTargetTableViewPosY(isTableVisible);
         if(isTableVisible)
         {
             _primaryTableContentScroll.verticalNormalizedPosition = 0f;
             _secondaryTableContentScroll.verticalNormalizedPosition = 0f;
         }
+        transform.DOMoveY(target, speed).SetEase(Ease.InOutExpo);
     }
 
     public void UpdateApproveButton(bool isPendingAction)
@@ -450,41 +449,37 @@ public class PlayerTableView : TableView
 
     public void ExpandHolderVertically(GameTaskItemData data)
     {
-        UpdateHolderHeight((CardHolder)data.holder, true);
+        CardHolder holder = (CardHolder)data.holder;
+        if (holder.holderSubType == HolderSubType.PRIMARY)
+        {
+            RectTransform rect = holder.GetComponent<RectTransform>();
+            holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(1);
+            rect.sizeDelta = _tableLayout.GetUpdatedPrimaryHolderSize(rect, 1);
+        }
     }
 
     public void ExpandHolderVerticallyRewind(GameTaskItemData data)
     {
-        UpdateHolderHeight((CardHolder)data.holder, false);
-    }
-
-    private void UpdateHolderHeight(CardHolder holder, bool isIncrease)
-    {
-        if(holder.holderSubType == HolderSubType.PRIMARY)
+        CardHolder holder = (CardHolder)data.holder;
+        if (holder.holderSubType == HolderSubType.PRIMARY)
         {
-            int modifier = isIncrease ? 1 : -1;
             RectTransform rect = holder.GetComponent<RectTransform>();
-            holder.transform.position += new Vector3(0f, _Y_GAP_BETWEEN_STACKED_CARDS * 0.5f * modifier, 0f);
-            rect.sizeDelta = new Vector2(rect.sizeDelta.x, rect.sizeDelta.y + (_Y_GAP_BETWEEN_STACKED_CARDS * modifier));
+            holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(-1);
+            rect.sizeDelta = _tableLayout.GetUpdatedPrimaryHolderSize(rect, -1);
         }
     }
 
     public void StackCard(GameTaskItemData data)
     {
+        Card card = data.card;
         CardHolder holder = (CardHolder)data.holder;
-        holder.AddToContentList(data.card);
-        float startingPosY = 115f;
-        int count = holder.GetContentListSize() - 1;
-        float topPositionY = count < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * count;
-        RectTransform rect = data.card.GetComponent<RectTransform>();
-        rect.anchorMin = new(0.5f, 0f);
-        rect.anchorMax = new(0.5f, 0f);
-        rect.anchoredPosition = new(0f, topPositionY);
-        data.card.canMove = false;
-        data.card.cardStatus = CardStatus.PENDING_ON_TABLE;
-        if (holder.GetContentListSize() > 1)
+        holder.AddToContentList(card);
+        int contentSize = holder.GetContentListSize();
+        card.canMove = false;
+        card.cardStatus = CardStatus.PENDING_ON_TABLE;
+        if (contentSize > 1) // update card status below top card
         {
-            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 2);
+            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(contentSize - 2);
             if (cardBelow.cardStatus == CardStatus.PENDING_ON_TABLE)
             {
                 cardBelow.cardStatus = CardStatus.STACKED_PENDING_ON_TABLE;
@@ -494,22 +489,37 @@ public class PlayerTableView : TableView
 
     public void StackCardRewind(GameTaskItemData data)
     {
+        Card card = data.card;
         CardHolder holder = (CardHolder)data.holder;
-        holder.RemoveItemFromContentList(data.card);
-        RectTransform rect = data.card.GetComponent<RectTransform>();
-        data.card.transform.SetParent(data.targetTransform);
-        rect.anchorMin = new(0.5f, 0.5f);
-        rect.anchorMax = new(0.5f, 0.5f);
-        rect.anchoredPosition = new(data.card.prevAnchoredPosition.x, data.card.prevAnchoredPosition.y);
-        data.card.canMove = true;
-        data.card.cardStatus = CardStatus.IN_HAND;
-        if (holder.GetContentListSize() > 0)
+        holder.RemoveItemFromContentList(card);
+        int contentSize = holder.GetContentListSize();
+        card.canMove = true;
+        card.cardStatus = CardStatus.IN_HAND;
+        if (contentSize > 0) // update card status below top card
         {
-            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(holder.GetContentListSize() - 1);
+            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(contentSize - 1);
             if (cardBelow.cardStatus == CardStatus.STACKED_PENDING_ON_TABLE)
             {
                 cardBelow.cardStatus = CardStatus.PENDING_ON_TABLE;
             }
+        }
+    }
+
+    public void PositionTableCard(Card card, int contentCount, float speed, Transform handTransform)
+    {
+        RectTransform rect = card.GetComponent<RectTransform>();
+        Vector2 targetPos = _tableLayout.GetCardTargetPosition(card, contentCount, handTransform);
+        if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType))
+        {
+            float rotation = handTransform ? 0f : 90f;
+            DOTween.Sequence()
+                .Append(rect.DOAnchorPos(targetPos, speed))
+                .Join(rect.DORotate(new(0f, 0f, rotation), speed))
+                .SetEase(Ease.InOutSine);
+        }
+        else
+        {
+            DOTween.Sequence().Append(rect.DOAnchorPos(targetPos, speed)).SetEase(Ease.InOutSine);
         }
     }
 
@@ -536,30 +546,14 @@ public class PlayerTableView : TableView
     {
         if(_activePrimaryCardHolders.Count > 0)
         {
-            float[] positions = GetCardHolderLayout();
+            float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableHolderCenteringSpeed;
+            float[] positions = _tableLayout.GetPrimaryCardHolderLayout(_activePrimaryCardHolders.Count);
             for (int i = 0; i < positions.Length; i++)
             {
                 Transform holderTransform = _activePrimaryCardHolders[i].transform;
                 float posX = positions[i];
-                holderTransform.DOLocalMoveX(posX, 0.3f).SetEase(Ease.InOutSine);
+                holderTransform.DOLocalMoveX(posX, speed).SetEase(Ease.InOutSine);
             }
         }
-    }
-
-    private float[] GetCardHolderLayout()
-    {
-        return _activePrimaryCardHolders.Count switch
-        {
-            2 => new float[] { -95, 95 },
-            3 => new float[] { -190, 0, 190 },
-            4 => new float[] { -285, -95, 95, 285 },
-            5 => new float[] { -380, -190, 0, 190, 380 },
-            6 => new float[] { -475, -285, -95, 95, 285, 475 },
-            7 => new float[] { -570, -380, -190, 0, 190, 380, 570 },
-            8 => new float[] { -665, -475, -285, -95, 95, 285, 475, 665 },
-            9 => new float[] { -760, -570, -380, -190, 0, 190, 380, 570, 760 },
-            10 => new float[] { -855, -665, -475, -285, -95, 95, 285, 475, 665, 855 },
-            _ => new float[] { 0 },
-        };
     }
 }
