@@ -33,6 +33,7 @@ public class GameLogicManager : MonoBehaviour
             CampToggleHandler,
             CampScoreReceiveHandler,
             CardPickHandler,
+            CardMoveHandler,
             PendingCardPlaceHandler,
             CardInspectionStartHandler,
             CardInspectionEndHandler,
@@ -362,6 +363,12 @@ public class GameLogicManager : MonoBehaviour
                 task.Complete();
                 break;
         }
+    }
+
+    private void CardMoveHandler(GameTask task)
+    {
+        _playerController.ToggleHitArea(task.Data.card.Data.cardType);
+        task.Complete();
     }
 
     private void CardInspectionStartHandler(GameTask task)

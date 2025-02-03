@@ -30,7 +30,6 @@ public class PlayerTableView : TableView
         _primaryCardHolderContainer = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(0); // .../TableContents/PrimaryPage/Content/CardHolders
         _activePrimaryCardHolders = new();
 
-        _secondaryTableContentScroll = transform.GetChild(0).GetChild(1).GetComponent<ScrollRect>();
         _secondaryCardHolderPoolContainer = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(1); // .../TableContents/Secondary/Content/CardHolderPool
         _secondaryCardHolderContainer = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(0); // .../TableContents/SecondaryPage/Content/CardHolders
         _activeSecondaryCardHolders = new();
@@ -47,10 +46,17 @@ public class PlayerTableView : TableView
 
         CreateCardHolderPools();
         CreateUIHitAreas();
-        float closedPosY = transform.position.y;
-        float openPosY = closedPosY + transform.GetComponent<RectTransform>().rect.height;
-        _tableLayout = new TableLayout(closedPosY, openPosY);
+        CreateTableLayout();
         isTableVisible = false;
+    }
+
+    private void CreateTableLayout()
+    {
+        Rect rect = transform.GetComponent<RectTransform>().rect;
+        float closedPosY = transform.position.y;
+        float openPosY = closedPosY + rect.height;
+        float secondaryHolderWidth = GameAssets.Instance.tableSecondaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
+        _tableLayout = new TableLayout(closedPosY, openPosY, rect.width, secondaryHolderWidth);
     }
 
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)
@@ -108,7 +114,7 @@ public class PlayerTableView : TableView
         holder.transform.SetSiblingIndex(_activeSecondaryCardHolders.Count);
         holder.gameObject.SetActive(true);
         RectTransform rect = holder.GetComponent<RectTransform>();
-        rect.anchoredPosition = new Vector2(_activeSecondaryCardHolders.Count * 100f, rect.anchoredPosition.y);
+        rect.anchoredPosition = _tableLayout.GetSecondaryCardHolderPosition(_activeSecondaryCardHolders.Count, rect.anchoredPosition.y);
         _secondaryCardHolderPool.Remove(holder);
         _activeSecondaryCardHolders.Add(holder);
     }
@@ -150,7 +156,7 @@ public class PlayerTableView : TableView
         }
 
         _secondaryCardHolderPool = new();
-        for (int i = 0; i < _MAX_PRIMARY_HOLDER_NUM; i++)
+        for (int i = 0; i < _MAX_SECONDARY_HOLDER_NUM; i++)
         {
             CardHolder holder = Instantiate(GameAssets.Instance.tableSecondaryCardHolderPrefab, _secondaryCardHolderPoolContainer).GetComponent<CardHolder>();
             holder.ID = _MAX_PRIMARY_HOLDER_NUM + i;
@@ -224,6 +230,8 @@ public class PlayerTableView : TableView
 
     public void ToggleSecondaryHitArea(bool value)
     {
+        if (value && _activeSecondaryCardHolders.Count == _MAX_SECONDARY_HOLDER_NUM) return;
+
         _secondaryHitArea.gameObject.SetActive(value);
     }
 
@@ -436,7 +444,6 @@ public class PlayerTableView : TableView
         if(isTableVisible)
         {
             _primaryTableContentScroll.verticalNormalizedPosition = 0f;
-            _secondaryTableContentScroll.verticalNormalizedPosition = 0f;
         }
         transform.DOMoveY(target, speed).SetEase(Ease.InOutExpo);
     }
@@ -554,6 +561,18 @@ public class PlayerTableView : TableView
                 float posX = positions[i];
                 holderTransform.DOLocalMoveX(posX, speed).SetEase(Ease.InOutSine);
             }
+        }
+    }
+
+    public void AlignSecondaryCardHoldersToLeft()
+    {
+        float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableHolderCenteringSpeed;
+        for (int i = 0; i < _activeSecondaryCardHolders.Count; i++)
+        {
+            CardHolder holder = _activeSecondaryCardHolders[i];
+            RectTransform rect = holder.GetComponent<RectTransform>();
+            Vector2 targetPos = _tableLayout.GetSecondaryCardHolderPosition(i, rect.anchoredPosition.y);
+            rect.DOLocalMove(targetPos, speed).SetEase(Ease.InOutSine);
         }
     }
 }

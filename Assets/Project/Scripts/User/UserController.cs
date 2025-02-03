@@ -101,15 +101,22 @@ public abstract class UserController<T> : GameLogicEvent where T : TableView
             }
 
             primaryTableIcons.AddRange(GetAllCurrentIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
-            if (holder.IsEmpty() && card.Data.cardType == CardType.Landscape)
+            if (card.Data.cardType == CardType.Landscape)
             {
-                if (mainRequirements.Contains(CardIcon.AllMatching)) // only occurs at card ID 172
+                if(holder.IsEmpty())
                 {
-                    return GetMostCommonTableIconsCount(primaryTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllMatching).ToList().Count;
+                    if (mainRequirements.Contains(CardIcon.AllMatching)) // only occurs at card ID 172
+                    {
+                        return GetMostCommonTableIconsCount(primaryTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllMatching).ToList().Count;
+                    }
+                    else if (card.Data.requirements.Length == 1) // card has only road token requirement
+                    {
+                        return true;
+                    }
                 }
-                else if (card.Data.requirements.Length == 1) // card has only road token requirement
+                else
                 {
-                    return true;
+                    return false;
                 }
             }
 

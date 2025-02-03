@@ -116,16 +116,7 @@ public class Card : Interactable
         prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
-        PlayerController playerController = ReferenceManager.Instance.playerController;
-        playerController.draggingCardType = _data.cardType;
-        if(_data.cardType == CardType.Ground)
-        {
-            playerController.TableView.TogglePrimaryHitAreas(true);
-        }
-        else if(_data.cardType == CardType.Landscape)
-        {
-            playerController.TableView.ToggleSecondaryHitArea(true);
-        }
+        StartEventHandler(GameLogicEventType.CARD_MOVED, new GameTaskItemData() { card = this });
     }
 
     public override void OnEndDrag(PointerEventData eventData)

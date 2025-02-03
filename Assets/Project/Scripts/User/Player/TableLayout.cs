@@ -3,16 +3,20 @@ using UnityEngine;
 
 public class TableLayout
 {
-    private static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
-    public static float SLIDE_X_DISTANCE_OF_DISPLAY_ICON = 30f;
+    private readonly static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
+    public readonly static float SLIDE_X_DISTANCE_OF_DISPLAY_ICON = 30f;
 
-    private float _tableClosedPosY;
-    private float _tableOpenPosY;
+    private readonly float _tableClosedPosY;
+    private readonly float _tableOpenPosY;
+    private readonly float _tableWidth;
+    private readonly float _secondaryHolderWidth;
 
-    public TableLayout(float closedPosY, float openPosY)
+    public TableLayout(float closedPosY, float openPosY, float tableWidth, float secondaryHolderWidth)
     {
         _tableClosedPosY = closedPosY;
         _tableOpenPosY = openPosY;
+        _tableWidth = tableWidth;
+        _secondaryHolderWidth = secondaryHolderWidth;
     }
 
     public float GetTargetTableViewPosY(bool isTableVisible)
@@ -43,6 +47,14 @@ public class TableLayout
             card.transform.SetParent(handTransform);
             return new(card.prevPosition.x, card.prevPosition.y);
         }
+    }
+
+    public Vector2 GetSecondaryCardHolderPosition(int holderCount, float posY)
+    {
+        float gap = 27.7f;
+        float startingPosX = -((_tableWidth * 0.5f) - ((_secondaryHolderWidth * 0.5f) + gap));
+        float posX = startingPosX + ((_secondaryHolderWidth + gap) * holderCount);
+        return new(posX, posY);
     }
 
     public float[] GetPrimaryCardHolderLayout(int holderCount)

@@ -132,6 +132,19 @@ public class PlayerController : UserController<PlayerTableView>
         return _tableView.isTableVisible;
     }
 
+    public void ToggleHitArea(CardType cardType)
+    {
+        draggingCardType = cardType;
+        if (cardType == CardType.Ground)
+        {
+            _tableView.TogglePrimaryHitAreas(true);
+        }
+        else if (cardType == CardType.Landscape)
+        {
+            _tableView.ToggleSecondaryHitArea(true);
+        }
+    }
+
     public CardHolder GetTableCardHolderOfHitArea(TableCardHitArea hitArea)
     {
         if(hitArea.type == HolderSubType.PRIMARY)
@@ -163,6 +176,7 @@ public class PlayerController : UserController<PlayerTableView>
             if (string.IsNullOrEmpty(hitAreaTag))
             {
                 _tableView.RemoveEmptyHolder(HolderSubType.SECONDARY);
+                _tableView.AlignSecondaryCardHoldersToLeft();
             }
             else
             {
@@ -414,7 +428,7 @@ public class PlayerController : UserController<PlayerTableView>
     {
         _infoView.RegisterScore(score);
     }
-
+        
     public void UpdateDisplayIconsHandler(GameTask task)
     {
         switch (task.State)

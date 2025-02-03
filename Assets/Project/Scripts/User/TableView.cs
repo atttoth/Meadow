@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public abstract class TableView : MonoBehaviour
 {
     protected static int _MAX_PRIMARY_HOLDER_NUM = 10;
+    protected static int _MAX_SECONDARY_HOLDER_NUM = 8;
 
     // Primary - ground and observation cards
     protected ScrollRect _primaryTableContentScroll;
@@ -13,7 +14,6 @@ public abstract class TableView : MonoBehaviour
     protected Transform _primaryCardHolderContainer;
 
     // Secondary - landscape and discovery cards
-    protected ScrollRect _secondaryTableContentScroll;
     protected List<CardHolder> _activeSecondaryCardHolders;
     protected Transform _secondaryCardHolderContainer;
 
