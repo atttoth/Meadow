@@ -17,7 +17,7 @@ public class PlayerTableView : TableView
     private List<CardHolder> _secondaryCardHolderPool;
     private Transform _secondaryCardHolderPoolContainer;
     private RectTransform _secondaryHitArea; // right side
-    
+
     private TextMeshProUGUI _approveButtonText;
     private Image _approveButtonImage;
     private TableLayout _tableLayout;
@@ -53,10 +53,11 @@ public class PlayerTableView : TableView
     private void CreateTableLayout()
     {
         Rect rect = transform.GetComponent<RectTransform>().rect;
-        float closedPosY = transform.position.y;
-        float openPosY = closedPosY + rect.height;
+        float tableClosedPosY = transform.position.y;
+        float tableOpenPosY = tableClosedPosY + rect.height;
+        float primaryHolderWidth = GameAssets.Instance.tablePrimaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
         float secondaryHolderWidth = GameAssets.Instance.tableSecondaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
-        _tableLayout = new TableLayout(closedPosY, openPosY, rect.width, secondaryHolderWidth);
+        _tableLayout = new TableLayout(tableClosedPosY, tableOpenPosY, rect.width, primaryHolderWidth, secondaryHolderWidth);
     }
 
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)
@@ -82,17 +83,7 @@ public class PlayerTableView : TableView
 
     public void AddEmptyPrimaryHolder(string tag)
     {
-        int listIndex = 0;
-        float targetPosX = 0f;
-        if(_activePrimaryCardHolders.Count > 0)
-        {
-            int direction = tag == "RectLeft" ? -1 : 1;
-            listIndex = direction == -1 ? 0 : _activePrimaryCardHolders.Count;
-            int prevHolderIndex = _activePrimaryCardHolders.Count == 1 ? 0 : direction == -1 ? 0 : _activePrimaryCardHolders.Count - 1;
-            CardHolder prevHolder = _activePrimaryCardHolders[prevHolderIndex];
-            targetPosX = prevHolder.GetComponent<RectTransform>().anchoredPosition.x + 190 * direction;
-        }
-        
+        int listIndex = tag == "RectLeft" ? 0 : _activePrimaryCardHolders.Count;
         CardHolder holder = _primaryCardHolderPool[0];
         holder.Init(-1, HolderType.TableCard);
         holder.holderSubType = HolderSubType.PRIMARY;
@@ -100,7 +91,13 @@ public class PlayerTableView : TableView
         holder.transform.SetSiblingIndex(listIndex);
         holder.gameObject.SetActive(true);
         RectTransform rect = holder.GetComponent<RectTransform>();
-        rect.anchoredPosition = new Vector2(targetPosX, rect.anchoredPosition.y);
+        RectTransform prevHolderTransform = null;
+        if (_activePrimaryCardHolders.Count > 0)
+        {
+            int prevHolderIndex = _activePrimaryCardHolders.Count == 1 ? 0 : tag == "RectLeft" ? 0 : _activePrimaryCardHolders.Count - 1;
+            prevHolderTransform = _activePrimaryCardHolders[prevHolderIndex].GetComponent<RectTransform>();
+        }
+        rect.anchoredPosition = _tableLayout.GetPrimaryHolderPosition(prevHolderTransform, tag == "RectLeft" ? -1 : 1, rect.anchoredPosition.y);
         _primaryCardHolderPool.Remove(holder);
         _activePrimaryCardHolders.Insert(listIndex, holder);
     }
@@ -184,41 +181,49 @@ public class PlayerTableView : TableView
         _secondaryHitArea = secondaryHitArea.GetComponent<RectTransform>();
     }
 
-    public void UpdatePrimaryHitAreaSize(GameTaskItemData data)
+    public void UpdateHitAreaSize(GameTaskItemData data)
     {
-        // decrease size above 2 holders
-        // decrease size only at ground cards
-        // ignore updating size at max (10) holders
-        if (_activePrimaryCardHolders.Count < 2 || data.card.Data.cardType != CardType.Ground || _activePrimaryCardHolders.Count == _MAX_PRIMARY_HOLDER_NUM)
+        CardType cardType = data.card.Data.cardType;
+        if (cardType == CardType.Ground && _activePrimaryCardHolders.Count < _MAX_PRIMARY_HOLDER_NUM)
         {
-            return;
+            CalculatePrimaryHitAreaSizeAndPosition(cardType, 1);
         }
-        CalculatePrimaryHitAreaSizeAndPosition(false);
+        else if(cardType == CardType.Landscape && _activeSecondaryCardHolders.Count < _MAX_SECONDARY_HOLDER_NUM)
+        {
+            CalculateSecondaryHitAreaSizeAndPosition(cardType, 1);
+        }
     }
 
-    public void UpdatePrimaryHitAreaSizeRewind(GameTaskItemData data)
+    public void UpdateHitAreaSizeRewind(GameTaskItemData data)
     {
-        if (_activePrimaryCardHolders.Count < 2 || data.card.Data.cardType != CardType.Ground)
+        CardType cardType = data.card.Data.cardType;
+        if (cardType == CardType.Ground)
         {
-            return;
+            CalculatePrimaryHitAreaSizeAndPosition(cardType, -1);
         }
-        CalculatePrimaryHitAreaSizeAndPosition(true);
+        else if(cardType == CardType.Landscape)
+        {
+            CalculateSecondaryHitAreaSizeAndPosition(cardType, -1);
+        }
     }
 
-    private void CalculatePrimaryHitAreaSizeAndPosition(bool isRewind)
+    private void CalculatePrimaryHitAreaSizeAndPosition(CardType cardType, int status)
     {
-        float status = isRewind ? -1 : 1;
         _primaryHitAreas.ForEach(rect =>
         {
-            int direction = rect.CompareTag("RectLeft") ? -1 : 1;
-            float widthValue = 95f * status;
-            float posXValue = 47.5f;
-            float moveValue = (posXValue * direction) * status;
-            float width = rect.sizeDelta.x - widthValue;
-            rect.sizeDelta = new(width, rect.sizeDelta.y);
-            float posX = rect.anchoredPosition.x + moveValue;
-            rect.anchoredPosition = new(posX, rect.anchoredPosition.y);
+            float prevWidth = rect.sizeDelta.x;
+            rect.sizeDelta = _tableLayout.GetPrimaryHitAreaSize(_activePrimaryCardHolders.Count, status, rect.sizeDelta.y);
+            float diff = prevWidth - rect.sizeDelta.x;
+            rect.anchoredPosition = _tableLayout.GetHitAreaPosition(rect, diff);
         });
+    }
+
+    private void CalculateSecondaryHitAreaSizeAndPosition(CardType cardType, int status)
+    {
+        float prevWidth = _secondaryHitArea.sizeDelta.x;
+        _secondaryHitArea.sizeDelta = _tableLayout.GetSecondaryHitAreaSize(_activeSecondaryCardHolders.Count, status, _secondaryHitArea.sizeDelta.y);
+        float diff = prevWidth - _secondaryHitArea.sizeDelta.x;
+        _secondaryHitArea.anchoredPosition = _tableLayout.GetHitAreaPosition(_secondaryHitArea, diff);
     }
 
     public void TogglePrimaryHitAreas(bool value)
@@ -549,7 +554,7 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void CenterPrimaryCardHolders()
+    public void AlignPrimaryCardHoldersToCenter()
     {
         if(_activePrimaryCardHolders.Count > 0)
         {

@@ -169,7 +169,7 @@ public class PlayerController : UserController<PlayerTableView>
             {
                 _tableView.AddEmptyPrimaryHolder(hitAreaTag);
             }
-            _tableView.CenterPrimaryCardHolders();
+            _tableView.AlignPrimaryCardHoldersToCenter();
         }
         else if(subType == HolderSubType.SECONDARY)
         {
@@ -356,13 +356,13 @@ public class PlayerController : UserController<PlayerTableView>
             _handView.RemoveCardFromHand,
             _tableView.StackCard,
             _tableView.ExpandHolderVertically,
-            _tableView.UpdatePrimaryHitAreaSize,
+            _tableView.UpdateHitAreaSize,
             CreateEntryForCurrentIcons,
             UpdateCurrentIconsOfHolder
         };
         PendingActionItem[] prevActionItems = new PendingActionItem[] {
             UpdateCurrentIconsOfHolderRewind,
-            _tableView.UpdatePrimaryHitAreaSizeRewind,
+            _tableView.UpdateHitAreaSizeRewind,
             _tableView.ExpandHolderVerticallyRewind,
             _tableView.StackCardRewind,
             CreateEntryForCurrentIconsRewind,
