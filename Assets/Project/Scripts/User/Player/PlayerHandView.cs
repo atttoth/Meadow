@@ -6,10 +6,15 @@ using UnityEngine;
 public class PlayerHandView : MonoBehaviour
 {
     private List<Card> _cards;
+    private HandLayout _handLayout;
+    private bool _isHandDefault;
 
     public void Init()
     {
         _cards = new();
+        float cardWidth = GameAssets.Instance.cardPrefab.GetComponent<RectTransform>().rect.width;
+        _handLayout = new HandLayout(cardWidth);
+        _isHandDefault = true;
     }
 
     public void AddCardHandler(GameTask task)
@@ -17,33 +22,28 @@ public class PlayerHandView : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                MoveCardsHorizontallyInHand(false, false);
-                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard;
+                float drawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard;
                 Card card = task.Data.card;
-                float[] endPositions = GetHandLayout();
-                card.transform.SetParent(transform);
-                float endPosition = endPositions.Length > 1 ? endPositions[^1] : endPositions[0];
-                Vector3 targetPosition = _cards.Count < 1 ? new(0f, card.hoverOriginY, 0f) : new(endPosition, card.hoverOriginY, 0f);
-                DOTween.Sequence().Append(card.transform.DOLocalMove(targetPosition, speed).SetEase(Ease.InOutBack));
-                card.SavePosition(endPosition);
                 _cards.Add(card);
-                task.StartDelayMs((int)(speed * 1000));
+                float[] positions = GetLayoutPositions();
+                MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
+                float newCardPosition = positions[^1];
+                card.transform.SetParent(transform);
+                DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetEase(Ease.InOutBack));
+                task.StartDelayMs((int)(drawSpeed * 1000));
                 break;
             default:
+                _cards.ForEach(card => card.SetCardReadyInHand());
                 task.Complete();
                 break;
         }
     }
 
-    public void SetCardsReady()
-    {
-        _cards.ForEach(card => card.SetCardReadyInHand());
-    }
-
     public void ToggleHand()
     {
+        _isHandDefault = !_isHandDefault;
         _cards.ForEach(card => card.ToggleCard());
-        MoveCardsHorizontallyInHand(true, true, true);
+        MoveCardsHorizontallyInHand(GetLayoutPositions());
     }
 
     public void RemoveCardFromHand(GameTaskItemData data)
@@ -56,56 +56,23 @@ public class PlayerHandView : MonoBehaviour
         _cards.Add(data.card);
     }
 
-    public void MoveCardsHorizontallyInHand(bool isVisible, bool isTableToggled, bool isUpdating = false)
+    public float[] GetLayoutPositions()
     {
-        if (_cards.Count < 1)
+        return _isHandDefault ? _handLayout.GetDefaultLayout(_cards.Count) : _handLayout.GetSpreadedLayout(_cards.Count);
+    }
+
+    public void MoveCardsHorizontallyInHand(float[] positions, bool isRapid = false)
+    {
+        if (positions.Length < 1)
         {
             return;
         }
 
-        float[] endPositions = isVisible ? GetSpreadedHandLayout() : GetHandLayout(isUpdating);
-        foreach (Card card in _cards)
+        for (int i = 0; i < positions.Length; i++)
         {
-            float endPosition = endPositions.Length > 1 ? endPositions[card.transform.GetSiblingIndex()] : endPositions[0];
-            card.MoveCardHorizontally(endPosition, isTableToggled);
-            card.SavePosition(endPosition);
+            Card card = _cards[i];
+            float posX = positions[i];
+            card.MoveCardHorizontally(posX, isRapid);
         }
-    }
-
-    private float[] GetHandLayout(bool isUpdating = false)
-    {
-        int layout = isUpdating ? _cards.Count - 1 : _cards.Count;
-        return layout switch
-        {
-            1 => new float[] { -80, 80 },
-            2 => new float[] { -160, 0, 160 },
-            3 => new float[] { -240, -80, 80, 240 },
-            4 => new float[] { -320, -160, 0, 160, 320 },
-            5 => new float[] { -200, -120, -40, 40, 120, 200 },
-            6 => new float[] { -240, -160, -80, 0, 80, 160, 240 },
-            7 => new float[] { -280, -200, -120, -40, 40, 120, 200, 280 },
-            8 => new float[] { -320, -240, -160, -80, 0, 80, 160, 240, 320 },
-            _ => new float[] { 0 },
-        };
-    }
-
-    private float[] GetSpreadedHandLayout()
-    {
-        return _cards.Count switch
-        {
-            2 => new float[] { -80, 80 },
-            3 => new float[] { -160, 0, 160 },
-            4 => new float[] { -240, -80, 80, 240 },
-            5 => new float[] { -320, -160, 0, 160, 320 },
-            6 => new float[] { -400, -240, -80, 80, 240, 400 },
-            7 => new float[] { -480, -320, -160, 0, 160, 320, 480 },
-            8 => new float[] { -560, -400, -240, -80, 80, 240, 400, 560 },
-            9 => new float[] { -640, -480, -320, -160, 0, 160, 320, 480, 640 },
-            10 => new float[] { -720, -560, -400, -240, -80, 80, 240, 400, 560, 720 },
-            11 => new float[] { -800, -640, -480, -320, -160, 0, 160, 320, 480, 640, 800 },
-            12 => new float[] { -880, -720, -560, -400, -240, -80, 80, 240, 400, 560, 720, 880 },
-            13 => new float[] { -600, -500, -400, -300, -200, -100, 0, 100, 200, 300, 400, 500, 600 },
-            _ => new float[] { 0 },
-        };
     }
 }

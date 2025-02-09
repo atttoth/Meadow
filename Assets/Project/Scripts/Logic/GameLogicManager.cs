@@ -489,7 +489,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_playerController.UpdateDisplayIconsHandler);
                 break;
             case 2:
-                task.StartHandler(_playerController.UpdateHandViewHandler);
+                task.StartHandler(_playerController.CenterCardsInHandHandler);
                 break;
             default:
                 _playerController.ApplyPendingCardPlacement();

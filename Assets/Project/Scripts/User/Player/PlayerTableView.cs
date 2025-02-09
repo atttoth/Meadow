@@ -517,13 +517,13 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void PositionTableCard(Card card, int contentCount, float speed, Transform handTransform)
+    public void PositionTableCard(Card card, int contentCount, float speed, bool isPlacement, float lastPosX)
     {
         RectTransform rect = card.GetComponent<RectTransform>();
-        Vector2 targetPos = _tableLayout.GetCardTargetPosition(card, contentCount, handTransform);
+        Vector2 targetPos = _tableLayout.GetCardTargetPosition(card, contentCount, isPlacement, lastPosX);
         if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType))
         {
-            float rotation = handTransform ? 0f : 90f;
+            float rotation = isPlacement ? 90f : 0f;
             DOTween.Sequence()
                 .Append(rect.DOAnchorPos(targetPos, speed))
                 .Join(rect.DORotate(new(0f, 0f, rotation), speed))

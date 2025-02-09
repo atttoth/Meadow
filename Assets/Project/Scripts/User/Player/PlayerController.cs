@@ -5,7 +5,6 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
-using UnityEngine.WSA;
 using static PendingActionCreator;
 
 public class PlayerController : UserController<PlayerTableView>
@@ -228,12 +227,12 @@ public class PlayerController : UserController<PlayerTableView>
         return pairs;
     }
 
-    public void UpdateHandViewHandler(GameTask task)
+    public void CenterCardsInHandHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                _handView.MoveCardsHorizontallyInHand(IsTableVisible(), false, true);
+                _handView.MoveCardsHorizontallyInHand(_handView.GetLayoutPositions());
                 task.StartDelayMs(500);
                 break;
             default:
@@ -278,7 +277,6 @@ public class PlayerController : UserController<PlayerTableView>
                 task.StartHandler(_handView.AddCardHandler, task.Data);
                 break;
             default:
-                _handView.SetCardsReady();
                 task.Complete();
                 break;
         }
@@ -388,11 +386,19 @@ public class PlayerController : UserController<PlayerTableView>
         switch(task.State)
         {
             case 0:
+                Card card = task.Data.card;
                 CardHolder holder = (CardHolder)task.Data.holder;
                 float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardPlacementSpeed;
-                Transform handTransform = task.Data.value ? null : _handView.transform;
-                int contentCount = task.Data.value ? holder.GetContentListSize() - 1 : -1;
-                _tableView.PositionTableCard(task.Data.card, contentCount, speed, handTransform);
+                bool isPlacement = task.Data.value;
+                int contentCount = isPlacement ? holder.GetContentListSize() - 1 : -1;
+                float[] positions = _handView.GetLayoutPositions();
+                float lastPosX = positions.Length > 0 ? positions[^1] : 0f;
+                _handView.MoveCardsHorizontallyInHand(positions);
+                if(!isPlacement)
+                {
+                    card.transform.SetParent(_handView.transform);
+                }
+                _tableView.PositionTableCard(card, contentCount, speed, isPlacement, lastPosX);
                 task.StartDelayMs((int)(speed * 1000));
                 break;
             default:

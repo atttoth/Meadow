@@ -37,9 +37,9 @@ public class TableLayout
         return new Vector2(transform.sizeDelta.x, transform.sizeDelta.y + (_Y_GAP_BETWEEN_STACKED_CARDS * modifier));
     }
 
-    public Vector2 GetCardTargetPosition(Card card, int contentCount, Transform handTransform)
+    public Vector2 GetCardTargetPosition(Card card, int contentCount, bool isPlacement, float lastPosX)
     {
-        if (handTransform == null)
+        if (isPlacement)
         {
             float startingPosY = Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType) ? 70f : 105f;
             float posY = contentCount < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * contentCount;
@@ -47,8 +47,7 @@ public class TableLayout
         }
         else
         {
-            card.transform.SetParent(handTransform);
-            return new(card.prevPosition.x, card.prevPosition.y);
+            return new(lastPosX, card.hoverTargetY * 2);
         }
     }
 
@@ -68,11 +67,11 @@ public class TableLayout
     public float[] GetPrimaryCardHolderLayout(int numOfHolders)
     {
         float totalWidth = (_primaryHolderWidth * (numOfHolders - 1)) + (_X_GAP_BETWEEN_HOLDERS * (numOfHolders - 1));
-        float startingPosX = -(totalWidth * 0.5f);
+        float startingPosX = totalWidth * -0.5f;
         float[] positions = new float[numOfHolders];
         for(int i = 0; i < numOfHolders; i++)
         {
-            float position = startingPosX + (((_primaryHolderWidth + _X_GAP_BETWEEN_HOLDERS) * i));
+            float position = startingPosX + ((_primaryHolderWidth + _X_GAP_BETWEEN_HOLDERS) * i);
             positions[i] = position;
         }
         return positions;

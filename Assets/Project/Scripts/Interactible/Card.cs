@@ -57,22 +57,23 @@ public enum CardStatus
 public class Card : Interactable
 {
     public CardStatus cardStatus;
-    private CardData _data;
-    private int _siblingIndexInParent;
-    public Image highlightFrame;
-    private Sprite _cardFront;
-    private Sprite _cardBack;
-    private bool _canInspect;
+    public Image highlightFrame; // refactor this
     public bool isSelected;
     public bool canMove;
     public bool canHover;
-    public float originXInParent;
     public float hoverOriginY;
     public float hoverTargetY;
-    public Vector2 prevPosition; // for pending action
 
-    Sequence hoverSequence;
-    Sequence zoomSequence;
+    private CardData _data;
+    private Sprite _cardFront;
+    private Sprite _cardBack;
+    private Sequence _hoverSequence;
+    private Sequence _zoomSequence;
+    private bool _canInspect;
+    
+    // reset card position on cancelled card placement
+    private int _siblingIndexInParent;
+    private Vector2 _prevPosition;
 
     public void Init(CardData data, Sprite cardFront, Sprite cardBack)
     {
@@ -112,8 +113,8 @@ public class Card : Interactable
         {
             return;
         }
-
-        prevPosition = GetComponent<RectTransform>().anchoredPosition;
+        _siblingIndexInParent = transform.GetSiblingIndex();
+        _prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
         StartEventHandler(GameLogicEventType.CARD_MOVED, new GameTaskItemData() { card = this });
@@ -131,12 +132,6 @@ public class Card : Interactable
         StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { raycastResults = raycastResults, card = this });
     }
 
-    public void SavePosition(float posX)
-    {
-        originXInParent = posX;
-        _siblingIndexInParent = transform.GetSiblingIndex();
-    }
-
     public void SetCardReadyInHand()
     {
         cardStatus = CardStatus.IN_HAND;
@@ -147,7 +142,7 @@ public class Card : Interactable
     public void MoveCardBackToHand(Transform handViewTransform)
     {
         transform.SetParent(handViewTransform);
-        GetComponent<RectTransform>().anchoredPosition = prevPosition;
+        GetComponent<RectTransform>().anchoredPosition = _prevPosition;
         transform.SetSiblingIndex(_siblingIndexInParent);
     }
 
@@ -175,7 +170,7 @@ public class Card : Interactable
             _canInspect = false;
             highlightFrame.gameObject.SetActive(false);
             highlightFrame.color = Color.green;
-            zoomSequence.Kill();
+            _zoomSequence.Kill();
             transform.localScale = new Vector3(1f, 1f, 1f);
             StartEventHandler(GameLogicEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
         }
@@ -254,7 +249,7 @@ public class Card : Interactable
         if (!value)
         {
             transform.SetParent(_parent);
-            zoomSequence.Kill();
+            _zoomSequence.Kill();
         }
 
         if (value)
@@ -265,17 +260,17 @@ public class Card : Interactable
 
         float target = value ? 1.2f : 1f;
         float duration = value ? 0.5f : 0.2f;
-        zoomSequence = DOTween.Sequence();
+        _zoomSequence = DOTween.Sequence();
 
-        zoomSequence.Append(transform.DOScale(target, duration));
+        _zoomSequence.Append(transform.DOScale(target, duration));
     }
 
     public void MoveCard(float endYvalue, float duration)
     {
-        hoverSequence.Kill();
-        hoverSequence = DOTween.Sequence();
+        _hoverSequence.Kill();
+        _hoverSequence = DOTween.Sequence();
 
-        hoverSequence.Append(transform.DOLocalMoveY(endYvalue, duration)).OnComplete(() => hoverSequence.Kill());
+        _hoverSequence.Append(transform.DOLocalMoveY(endYvalue, duration)).OnComplete(() => _hoverSequence.Kill());
     }
 
     public void ToggleCard()
@@ -329,10 +324,10 @@ public class Card : Interactable
         cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
     }
 
-    public void MoveCardHorizontally(float endPosition, bool isTableToggled = false)
+    public void MoveCardHorizontally(float posX, bool isRapid)
     {
-        float duration = isTableToggled ? 0.2f : 0.4f;
-        Ease ease = isTableToggled ? Ease.Linear : Ease.InOutBack;
-        DOTween.Sequence().Append(transform.DOLocalMoveX(endPosition, duration).SetEase(ease));
+        float duration = canMove ? 0.2f : 0.4f;
+        Ease ease = isRapid ? Ease.InOutBack : canMove ? Ease.Linear : Ease.InOutQuad;
+        DOTween.Sequence().Append(transform.DOLocalMoveX(posX, duration).SetEase(ease));
     }
 }
