@@ -11,12 +11,12 @@ public class PlayerTableView : TableView
     // Primary - ground and observation cards
     private List<CardHolder> _primaryCardHolderPool;
     private Transform _primaryCardHolderPoolContainer;
-    private List<RectTransform> _primaryHitAreas; // left and right sides
+    private List<TableCardHitArea> _primaryHitAreas; // left and right sides
 
     // Secondary - landscape and discovery cards
     private List<CardHolder> _secondaryCardHolderPool;
     private Transform _secondaryCardHolderPoolContainer;
-    private RectTransform _secondaryHitArea; // right side
+    private TableCardHitArea _secondaryHitArea; // right side
 
     private TextMeshProUGUI _approveButtonText;
     private Image _approveButtonImage;
@@ -168,17 +168,15 @@ public class PlayerTableView : TableView
         _primaryHitAreas = new();
         for (int i = 0; i < 2; i++)
         {
-            TableCardHitArea primaryHitArea = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(i).GetComponent<TableCardHitArea>(); // .../TableContents/Primary/Content/UIHitArea/Rect
+            TableCardHitArea primaryHitArea = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(i).GetComponent<TableCardHitArea>(); // .../TableContents/Primary/Content/UIHitArea/Hitarea
             primaryHitArea.type = HolderSubType.PRIMARY;
-            RectTransform rect = primaryHitArea.GetComponent<RectTransform>();
-            rect.gameObject.SetActive(false);
-            _primaryHitAreas.Add(rect);
+            primaryHitArea.Toggle(false);
+            _primaryHitAreas.Add(primaryHitArea);
         }
 
-        TableCardHitArea secondaryHitArea = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2).GetComponent<TableCardHitArea>(); // .../TableContents/Secondary/Content/RectRight/
-        secondaryHitArea.type = HolderSubType.SECONDARY;
-        secondaryHitArea.gameObject.SetActive(false);
-        _secondaryHitArea = secondaryHitArea.GetComponent<RectTransform>();
+        _secondaryHitArea = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2).GetComponent<TableCardHitArea>(); // .../TableContents/Secondary/Content/Hitarea
+        _secondaryHitArea.type = HolderSubType.SECONDARY;
+        _secondaryHitArea.Toggle(false);
     }
 
     public void UpdateHitAreaSize(GameTaskItemData data)
@@ -209,8 +207,9 @@ public class PlayerTableView : TableView
 
     private void CalculatePrimaryHitAreaSizeAndPosition(CardType cardType, int status)
     {
-        _primaryHitAreas.ForEach(rect =>
+        _primaryHitAreas.ForEach(hitArea =>
         {
+            RectTransform rect = hitArea.GetComponent<RectTransform>();
             float prevWidth = rect.sizeDelta.x;
             rect.sizeDelta = _tableLayout.GetPrimaryHitAreaSize(_activePrimaryCardHolders.Count, status, rect.sizeDelta.y);
             float diff = prevWidth - rect.sizeDelta.x;
@@ -220,24 +219,25 @@ public class PlayerTableView : TableView
 
     private void CalculateSecondaryHitAreaSizeAndPosition(CardType cardType, int status)
     {
-        float prevWidth = _secondaryHitArea.sizeDelta.x;
-        _secondaryHitArea.sizeDelta = _tableLayout.GetSecondaryHitAreaSize(_activeSecondaryCardHolders.Count, status, _secondaryHitArea.sizeDelta.y);
-        float diff = prevWidth - _secondaryHitArea.sizeDelta.x;
-        _secondaryHitArea.anchoredPosition = _tableLayout.GetHitAreaPosition(_secondaryHitArea, diff);
+        RectTransform rect = _secondaryHitArea.GetComponent<RectTransform>();
+        float prevWidth = rect.sizeDelta.x;
+        rect.sizeDelta = _tableLayout.GetSecondaryHitAreaSize(_activeSecondaryCardHolders.Count, status, rect.sizeDelta.y);
+        float diff = prevWidth - rect.sizeDelta.x;
+        rect.anchoredPosition = _tableLayout.GetHitAreaPosition(rect, diff);
     }
 
     public void TogglePrimaryHitAreas(bool value)
     {
         if(value && _activePrimaryCardHolders.Count == _MAX_PRIMARY_HOLDER_NUM) return;
 
-        _primaryHitAreas.ForEach(rect => rect.gameObject.SetActive(value));
+        _primaryHitAreas.ForEach(hitArea => hitArea.Toggle(value));
     }
 
     public void ToggleSecondaryHitArea(bool value)
     {
         if (value && _activeSecondaryCardHolders.Count == _MAX_SECONDARY_HOLDER_NUM) return;
 
-        _secondaryHitArea.gameObject.SetActive(value);
+        _secondaryHitArea.Toggle(value);
     }
 
     public void PrepareDisplayIcon(Card card)

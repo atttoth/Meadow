@@ -19,7 +19,6 @@ public class PlayerController : UserController<PlayerTableView>
     private HandScreenHitArea _handScreenHitArea;
     private List<int> _campScoreTokens;
     private bool _isCampVisible;
-    private bool _isHandScreenVisible;
     public CardType draggingCardType;
 
     public void CreatePlayer()

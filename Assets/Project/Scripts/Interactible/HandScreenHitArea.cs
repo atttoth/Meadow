@@ -37,9 +37,4 @@ public class HandScreenHitArea : HitArea
     {
         _fakeCardImage.enabled = value;
     }
-
-    public void Toggle(bool value)
-    {
-        gameObject.SetActive(value);
-    }
 }
