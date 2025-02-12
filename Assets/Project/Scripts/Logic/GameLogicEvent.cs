@@ -7,6 +7,7 @@ public enum GameLogicEventType
     CAMP_ICONS_SELECTED,
     CAMP_TOGGLED,
     CAMP_SCORE_RECEIVED,
+    TABLE_HITAREA_HOVERED_OVER,
     CARD_PICKED,
     CARD_MOVED,
     CARD_PLACED,
@@ -18,14 +19,15 @@ public enum GameLogicEventType
     MARKER_CANCELLED,
     MARKER_ACTION_SELECTED,
     DECK_SELECTED,
-    SCORE_COLLECTED
+    SCORE_COLLECTED,
+    HAND_SCREEN_TOGGLED
 }
 
 public class GameLogicEvent : MonoBehaviour
 {
     private event EventHandler<GameTaskItemData> _logicEventHandler;
 
-    private void Awake()
+    private void Start()
     {
         _logicEventHandler += ReferenceManager.Instance.gameLogicManager.OnLogicEvent;
     }

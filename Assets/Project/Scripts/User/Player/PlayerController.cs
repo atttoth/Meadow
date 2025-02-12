@@ -16,8 +16,10 @@ public class PlayerController : UserController<PlayerTableView>
     private Button _tableApproveButton;
     private Button _turnEndButton;
     private Button _campToggleButton;
+    private HandScreenHitArea _handScreenHitArea;
     private List<int> _campScoreTokens;
     private bool _isCampVisible;
+    private bool _isHandScreenVisible;
     public CardType draggingCardType;
 
     public void CreatePlayer()
@@ -70,6 +72,10 @@ public class PlayerController : UserController<PlayerTableView>
             _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
         });
 
+        _handScreenHitArea = transform.GetChild(4).GetComponent<HandScreenHitArea>();
+        _handScreenHitArea.Init();
+        ToggleHandScreenHitarea(false);
+
         _allIconsOfPrimaryHoldersInOrder = new();
         _allIconsOfSecondaryHoldersInOrder = new();
         draggingCardType = CardType.None;
@@ -85,6 +91,7 @@ public class PlayerController : UserController<PlayerTableView>
         _handView.ToggleHand();
         _markerView.Fade(_tableView.isTableVisible);
         FadeTurnEndButton(_tableView.isTableVisible);
+        ToggleHandScreenHitarea(!_tableView.isTableVisible);
         StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new GameTaskItemData() { value = _tableView.isTableVisible });
     }
 
@@ -504,5 +511,21 @@ public class PlayerController : UserController<PlayerTableView>
     public void ResetMarkers()
     {
         _markerView.Reset();
+    }
+
+    public void ToggleHandScreenHitarea(bool value)
+    {
+        bool status = value && _handView.GetNumberOfCards() > 10;
+        _handScreenHitArea.Toggle(status);
+    }
+
+    public List<CardData> UpdateHandScreenButton(bool isToggled)
+    {
+        List<CardData> dataCollection = _handView.GetDataCollection();
+        _handScreenHitArea.transform.SetParent(isToggled ? transform.root : transform);
+        _handScreenHitArea.SetupHitAreaImage(dataCollection.Last());
+        _handScreenHitArea.ToggleHitAreaImage(isToggled);
+        _handView.gameObject.SetActive(!isToggled);
+        return isToggled ? dataCollection : null;
     }
 }

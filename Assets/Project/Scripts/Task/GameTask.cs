@@ -83,7 +83,7 @@ public class GameTask
     public void StartDelayMs(int duration)
     {
         State++;
-        _duration = +duration;
+        _duration = duration;
     }
 
     public void NextState(int state, int duration = 0)

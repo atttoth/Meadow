@@ -32,6 +32,7 @@ public class GameLogicManager : MonoBehaviour
             CampIconsSelectHandler,
             CampToggleHandler,
             CampScoreReceiveHandler,
+            TableHitAreaHoverOverHandler,
             CardPickHandler,
             CardMoveHandler,
             PendingCardPlaceHandler,
@@ -43,7 +44,8 @@ public class GameLogicManager : MonoBehaviour
             MarkerCancelHandler,
             MarkerActionSelectHandler,
             DeckSelectHandler,
-            ScoreCollectHandler
+            ScoreCollectHandler,
+            HandScreenHandler
         };
 
         _boardController.CreateBoard();
@@ -237,6 +239,21 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void HandScreenHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                bool isToggled = task.Data.value;
+                task.Data.dataCollection = _playerController.UpdateHandScreenButton(isToggled);
+                task.StartHandler(_overlayController.GetHandScreenToggleHandler(isToggled), task.Data);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private void TableToggleHandler(GameTask task)
     {
         switch(task.State)
@@ -314,12 +331,23 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void TableHitAreaHoverOverHandler(GameTask task)
+    {
+        HolderSubType subType = task.Data.subType;
+        if ((_playerController.draggingCardType == CardType.Ground && subType == HolderSubType.PRIMARY) || (_playerController.draggingCardType == CardType.Landscape && subType == HolderSubType.SECONDARY))
+        {
+            _playerController.UpdateActiveCardHolders(subType, task.Data.hitAreaTag);
+        }
+        task.Complete();
+    }
+
     private void CardPickHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
                 _boardController.ToggleRayCastOfCards(false);
+                _playerController.ToggleHandScreenHitarea(false);
                 _playerController.EnableTableView(false);
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (task.Data.holder == null) // card-pick from deck selection action
@@ -350,6 +378,7 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_boardController.BoardFillHandler, task.Data);
                 break;
             case 4:
+                _playerController.ToggleHandScreenHitarea(true);
                 _playerController.EnableTableView(true);
                 _boardController.ToggleRayCastOfCards(true);
                 if (_playerController.GetRemainingMarkers().Count > 0)

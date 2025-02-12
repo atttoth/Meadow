@@ -4,6 +4,7 @@ using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static GameTask;
 
 public class OverlayController : GameLogicEvent
 {
@@ -11,6 +12,7 @@ public class OverlayController : GameLogicEvent
     private MarkerActionScreen _markerActionScreen;
     private DeckSelectionScreen _deckSelectionScreen;
     private ScoreCollectionScreen _scoreCollectionScreen;
+    private CardsInHandScreen _cardsInHandScreen;
 
     public void CreateOverlay()
     {
@@ -36,6 +38,9 @@ public class OverlayController : GameLogicEvent
 
         _scoreCollectionScreen = transform.GetChild(3).GetComponent<ScoreCollectionScreen>();
         _scoreCollectionScreen.Init();
+
+        _cardsInHandScreen = transform.GetChild(4).GetComponent<CardsInHandScreen>();
+        _cardsInHandScreen.Init();
     }
 
     public void ToggleMarkerActionScreen(Marker marker)
@@ -181,5 +186,10 @@ public class OverlayController : GameLogicEvent
                 task.Complete();
                 break;
         }
+    }
+
+    public GameTaskHandler GetHandScreenToggleHandler(bool isToggled)
+    {
+        return isToggled ? _cardsInHandScreen.ShowScreenHandler : _cardsInHandScreen.HideScreenHandler;
     }
 }

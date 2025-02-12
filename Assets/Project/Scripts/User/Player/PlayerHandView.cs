@@ -17,6 +17,16 @@ public class PlayerHandView : MonoBehaviour
         _isHandDefault = true;
     }
 
+    public int GetNumberOfCards()
+    {
+        return _cards.Count;
+    }
+
+    public List<CardData> GetDataCollection()
+    {
+        return _cards.Select(card => card.Data).ToList();
+    }
+
     public void AddCardHandler(GameTask task)
     {
         switch(task.State)

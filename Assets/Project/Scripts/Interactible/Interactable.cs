@@ -8,6 +8,8 @@ public abstract class Interactable : GameLogicEvent, IPointerClickHandler, IPoin
     protected Image _mainImage; // to toggle raycast
     protected Transform _parent; // used at marker and card hierarchy positioning
 
+    public Image MainImage {  get { return _mainImage; } }
+
     public virtual void ToggleRayCast(bool value) { return; }
 
     public virtual void OnBeginDrag(PointerEventData eventData) { return; }

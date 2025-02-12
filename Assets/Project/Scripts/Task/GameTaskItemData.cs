@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
+
 public class GameTaskItemData
 {
     public int pendingCardDataID = -1; // only used at Pending card actions
@@ -18,6 +19,9 @@ public class GameTaskItemData
     public MarkerAction markerAction;
     public DeckType deckType;
     public List<Card> cards;
+    public List<CardData> dataCollection;
+    public HolderSubType subType;
+    public string hitAreaTag;
 
     public int score;
 
