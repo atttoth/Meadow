@@ -4,8 +4,16 @@ using System.Linq;
 public class PendingActionCreator
 {
     public delegate void PendingActionItem(GameTaskItemData data);
-    private Dictionary<int, PendingActionItem[]> _actionItemsCollection = new();
-    private Dictionary<int, GameTaskItemData> _dataCollection = new();
+    private readonly Dictionary<int, PendingActionItem[]> _actionItemsCollection;
+    private readonly Dictionary<int, GameTaskItemData> _dataCollection;
+    private readonly bool _canOnlyCancelLastAction;
+
+    public PendingActionCreator(bool canOnlyCancelLastAction)
+    {
+        _actionItemsCollection = new();
+        _dataCollection = new();
+        _canOnlyCancelLastAction = canOnlyCancelLastAction;
+    }
 
     public int GetNumOfActions()
     {
@@ -14,20 +22,26 @@ public class PendingActionCreator
 
     public void Create(PendingActionItem[] postActionItems, PendingActionItem[] prevActionItems, GameTaskItemData data)
     {
-        int ID = data.pendingCardDataID;
+        int ID = _canOnlyCancelLastAction ? _actionItemsCollection.Count : data.pendingActionID;
         _actionItemsCollection.Add(ID, prevActionItems);
         _dataCollection.Add(ID, data);
         postActionItems.ToList().ForEach(item => item(data));
     }
 
-    public void Cancel(GameTaskItemData data)
+    public bool TryCancel(GameTaskItemData data)
     {
-        int ID = data.pendingCardDataID;
+        if (_canOnlyCancelLastAction && _dataCollection.ToList().Last().Value.pendingActionID != data.pendingActionID) // check if cancelled action was the last action
+        {
+            return false;
+        }
+
+        int ID = _canOnlyCancelLastAction ? _actionItemsCollection.Count - 1 : data.pendingActionID;
         PendingActionItem[] prevActionItems = _actionItemsCollection[ID];
         GameTaskItemData actionData = _dataCollection[ID];
         _actionItemsCollection.Remove(ID);
         _dataCollection.Remove(ID);
         prevActionItems.ToList().ForEach(item => item(actionData));
+        return true;
     }
 
     public List<GameTaskItemData> GetDataCollection()

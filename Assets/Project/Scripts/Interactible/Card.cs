@@ -50,7 +50,6 @@ public enum CardStatus
     NONE,
     IN_HAND,
     PENDING_ON_TABLE,
-    STACKED_PENDING_ON_TABLE,
     USED
 }
 
@@ -152,7 +151,7 @@ public class Card : Interactable
         {
             if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
-                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { pendingCardDataID = Data.ID, card = this });
+                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { card = this });
             }
             else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus))
             {
@@ -228,7 +227,7 @@ public class Card : Interactable
             MoveCard(hoverOriginY, 0.2f);
         }
 
-        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE, CardStatus.STACKED_PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
+        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
         {
             HighlightCard(false);
         }

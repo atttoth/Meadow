@@ -31,7 +31,7 @@ public class PlayerController : UserController<PlayerTableView>
         _infoView.Init();
         _handView.Init();
         _markerView.Init();
-        _pendingActionCreator = new PendingActionCreator();
+        _pendingActionCreator = new PendingActionCreator(true);
 
         _tableToggleButton = _tableView.transform.GetChild(2).GetComponent<Button>();
         _tableApproveButton = _tableView.transform.GetChild(1).GetComponent<Button>();
@@ -374,16 +374,32 @@ public class PlayerController : UserController<PlayerTableView>
             _infoView.DecrementNumberOfCardPlacements
         };
         _tableView.UpdateApproveButton(true);
+        data.pendingActionID = data.card.Data.ID;
         _pendingActionCreator.Create(postActionItems, prevActionItems, data);
     }
 
-    public void CancelPendingCardPlacement(GameTaskItemData data)
+    public void CancelPendingCardPlacement(GameTask task)
     {
-        _pendingActionCreator.Cancel(data);
-        if (_pendingActionCreator.GetNumOfActions() == 0)
+        switch(task.State)
         {
-            _tableView.UpdateApproveButton(false);
-            _tableToggleButton.enabled = true;
+            case 0:
+                if (!_pendingActionCreator.TryCancel(task.Data))
+                {
+                    task.Complete();
+                    return;
+                }
+                _pendingActionCreator.GetDataCollection()?.ForEach(data => data.card.ToggleRayCast(false));
+                if (_pendingActionCreator.GetNumOfActions() == 0)
+                {
+                    _tableView.UpdateApproveButton(false);
+                    _tableToggleButton.enabled = true;
+                }
+                task.StartHandler(SnapCardHandler, task.Data);
+                break;
+            default:
+                _pendingActionCreator.GetDataCollection()?.ForEach(data => data.card.ToggleRayCast(true));
+                task.Complete();
+                break;
         }
     }
 

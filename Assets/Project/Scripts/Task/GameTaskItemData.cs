@@ -4,7 +4,7 @@ using UnityEngine.EventSystems;
 
 public class GameTaskItemData
 {
-    public int pendingCardDataID = -1; // only used at Pending card actions
+    public int pendingActionID = -1;
 
     public Card card;
     public Holder holder;

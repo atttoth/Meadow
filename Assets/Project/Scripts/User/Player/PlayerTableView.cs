@@ -489,14 +489,6 @@ public class PlayerTableView : TableView
         int contentSize = holder.GetContentListSize();
         card.canMove = false;
         card.cardStatus = CardStatus.PENDING_ON_TABLE;
-        if (contentSize > 1) // update card status below top card
-        {
-            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(contentSize - 2);
-            if (cardBelow.cardStatus == CardStatus.PENDING_ON_TABLE)
-            {
-                cardBelow.cardStatus = CardStatus.STACKED_PENDING_ON_TABLE;
-            }
-        }
     }
 
     public void StackCardRewind(GameTaskItemData data)
@@ -507,14 +499,6 @@ public class PlayerTableView : TableView
         int contentSize = holder.GetContentListSize();
         card.canMove = true;
         card.cardStatus = CardStatus.IN_HAND;
-        if (contentSize > 0) // update card status below top card
-        {
-            Card cardBelow = (Card)holder.GetItemFromContentListByIndex(contentSize - 1);
-            if (cardBelow.cardStatus == CardStatus.STACKED_PENDING_ON_TABLE)
-            {
-                cardBelow.cardStatus = CardStatus.PENDING_ON_TABLE;
-            }
-        }
     }
 
     public void PositionTableCard(Card card, int contentCount, float speed, bool isPlacement, float lastPosX)

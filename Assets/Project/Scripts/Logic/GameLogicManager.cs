@@ -456,7 +456,6 @@ public class GameLogicManager : MonoBehaviour
                     if (holder && _playerController.CanCardBePlaced(holder, card))
                     {
                         task.Data.raycastResults = null;
-                        task.Data.pendingCardDataID = card.Data.ID;
                         task.Data.holder = holder;
                         _playerController.CreatePendingCardPlacement(task.Data);
                         break;
@@ -495,8 +494,8 @@ public class GameLogicManager : MonoBehaviour
             case 0:
                 task.Data.card.ToggleRayCast(false);
                 task.Data.value = false;
-                task.StartHandler(_playerController.SnapCardHandler, task.Data);
-                _playerController.CancelPendingCardPlacement(task.Data);
+                task.Data.pendingActionID = task.Data.card.Data.ID;
+                task.StartHandler(_playerController.CancelPendingCardPlacement, task.Data);
                 break;
             default:
                 task.Data.card.ToggleRayCast(true);
