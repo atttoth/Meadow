@@ -47,6 +47,9 @@ MonoBehaviour:
   cardDataJson: {fileID: 4900000, guid: aa5b2f5fe717cc14e8691dc879f4f2c4, type: 3}
   deckPrefab: {fileID: 507146776534277429, guid: 5c7562ab37821bd4dadba068928a28a2, type: 3}
   cardPrefab: {fileID: 6090333228907795711, guid: 3cf8631f39959c3498134d201016f7eb, type: 3}
+  topIconsHolderPrefab: {fileID: 1344820618171853396, guid: 19a93bcf1fadf204d9fd833fa70e2e9e, type: 3}
+  requiredIconsHolderPrefab: {fileID: 7916160077716389213, guid: ecf1bec5c236a384ea73e4c53f7bd937, type: 3}
+  cardIconItemPrefab: {fileID: 5728147989031318804, guid: 6f0c5672f99fade42aa8f3ba379eac72, type: 3}
   boardCardHolderPrefab: {fileID: 911632800280658922, guid: efafd4edac6ba354a8cf691d34f5f2e3, type: 3}
   tablePrimaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 9694b7a706bfb354c96111d34fa4acba, type: 3}
   tableSecondaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 7bb290dc78c988045b20bbdf14a062ba, type: 3}

@@ -31,6 +31,9 @@ public class GameAssets : MonoBehaviour
 
     public Transform deckPrefab;
     public Transform cardPrefab;
+    public Transform topIconsHolderPrefab;
+    public Transform requiredIconsHolderPrefab;
+    public Transform cardIconItemPrefab;
     public Transform boardCardHolderPrefab;
     public Transform tablePrimaryCardHolderPrefab;
     public Transform tableSecondaryCardHolderPrefab;

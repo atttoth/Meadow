@@ -259,11 +259,11 @@ public class GameLogicManager : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                bool value = task.Data.value;
-                _boardController.ToggleRayCastOfCards(!value);
-                _boardController.ToggleRayCastOfMarkerHolders(!value);
+                bool value = !task.Data.value;
+                _boardController.ToggleRayCastOfCards(value);
+                _boardController.ToggleRayCastOfMarkerHolders(value);
                 _boardController.Fade(value);
-                _campController.ToggleRayCastOfMarkerHolders(!value);
+                _campController.ToggleRayCastOfMarkerHolders(value);
                 _campController.Fade(value);
                 task.StartDelayMs(0);
                 break;
@@ -352,7 +352,7 @@ public class GameLogicManager : MonoBehaviour
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (task.Data.holder == null) // card-pick from deck selection action
                 {
-                    task.Data.cards = _boardController.GetUnselectedTopCardsOfDeck(task.Data.card.ID);
+                    task.Data.cards = _boardController.GetUnselectedTopCardsOfDeck(task.Data.card.Data.ID);
                     task.StartHandler(_overlayController.HideCardSelectionHandler, task.Data);
                 }
                 else

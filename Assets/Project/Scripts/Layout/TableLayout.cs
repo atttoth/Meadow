@@ -64,7 +64,7 @@ public class TableLayout
         return new(posX, posY);
     }
 
-    public float[] GetPrimaryCardHolderLayout(int numOfHolders)
+    public float[] GetPrimaryCardHolderPositions(int numOfHolders)
     {
         float totalWidth = (_primaryHolderWidth * (numOfHolders - 1)) + (_X_GAP_BETWEEN_HOLDERS * (numOfHolders - 1));
         float startingPosX = totalWidth * -0.5f;

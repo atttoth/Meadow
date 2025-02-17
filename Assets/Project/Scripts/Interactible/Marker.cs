@@ -22,6 +22,7 @@ public enum MarkerAction
 
 public class Marker : Interactable
 {
+    public int ID;
     public int numberOnMarker;
     public MarkerAction action;
     public TextMeshProUGUI numberOnMarkerText;

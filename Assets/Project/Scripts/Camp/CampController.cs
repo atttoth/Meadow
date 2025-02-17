@@ -140,7 +140,7 @@ public class CampController : GameLogicEvent
     public void Fade(bool value)
     {
         float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
-        float targetValue = value ? 0f : 1f;
+        float targetValue = value ? 1f : 0f;
         DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
     }
 }

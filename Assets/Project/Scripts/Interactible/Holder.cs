@@ -6,7 +6,8 @@ public enum HolderType
     BoardCard,
     TableCard,
     BoardMarker,
-    CampMarker
+    CampMarker,
+    CardIcon
 }
 
 public class Holder : MonoBehaviour

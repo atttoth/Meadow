@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Linq;
 
 public enum CardType
 {
@@ -64,20 +65,22 @@ public class Card : Interactable
     public float hoverTargetY;
 
     private CardData _data;
+    private CardIconItemsView _iconItemsView;
     private Sprite _cardFront;
     private Sprite _cardBack;
     private Sequence _hoverSequence;
     private Sequence _zoomSequence;
     private bool _canInspect;
     
-    // reset card position on cancelled card placement
+    // to reset card position on invalid placement
     private int _siblingIndexInParent;
     private Vector2 _prevPosition;
 
     public void Init(CardData data, Sprite cardFront, Sprite cardBack)
     {
-        ID = data.ID;
         _data = data;
+        _iconItemsView = transform.GetChild(1).GetComponent<CardIconItemsView>();
+        _iconItemsView.Init(data);
         hoverOriginY = -55f;
         hoverTargetY = 100f;
         cardStatus = CardStatus.NONE;
@@ -194,6 +197,11 @@ public class Card : Interactable
     {
         _mainImage.raycastTarget = value;
         highlightFrame.raycastTarget = value;
+    }
+
+    public void ToggleIcons(bool value)
+    {
+        _iconItemsView.Toggle(value);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
@@ -313,10 +321,10 @@ public class Card : Interactable
         });
     }
 
-    public void FlipDeckCard(bool isReset = false)
+    public void FlipDeckCard(bool value)
     {
         float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
-        Sprite sprite = isReset ? _cardBack : _cardFront;
+        Sprite sprite = value ? _cardFront : _cardBack;
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = sprite));
         cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);

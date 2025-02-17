@@ -543,7 +543,7 @@ public class PlayerTableView : TableView
         if(_activePrimaryCardHolders.Count > 0)
         {
             float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableHolderCenteringSpeed;
-            float[] positions = _tableLayout.GetPrimaryCardHolderLayout(_activePrimaryCardHolders.Count);
+            float[] positions = _tableLayout.GetPrimaryCardHolderPositions(_activePrimaryCardHolders.Count);
             for (int i = 0; i < positions.Length; i++)
             {
                 Transform holderTransform = _activePrimaryCardHolders[i].transform;

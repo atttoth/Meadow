@@ -1,6 +1,7 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
@@ -101,6 +102,8 @@ public class BoardController : MonoBehaviour
         {
             case 0:
                 SaveTargetHoldersAndCards(task.Data.deckType);
+                task.Data.cards = new();
+                task.Data.cards.AddRange(_cardsToDraw);
                 task.StartDelayMs(0);
                 break;
             case 1:
@@ -122,6 +125,10 @@ public class BoardController : MonoBehaviour
                     }
                 }
                 task.StartDelayMs(duration);
+                break;
+                case 2:
+                task.Data.cards.ForEach(card => card.ToggleIcons(true));
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -290,7 +297,7 @@ public class BoardController : MonoBehaviour
     {
         List<Card> topCards = _deckController.TopCards;
         topCards.ForEach(card => card.ToggleSelection(false));
-        List<Card> unselectedTopCards = topCards.Where(card => card.ID != cardID).ToList();
+        List<Card> unselectedTopCards = topCards.Where(card => card.Data.ID != cardID).ToList();
         _deckController.TopCards = unselectedTopCards;
         return unselectedTopCards;
     }
@@ -314,7 +321,7 @@ public class BoardController : MonoBehaviour
     public void Fade(bool value)
     {
         float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
-        float targetValue = value ? 0f : 1f;
+        float targetValue = value ? 1f : 0f;
         DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
         _cardHolders.Select(e => e.Value).ToList().ForEach(holders =>
         {
@@ -323,6 +330,7 @@ public class BoardController : MonoBehaviour
                 if (!holder.IsEmpty())
                 {
                     Card card = (Card)holder.GetItemFromContentListByIndex(0);
+                    card.ToggleIcons(value);
                     DOTween.Sequence().Append(card.GetComponent<Image>().DOFade(targetValue, fadeDuration));
                 }
             });
