@@ -412,7 +412,7 @@ public class GameLogicManager : MonoBehaviour
                     _boardController.ToggleRayCastOfMarkerHolders(false);
                     _campController.ToggleRayCastOfMarkerHolders(false);
                 }
-                task.StartHandler(_overlayController.ShowCardInspectionScreenHandler, task.Data);
+                task.StartHandler(_overlayController.GetCardInspectionScreenHandler(true), task.Data);
                 break;
             default:
                 task.Complete();
@@ -425,7 +425,7 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.StartHandler(_overlayController.HideCardInspectionScreenHandler);
+                task.StartHandler(_overlayController.GetCardInspectionScreenHandler(false));
                 break;
             default:
                 if(!_playerController.TableView.isTableVisible)

@@ -80,7 +80,7 @@ public class Card : Interactable
     {
         _data = data;
         _iconItemsView = transform.GetChild(1).GetComponent<CardIconItemsView>();
-        _iconItemsView.Init(data);
+        InitIconItemsView(data);
         hoverOriginY = -55f;
         hoverTargetY = 100f;
         cardStatus = CardStatus.NONE;
@@ -92,6 +92,14 @@ public class Card : Interactable
         highlightFrame.color = Color.green;
         highlightFrame.gameObject.SetActive(false);
         gameObject.SetActive(false);
+    }
+
+    public void InitIconItemsView(CardData data)
+    {
+        if(data != null)
+        {
+            _iconItemsView.Init(data);
+        }
     }
 
     public CardData Data { get { return _data; } }
@@ -202,6 +210,11 @@ public class Card : Interactable
     public void ToggleIcons(bool value)
     {
         _iconItemsView.Toggle(value);
+    }
+
+    public void ToggleIconsRaycast(bool value)
+    {
+        _iconItemsView.ToggleRaycast(value);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)

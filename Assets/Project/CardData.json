@@ -476,7 +476,7 @@
       "deckType": 0,
       "cardType": 1,
       "requirements": [16],
-      "optionalRequirements": [12, 13],
+      "optionalRequirements": [],
       "adjacentRequirements":[12, 13],
       "icons": [13],
       "score": 3

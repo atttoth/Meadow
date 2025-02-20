@@ -48,36 +48,6 @@ public class OverlayController : GameLogicEvent
         _markerActionScreen.ToggleScreen(marker);
     }
 
-    public void ShowCardInspectionScreenHandler(GameTask task)
-    {
-        switch(task.State)
-        {
-            case 0:
-                int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardInspectionFlipDuration * 1000);
-                _cardInspectionScreen.ShowCard(task.Data.card);
-                task.StartDelayMs(duration);
-                break;
-            default:
-                _cardInspectionScreen.ToggleScreenButton(true);
-                task.Complete();
-                break;
-        }
-    }
-
-    public void HideCardInspectionScreenHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                _cardInspectionScreen.HideCard();
-                task.StartDelayMs(0);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
     public void ShowDeckSelectionScreenHandler(GameTask task)
     {
         switch (task.State)
@@ -186,6 +156,11 @@ public class OverlayController : GameLogicEvent
                 task.Complete();
                 break;
         }
+    }
+
+    public GameTaskHandler GetCardInspectionScreenHandler(bool isShow)
+    {
+        return isShow ? _cardInspectionScreen.ShowCardHandler : _cardInspectionScreen.HideCardHandler;
     }
 
     public GameTaskHandler GetHandScreenToggleHandler(bool isToggled)

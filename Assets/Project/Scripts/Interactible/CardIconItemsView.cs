@@ -14,9 +14,20 @@ public class CardIconItemsView : MonoBehaviour
     
     public void Init(CardData data)
     {
-        _iconItemsLayout = new CardIconItemsLayout();
-        _topIconItemsHolder = Instantiate(GameAssets.Instance.topIconsHolderPrefab, transform).GetComponent<Holder>();
+        if(_iconItemsLayout == null)
+        {
+            _iconItemsLayout = new CardIconItemsLayout();
+            _topIconItemsHolder = Instantiate(GameAssets.Instance.topIconsHolderPrefab, transform).GetComponent<Holder>();
+            _requiredIconItemsHolder = Instantiate(GameAssets.Instance.requiredIconsHolderPrefab, transform).GetComponent<Holder>();
+        }
+        else // delete icons from prev initialization
+        {
+            _topIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
+            _requiredIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
+        }
         _topIconItemsHolder.Init(-1, HolderType.CardIcon);
+        _requiredIconItemsHolder.Init(-1, HolderType.CardIcon);
+
         data.icons.ToList().ForEach(icon =>
         {
             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
@@ -24,7 +35,8 @@ public class CardIconItemsView : MonoBehaviour
             _topIconItemsHolder.AddToContentList(item);
         });
 
-        List<Interactable> topIconItems = _topIconItemsHolder.GetAllContent();
+        List<Interactable> topIconItems = new();
+        topIconItems.AddRange(_topIconItemsHolder.GetAllContent());
         if (data.cardType == CardType.Ground) // ground icons are positioned to the bottom
         {
             List<CardIconItem> groundIconItems = new();
@@ -55,12 +67,9 @@ public class CardIconItemsView : MonoBehaviour
             RectTransform rect = item.GetComponent<RectTransform>();
             rect.anchoredPosition = topIconPositions[i];
         }
-
+        
         if (data.cardType != CardType.Ground)
         {
-            _requiredIconItemsHolder = Instantiate(GameAssets.Instance.requiredIconsHolderPrefab, transform).GetComponent<Holder>();
-            _requiredIconItemsHolder.Init(-1, HolderType.CardIcon);
-
             if (data.requirements.Length > 0)
             {
                 if(data.requirements.Contains(CardIcon.AllMatching))
@@ -147,7 +156,7 @@ public class CardIconItemsView : MonoBehaviour
             item.ToggleRayCast(value);
         }
 
-        if(_requiredIconItemsHolder != null)
+        if(!_requiredIconItemsHolder.IsEmpty())
         {
             List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
             for (int i = 0; i < requiredIconItems.Count; i++)
@@ -160,6 +169,31 @@ public class CardIconItemsView : MonoBehaviour
 
     public void Toggle(bool value)
     {
+        if(value)
+        {
+            Rotate();
+        }
         gameObject.SetActive(value);
+    }
+
+    public void Rotate()
+    {
+        Vector3 rotation = new(0f, 0f, 0f);
+        List<Interactable> topIconItems = _topIconItemsHolder.GetAllContent();
+        for (int i = 0; i < topIconItems.Count; i++)
+        {
+            CardIconItem item = (CardIconItem)topIconItems[i];
+            item.transform.eulerAngles = rotation;
+        }
+
+        if (!_requiredIconItemsHolder.IsEmpty())
+        {
+            List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+            for (int i = 0; i < requiredIconItems.Count; i++)
+            {
+                CardIconItem item = (CardIconItem)requiredIconItems[i];
+                item.transform.eulerAngles = rotation;
+            }
+        }
     }
 }
