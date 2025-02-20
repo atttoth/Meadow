@@ -186,7 +186,8 @@ public class GameLogicManager : MonoBehaviour
                         break;
                     case MarkerAction.PICK_A_CARD_FROM_CHOSEN_DECK:
                         task.Data.deckType = GetActiveDeckType();
-                        task.StartHandler(_overlayController.ShowDeckSelectionScreenHandler, task.Data);
+                        task.Data.value = true;
+                        task.StartHandler(_overlayController.GetToggleDeckSelectionScreenHandler(), task.Data);
                         break;
                     default:
                         task.StartHandler(_playerController.AddExtraCardPlacementHandler);
@@ -213,11 +214,11 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.StartHandler(_overlayController.HideDeckSelectionScreenHandler, task.Data);
+                task.StartHandler(_overlayController.GetToggleDeckSelectionScreenHandler(), task.Data);
                 break;
             case 1:
                 task.Data.cards = _boardController.GetTopCardsOfDeck(task.Data.deckType);
-                task.StartHandler(_overlayController.ShowCardSelectionHandler, task.Data);
+                task.StartHandler(_overlayController.GetCardSelectionToggleHandler(true), task.Data);
                 break;
             default:
                 task.Complete();
@@ -353,7 +354,7 @@ public class GameLogicManager : MonoBehaviour
                 if (task.Data.holder == null) // card-pick from deck selection action
                 {
                     task.Data.cards = _boardController.GetUnselectedTopCardsOfDeck(task.Data.card.Data.ID);
-                    task.StartHandler(_overlayController.HideCardSelectionHandler, task.Data);
+                    task.StartHandler(_overlayController.GetCardSelectionToggleHandler(false), task.Data);
                 }
                 else
                 {
@@ -473,7 +474,6 @@ public class GameLogicManager : MonoBehaviour
                 }
                 else
                 {
-                    task.Data.value = true;
                     task.StartHandler(_playerController.SnapCardHandler, task.Data);
                 }
                 _playerController.draggingCardType = CardType.None;

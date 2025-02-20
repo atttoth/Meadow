@@ -445,12 +445,12 @@ public class PlayerTableView : TableView
     {
         float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableViewOpenSpeed;
         isTableVisible = !isTableVisible;
-        float target = _tableLayout.GetTargetTableViewPosY(isTableVisible);
+        float posY = _tableLayout.GetTargetTableViewPosY(isTableVisible);
         if(isTableVisible)
         {
             _primaryTableContentScroll.verticalNormalizedPosition = 0f;
         }
-        transform.DOMoveY(target, speed).SetEase(Ease.InOutExpo);
+        transform.DOMoveY(posY, speed).SetEase(Ease.InOutExpo);
     }
 
     public void UpdateApproveButton(bool isPendingAction)
@@ -481,42 +481,28 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void StackCard(GameTaskItemData data)
+    public void RegisterCardPlacement(GameTaskItemData data)
     {
         Card card = data.card;
         CardHolder holder = (CardHolder)data.holder;
         holder.AddToContentList(card);
-        int contentSize = holder.GetContentListSize();
         card.canMove = false;
         card.cardStatus = CardStatus.PENDING_ON_TABLE;
     }
 
-    public void StackCardRewind(GameTaskItemData data)
+    public void RegisterCardPlacementRewind(GameTaskItemData data)
     {
         Card card = data.card;
         CardHolder holder = (CardHolder)data.holder;
         holder.RemoveItemFromContentList(card);
-        int contentSize = holder.GetContentListSize();
         card.canMove = true;
         card.cardStatus = CardStatus.IN_HAND;
     }
 
-    public void PositionTableCard(Card card, int contentCount, float speed, bool isPlacement, float lastPosX)
+    public void PositionTableCard(Card card, int contentCount, float speed, float lastPosX)
     {
-        RectTransform rect = card.GetComponent<RectTransform>();
-        Vector2 targetPos = _tableLayout.GetCardTargetPosition(card, contentCount, isPlacement, lastPosX);
-        if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType))
-        {
-            float rotation = isPlacement ? 90f : 0f;
-            DOTween.Sequence()
-                .Append(rect.DOAnchorPos(targetPos, speed))
-                .Join(rect.DORotate(new(0f, 0f, rotation), speed))
-                .SetEase(Ease.InOutSine);
-        }
-        else
-        {
-            DOTween.Sequence().Append(rect.DOAnchorPos(targetPos, speed)).SetEase(Ease.InOutSine);
-        }
+        Vector2 position = _tableLayout.GetCardTargetPosition(card, contentCount, lastPosX);
+        card.PositionCardOnTable(position, speed);
     }
 
     public void RemoveEmptyHolder(HolderSubType holderSubType)

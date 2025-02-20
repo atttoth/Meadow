@@ -212,9 +212,15 @@ public class Card : Interactable
         _iconItemsView.Toggle(value);
     }
 
+    public Vector3 GetScorePosition()
+    {
+        _iconItemsView.ToggleScoreItem(false);
+        return _iconItemsView.GetScoreItemPosition();
+    }
+
     public void ToggleIconsRaycast(bool value)
     {
-        _iconItemsView.ToggleRaycast(value);
+        _iconItemsView.ToggleRequiredIconsRaycast(value);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
@@ -349,5 +355,24 @@ public class Card : Interactable
         float duration = canMove ? 0.2f : 0.4f;
         Ease ease = isRapid ? Ease.InOutBack : canMove ? Ease.Linear : Ease.InOutQuad;
         DOTween.Sequence().Append(transform.DOLocalMoveX(posX, duration).SetEase(ease));
+    }
+
+    public void PositionCardOnTable(Vector3 position, float speed)
+    {
+        RectTransform rect = GetComponent<RectTransform>();
+        if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == Data.cardType))
+        {
+            bool isPlacement = cardStatus == CardStatus.PENDING_ON_TABLE;
+            Vector3 rotation = new(0f, 0f, isPlacement ? 90f : 0f);
+            _iconItemsView.Rotate(isPlacement ? -90f : 90f);
+            DOTween.Sequence()
+                .Append(rect.DOAnchorPos(position, speed))
+                .Join(rect.DORotate(rotation, speed))
+                .SetEase(Ease.InOutSine);
+        }
+        else
+        {
+            DOTween.Sequence().Append(rect.DOAnchorPos(position, speed)).SetEase(Ease.InOutSine);
+        }
     }
 }

@@ -48,60 +48,6 @@ public class OverlayController : GameLogicEvent
         _markerActionScreen.ToggleScreen(marker);
     }
 
-    public void ShowDeckSelectionScreenHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                _deckSelectionScreen.ToggleDeckSelectionScreen(true, task.Data.deckType);
-                task.StartDelayMs(0);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
-    public void HideDeckSelectionScreenHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                _deckSelectionScreen.ToggleDeckSelectionScreen(false, task.Data.deckType);
-                task.StartDelayMs(0);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
-    public void ShowCardSelectionHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                task.StartHandler(_deckSelectionScreen.ShowCardSelectionHandler, task.Data);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
-    public void HideCardSelectionHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                task.StartHandler(_deckSelectionScreen.HideCardSelectionHandler, task.Data);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
     public void CollectCardScoreHandler(GameTask task)
     {
         switch (task.State)
@@ -118,7 +64,7 @@ public class OverlayController : GameLogicEvent
                     Card card = cards.First();
                     cards.RemoveAt(0);
                     Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
-                    scoreTextPrefab.SetPositionAndRotation(card.GetComponent<Transform>().position, Quaternion.identity);
+                    scoreTextPrefab.SetPositionAndRotation(card.GetScorePosition(), Quaternion.identity);
                     scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.Data.score.ToString();
                     DOTween.Sequence().Append(scoreTextPrefab.DOMove(task.Data.targetTransform.position, speed).SetEase(Ease.InOutQuart).SetDelay(delay)).OnComplete(() =>
                     {
@@ -156,6 +102,16 @@ public class OverlayController : GameLogicEvent
                 task.Complete();
                 break;
         }
+    }
+
+    public GameTaskHandler GetToggleDeckSelectionScreenHandler()
+    {
+        return _deckSelectionScreen.ToggleDeckSelectionScreenHandler;
+    }
+
+    public GameTaskHandler GetCardSelectionToggleHandler(bool isShow)
+    {
+        return isShow ? _deckSelectionScreen.ShowCardSelectionHandler : _deckSelectionScreen.HideCardSelectionHandler;
     }
 
     public GameTaskHandler GetCardInspectionScreenHandler(bool isShow)

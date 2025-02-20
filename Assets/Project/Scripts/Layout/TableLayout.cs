@@ -37,9 +37,9 @@ public class TableLayout
         return new Vector2(transform.sizeDelta.x, transform.sizeDelta.y + (_Y_GAP_BETWEEN_STACKED_CARDS * modifier));
     }
 
-    public Vector2 GetCardTargetPosition(Card card, int contentCount, bool isPlacement, float lastPosX)
+    public Vector2 GetCardTargetPosition(Card card, int contentCount, float lastPosX)
     {
-        if (isPlacement)
+        if (card.cardStatus == CardStatus.PENDING_ON_TABLE)
         {
             float startingPosY = Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType) ? 70f : 105f;
             float posY = contentCount < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * contentCount;

@@ -29,4 +29,11 @@ public class CardIconItemsLayout
         }
         return positions;
     }
+
+    public Vector2 GetScoreItemPosition()
+    {
+        float posX = -45f;
+        float posY = -80f;
+        return new(posX, posY);
+    }
 }

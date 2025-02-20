@@ -38,29 +38,39 @@ public class DeckSelectionScreen : MonoBehaviour
         }
     }
 
-    public void ToggleDeckSelectionScreen(bool value, DeckType deckType)
+    public void ToggleDeckSelectionScreenHandler(GameTask task)
     {
-        if (value)
+        switch(task.State)
         {
-            _blackOverlay.enabled = true;
-            List<float> positions = new() { -300f, 0f, 300f };
-            DeckType[] currentTypes = new DeckType[3] { DeckType.West, DeckType.East, deckType };
-            _deckItems
-                .Where(item => Array.Exists(currentTypes, type => type == (DeckType)item.type))
-                .ToList()
-                .ForEach(item =>
+            case 0:
+                DeckType deckType = task.Data.deckType;
+                if (task.Data.value)
                 {
-                    item.button.enabled = true;
-                    item.GetComponent<RectTransform>().anchoredPosition = new(positions.First(), 300f);
-                    positions.RemoveAt(0);
-                    item.gameObject.SetActive(true);
-                });
-        }
-        else
-        {
-            _deckItems.Where(item => (DeckType)item.type != deckType).ToList().ForEach(item => item.gameObject.SetActive(false));
-            _deckItems.Find(item => (DeckType)item.type == deckType).button.enabled = false;
-            _selectText.enabled = false;
+                    _blackOverlay.enabled = true;
+                    List<float> positions = new() { -300f, 0f, 300f };
+                    DeckType[] currentTypes = new DeckType[3] { DeckType.West, DeckType.East, deckType };
+                    _deckItems
+                        .Where(item => Array.Exists(currentTypes, type => type == (DeckType)item.type))
+                        .ToList()
+                        .ForEach(item =>
+                        {
+                            item.button.enabled = true;
+                            item.GetComponent<RectTransform>().anchoredPosition = new(positions.First(), 300f);
+                            positions.RemoveAt(0);
+                            item.gameObject.SetActive(true);
+                        });
+                }
+                else
+                {
+                    _deckItems.Where(item => (DeckType)item.type != deckType).ToList().ForEach(item => item.gameObject.SetActive(false));
+                    _deckItems.Find(item => (DeckType)item.type == deckType).button.enabled = false;
+                    _selectText.enabled = false;
+                }
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
         }
     }
 

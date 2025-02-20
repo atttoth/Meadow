@@ -358,7 +358,7 @@ public class PlayerController : UserController<PlayerTableView>
         PendingActionItem[] postActionItems = new PendingActionItem[] {
             _infoView.IncrementNumberOfCardPlacements,
             _handView.RemoveCardFromHand,
-            _tableView.StackCard,
+            _tableView.RegisterCardPlacement,
             _tableView.ExpandHolderVertically,
             _tableView.UpdateHitAreaSize,
             CreateEntryForCurrentIcons,
@@ -368,7 +368,7 @@ public class PlayerController : UserController<PlayerTableView>
             UpdateCurrentIconsOfHolderRewind,
             _tableView.UpdateHitAreaSizeRewind,
             _tableView.ExpandHolderVerticallyRewind,
-            _tableView.StackCardRewind,
+            _tableView.RegisterCardPlacementRewind,
             CreateEntryForCurrentIconsRewind,
             _handView.RemoveCardFromHandRewind,
             _infoView.DecrementNumberOfCardPlacements
@@ -411,7 +411,7 @@ public class PlayerController : UserController<PlayerTableView>
                 Card card = task.Data.card;
                 CardHolder holder = (CardHolder)task.Data.holder;
                 float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardPlacementSpeed;
-                bool isPlacement = task.Data.value;
+                bool isPlacement = card.cardStatus == CardStatus.PENDING_ON_TABLE;
                 int contentCount = isPlacement ? holder.GetContentListSize() - 1 : -1;
                 float[] positions = _handView.GetLayoutPositions();
                 float lastPosX = positions.Length > 0 ? positions[^1] : 0f;
@@ -420,7 +420,7 @@ public class PlayerController : UserController<PlayerTableView>
                 {
                     card.transform.SetParent(_handView.transform);
                 }
-                _tableView.PositionTableCard(card, contentCount, speed, isPlacement, lastPosX);
+                _tableView.PositionTableCard(card, contentCount, speed, lastPosX);
                 task.StartDelayMs((int)(speed * 1000));
                 break;
             default:

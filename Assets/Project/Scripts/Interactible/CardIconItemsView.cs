@@ -11,7 +11,13 @@ public class CardIconItemsView : MonoBehaviour
     private CardIconItemsLayout _iconItemsLayout;
     private Holder _topIconItemsHolder;
     private Holder _requiredIconItemsHolder;
-    
+    private CardIconItem _scoreItem;
+
+    public Vector3 GetScoreItemPosition()
+    {
+        return _scoreItem.transform.position;
+    }
+
     public void Init(CardData data)
     {
         if(_iconItemsLayout == null)
@@ -32,6 +38,7 @@ public class CardIconItemsView : MonoBehaviour
         {
             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
             item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, TOP_ICON_DIMENSION);
+            item.ToggleRayCast(false);
             _topIconItemsHolder.AddToContentList(item);
         });
 
@@ -142,28 +149,25 @@ public class CardIconItemsView : MonoBehaviour
                 RectTransform rect = item.GetComponent<RectTransform>();
                 rect.anchoredPosition = requiredIconPositions[i];
             }
+
+            if(data.score > 0)
+            {
+                _scoreItem = Instantiate(GameAssets.Instance.cardIconItemPrefab, transform).GetComponent<CardIconItem>();
+                _scoreItem.Create(null, IconItemType.SCORE, TOP_ICON_DIMENSION, data.score);
+                _scoreItem.ToggleRayCast(false);
+                _scoreItem.GetComponent<RectTransform>().anchoredPosition = _iconItemsLayout.GetScoreItemPosition();
+            }
         }
-        ToggleRaycast(false);
         Toggle(false);
     }
 
-    public void ToggleRaycast(bool value)
+    public void ToggleRequiredIconsRaycast(bool value)
     {
-        List<Interactable> topIconItems = _topIconItemsHolder.GetAllContent();
-        for(int i = 0; i < topIconItems.Count; i++)
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        for (int i = 0; i < requiredIconItems.Count; i++)
         {
-            CardIconItem item = (CardIconItem)topIconItems[i];
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
             item.ToggleRayCast(value);
-        }
-
-        if(!_requiredIconItemsHolder.IsEmpty())
-        {
-            List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
-            for (int i = 0; i < requiredIconItems.Count; i++)
-            {
-                CardIconItem item = (CardIconItem)requiredIconItems[i];
-                item.ToggleRayCast(value);
-            }
         }
     }
 
@@ -176,14 +180,19 @@ public class CardIconItemsView : MonoBehaviour
         gameObject.SetActive(value);
     }
 
-    public void Rotate()
+    public void ToggleScoreItem(bool value)
     {
-        Vector3 rotation = new(0f, 0f, 0f);
+        _scoreItem.gameObject.SetActive(value);
+    }
+
+    public void Rotate(float target = 0f)
+    {
+        Vector3 rotation = new(0f, 0f, target);
         List<Interactable> topIconItems = _topIconItemsHolder.GetAllContent();
         for (int i = 0; i < topIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)topIconItems[i];
-            item.transform.eulerAngles = rotation;
+            item.GetComponent<RectTransform>().eulerAngles = rotation;
         }
 
         if (!_requiredIconItemsHolder.IsEmpty())
@@ -192,8 +201,13 @@ public class CardIconItemsView : MonoBehaviour
             for (int i = 0; i < requiredIconItems.Count; i++)
             {
                 CardIconItem item = (CardIconItem)requiredIconItems[i];
-                item.transform.eulerAngles = rotation;
+                item.GetComponent<RectTransform>().eulerAngles = rotation;
             }
+        }
+
+        if(_scoreItem != null)
+        {
+            _scoreItem.GetComponent<RectTransform>().eulerAngles = rotation;
         }
     }
 }
