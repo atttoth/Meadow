@@ -6,6 +6,7 @@ public abstract class UserController<T> : GameLogicEvent where T : TableView
 {
     protected T _tableView;
     protected InfoView _infoView;
+    protected IconDisplayView _iconDisplayView;
     protected Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
     protected Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
 

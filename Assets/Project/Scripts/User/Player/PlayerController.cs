@@ -24,10 +24,12 @@ public class PlayerController : UserController<PlayerTableView>
     public void CreatePlayer()
     {
         _tableView = transform.GetChild(1).GetComponent<PlayerTableView>();
+        _iconDisplayView = transform.GetChild(1).GetChild(2).GetChild(0).GetComponent<IconDisplayView>();
         _infoView = _tableView.transform.GetChild(3).GetComponent<InfoView>();
         _handView = transform.GetChild(2).GetComponent<PlayerHandView>();
         _markerView = transform.GetChild(3).GetComponent<PlayerMarkerView>();
         _tableView.Init();
+        _iconDisplayView.Init();
         _infoView.Init();
         _handView.Init();
         _markerView.Init();
@@ -55,7 +57,10 @@ public class PlayerController : UserController<PlayerTableView>
             {
                 _tableApproveButton.enabled = false;
                 _tableView.UpdateApproveButton(false);
-                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, null);
+                GameTaskItemData data = new GameTaskItemData();
+                data.cards = GetPlacedCardsWithScore();
+                data.targetTransform = GetScoreTransform();
+                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, data);
             }
             else
             {
@@ -434,7 +439,7 @@ public class PlayerController : UserController<PlayerTableView>
         return _infoView.scoreTransform;
     }
 
-    public List<Card> GetPlacedCardsWithScore()
+    private List<Card> GetPlacedCardsWithScore()
     {
         List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
         List<Card> primaryTableCards = dataCollection
@@ -456,42 +461,35 @@ public class PlayerController : UserController<PlayerTableView>
     {
         _infoView.RegisterScore(score);
     }
-        
+
     public void UpdateDisplayIconsHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                List<Card> allPlacedCards = _pendingActionCreator.GetDataCollection()
-                    .Select(data => data.card)
-                    .Where(card => card.cardStatus == CardStatus.PENDING_ON_TABLE)
-                    .ToList();
+                List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
+                List<Card> primaryTableCards = new();
+                for(int i = 0; i < dataCollection.Count; i++)
+                {
+                    Card card = dataCollection[i].card;
+                    CardHolder holder = (CardHolder)dataCollection[i].holder;
+                    if(holder.holderSubType == HolderSubType.PRIMARY && holder.IsTopCardOfHolder(card)) // filter top cards of primary table holders
+                    {
+                        primaryTableCards.Add(card);
+                    }
+                    card.cardStatus = CardStatus.USED;
+                }
 
-                allPlacedCards.ForEach(card => card.cardStatus = CardStatus.USED);
-                List<Card> primaryTableCards = allPlacedCards.Where(card => card.transform.parent.GetComponent<CardHolder>().holderSubType == HolderSubType.PRIMARY).ToList();
-                
                 if(primaryTableCards.Count > 0)
                 {
-                    primaryTableCards
-                    .OrderBy(card => card.transform.parent.GetSiblingIndex())
-                    .ToList()
-                    .ForEach(card => _tableView.PrepareDisplayIcon(card));
-                    task.StartDelayMs(0);
+                    task.Data.cards = primaryTableCards;
+                    task.Data.holders = _tableView.ActivePrimaryCardHolders;
+                    task.StartHandler(_iconDisplayView.UpdateIcons, task.Data);
                 }
                 else
                 {
-                    task.Complete();
+                    task.StartDelayMs(0);
                 }
-                break;
-            case 1:
-                task.StartHandler(_tableView.SetDisplayIconsHorizontalPositionHandler);
-                break;
-            case 2:
-                task.StartHandler(_tableView.ChangeDisplayIconsHandler);
-                break;
-            case 3:
-                _tableView.ReOrderDisplayIconsHierarchy();
-                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();

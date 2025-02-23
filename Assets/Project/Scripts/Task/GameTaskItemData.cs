@@ -22,6 +22,7 @@ public class GameTaskItemData
     public List<CardData> dataCollection;
     public HolderSubType subType;
     public string hitAreaTag;
+    public List<CardHolder> holders;
 
     public int score;
 

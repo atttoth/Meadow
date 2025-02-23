@@ -5,7 +5,6 @@ public class TableLayout
 {
     private readonly static float _Y_GAP_BETWEEN_STACKED_CARDS = 60f;
     private readonly static float _X_GAP_BETWEEN_HOLDERS = 27.7F;
-    public readonly static float SLIDE_X_DISTANCE_OF_DISPLAY_ICON = 30f;
 
     private readonly float _tableClosedPosY;
     private readonly float _tableOpenPosY;

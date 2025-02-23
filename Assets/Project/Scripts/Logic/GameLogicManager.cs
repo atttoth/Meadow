@@ -509,8 +509,6 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.Data.cards = _playerController.GetPlacedCardsWithScore();
-                task.Data.targetTransform = _playerController.GetScoreTransform();
                 task.StartHandler(_overlayController.CollectCardScoreHandler, task.Data);
                 break;
             case 1:

@@ -20,6 +20,11 @@ public class CardHolder : Holder
         _blackOverlay = transform.GetChild(0).GetComponent<Image>();
     }
 
+    public bool IsTopCardOfHolder(Card item)
+    {
+        return _contentList.IndexOf(item) == _contentList.Count - 1;
+    }
+
     public List<CardIcon> GetAllIconsOfHolder()
     {
         List<CardIcon> allIcons = ((Card)GetItemFromContentListByIndex(_contentList.Count - 1)).Data.icons.ToList();
