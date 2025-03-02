@@ -25,15 +25,15 @@ public enum GameLogicEventType
 
 public class GameLogicEvent : MonoBehaviour
 {
-    private event EventHandler<GameTaskItemData> _logicEventHandler;
+    private event EventHandler<object[]> _logicEventHandler;
 
     private void Start()
     {
         _logicEventHandler += ReferenceManager.Instance.gameLogicManager.OnLogicEvent;
     }
 
-    protected void StartEventHandler(GameLogicEventType type, GameTaskItemData data)
+    protected void StartEventHandler(GameLogicEventType type, object[] args)
     {
-        _logicEventHandler.Invoke(Enum.ToObject(typeof(GameLogicEventType), type), data);
+        _logicEventHandler.Invoke(Enum.ToObject(typeof(GameLogicEventType), type), args);
     }
 }

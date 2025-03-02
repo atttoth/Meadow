@@ -96,14 +96,13 @@ public class BoardController : MonoBehaviour
         _cardsToDraw = cards;
     }
 
-    public void BoardFillHandler(GameTask task)
+    public void BoardFillHandler(GameTask task, DeckType deckType, List<Card> cards)
     {
         switch (task.State)
         {
             case 0:
-                SaveTargetHoldersAndCards(task.Data.deckType);
-                task.Data.cards = new();
-                task.Data.cards.AddRange(_cardsToDraw);
+                SaveTargetHoldersAndCards(deckType);
+                cards.AddRange(_cardsToDraw);
                 task.StartDelayMs(0);
                 break;
             case 1:
@@ -127,7 +126,7 @@ public class BoardController : MonoBehaviour
                 task.StartDelayMs(duration);
                 break;
                 case 2:
-                task.Data.cards.ForEach(card => card.ToggleIcons(true));
+                cards.ForEach(card => card.ToggleIcons(true));
                 task.StartDelayMs(0);
                 break;
             default:

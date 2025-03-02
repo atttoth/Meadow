@@ -141,9 +141,10 @@ public class PlayerTableView : TableView
         _secondaryHitArea.Toggle(false);
     }
 
-    public void UpdateHitAreaSize(GameTaskItemData data)
+    public void UpdateHitAreaSize(params object[] args)
     {
-        CardType cardType = data.card.Data.cardType;
+        Card card = (Card)args[2];
+        CardType cardType = card.Data.cardType;
         if (cardType == CardType.Ground && _activePrimaryCardHolders.Count < _MAX_PRIMARY_HOLDER_NUM)
         {
             CalculatePrimaryHitAreaSizeAndPosition(cardType, 1);
@@ -154,9 +155,10 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void UpdateHitAreaSizeRewind(GameTaskItemData data)
+    public void UpdateHitAreaSizeRewind(object[] args)
     {
-        CardType cardType = data.card.Data.cardType;
+        Card card = (Card)args[2];
+        CardType cardType = card.Data.cardType;
         if (cardType == CardType.Ground)
         {
             CalculatePrimaryHitAreaSizeAndPosition(cardType, -1);
@@ -220,9 +222,9 @@ public class PlayerTableView : TableView
         _approveButtonImage.color = isPendingAction ? Color.green : Color.black;
     }
 
-    public void ExpandHolderVertically(GameTaskItemData data)
+    public void ExpandHolderVertically(params object[] args)
     {
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
         if (holder.holderSubType == HolderSubType.PRIMARY)
         {
             RectTransform rect = holder.GetComponent<RectTransform>();
@@ -231,9 +233,9 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void ExpandHolderVerticallyRewind(GameTaskItemData data)
+    public void ExpandHolderVerticallyRewind(object[] args)
     {
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
         if (holder.holderSubType == HolderSubType.PRIMARY)
         {
             RectTransform rect = holder.GetComponent<RectTransform>();
@@ -242,19 +244,19 @@ public class PlayerTableView : TableView
         }
     }
 
-    public void RegisterCardPlacement(GameTaskItemData data)
+    public void RegisterCardPlacement(params object[] args)
     {
-        Card card = data.card;
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
         holder.AddToContentList(card);
         card.canMove = false;
         card.cardStatus = CardStatus.PENDING_ON_TABLE;
     }
 
-    public void RegisterCardPlacementRewind(GameTaskItemData data)
+    public void RegisterCardPlacementRewind(object[] args)
     {
-        Card card = data.card;
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
         holder.RemoveItemFromContentList(card);
         card.canMove = true;
         card.cardStatus = CardStatus.IN_HAND;

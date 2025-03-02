@@ -27,13 +27,12 @@ public class PlayerHandView : MonoBehaviour
         return _cards.Select(card => card.Data).ToList();
     }
 
-    public void AddCardHandler(GameTask task)
+    public void AddCardHandler(GameTask task, Card card)
     {
         switch(task.State)
         {
             case 0:
                 float drawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard;
-                Card card = task.Data.card;
                 _cards.Add(card);
                 float[] positions = GetLayoutPositions();
                 MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
@@ -56,14 +55,14 @@ public class PlayerHandView : MonoBehaviour
         MoveCardsHorizontallyInHand(GetLayoutPositions());
     }
 
-    public void RemoveCardFromHand(GameTaskItemData data)
+    public void RemoveCardFromHand(params object[] args)
     {
-        _cards.Remove(data.card);
+        _cards.Remove((Card)args[2]);
     }
 
-    public void RemoveCardFromHandRewind(GameTaskItemData data)
+    public void RemoveCardFromHandRewind(object[] args)
     {
-        _cards.Add(data.card);
+        _cards.Add((Card)args[2]);
     }
 
     public float[] GetLayoutPositions()

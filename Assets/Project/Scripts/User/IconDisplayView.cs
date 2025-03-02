@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -24,23 +25,22 @@ public class IconDisplayView : MonoBehaviour
         _iconDisplayLayout = new IconDisplayLayout();
     }
 
-    public void UpdateIcons(GameTask task)
+    public void UpdateIcons(GameTask task, List<Card> cards, List<CardHolder> holders)
     {
         switch (task.State)
         {
             case 0:
-                List<Card> primaryTableCards = task.Data.cards;
-                primaryTableCards
+                cards
                     .OrderBy(card => card.transform.parent.GetSiblingIndex())
                     .ToList()
-                    .ForEach(card => PrepareDisplayIcon(card, task.Data.holders));
+                    .ForEach(card => PrepareDisplayIcon(card));
                 task.StartDelayMs(0);
                 break;
             case 1:
-                task.StartHandler(SetupDisplayIconsPositionHandler, task.Data);
+                task.StartHandler((Action<GameTask, List<CardHolder>>)SetupDisplayIconsPositionHandler, holders);
                 break;
             case 2:
-                task.StartHandler(ChangeDisplayIconsHandler, task.Data);
+                task.StartHandler((Action<GameTask, List<CardHolder>>)ChangeDisplayIconsHandler, holders);
                 break;
             default:
                 task.Complete();
@@ -72,7 +72,7 @@ public class IconDisplayView : MonoBehaviour
         displayIcon.transform.position = _displayIconPoolTransform.position;
     }
 
-    private void PrepareDisplayIcon(Card card, List<CardHolder> activePrimaryCardHolders)
+    private void PrepareDisplayIcon(Card card)
     {
         CardHolder holder = card.transform.parent.GetComponent<CardHolder>();
         int holderID = holder.ID;
@@ -83,8 +83,7 @@ public class IconDisplayView : MonoBehaviour
         List<CardIcon> icons = card.Data.icons.ToList();
         if (card.Data.cardType != CardType.Ground) // need to find a ground icon for displayIcon
         {
-            List<CardIcon> groundIcons = activePrimaryCardHolders
-                .Find(holder => holder.ID == holderID)
+            List<CardIcon> groundIcons = holder
                 .GetAllIconsOfHolder()
                 .Where(cardIcon => (int)cardIcon < 5)
                 .ToList();
@@ -94,7 +93,7 @@ public class IconDisplayView : MonoBehaviour
         _preparedDisplayIcons.Add(displayIcon);
     }
 
-    private void SetupDisplayIconsPositionHandler(GameTask task)
+    private void SetupDisplayIconsPositionHandler(GameTask task, List<CardHolder> holders)
     {
         switch (task.State)
         {
@@ -109,7 +108,7 @@ public class IconDisplayView : MonoBehaviour
                     List<DisplayIcon> leftDisplayIcons = new();
                     List<DisplayIcon> rightDisplayIcons = new();
                     List<DisplayIcon> existingDisplayIcons = new();
-                    int minSiblingIndex = task.Data.holders
+                    int minSiblingIndex = holders
                         .Where(holder => oldHolderIDs.Contains(holder.ID))
                         .Select(holder => holder.transform.GetSiblingIndex())
                         .Min();
@@ -117,7 +116,7 @@ public class IconDisplayView : MonoBehaviour
                     newHolderIDs.ForEach(holderID =>
                     {
                         DisplayIcon newDisplayIcon = _preparedDisplayIcons.Find(icon => icon.ID == holderID);
-                        int siblingIndex = task.Data.holders.Find(holder => holder.ID == holderID).transform.GetSiblingIndex();
+                        int siblingIndex = holders.Find(holder => holder.ID == holderID).transform.GetSiblingIndex();
                         if (siblingIndex < minSiblingIndex)
                         {
                             leftDisplayIcons.Add(newDisplayIcon);
@@ -196,7 +195,7 @@ public class IconDisplayView : MonoBehaviour
         }
     }
 
-    private void ChangeDisplayIconsHandler(GameTask task)
+    private void ChangeDisplayIconsHandler(GameTask task, List<CardHolder> holders)
     {
         switch (task.State)
         {
@@ -243,7 +242,7 @@ public class IconDisplayView : MonoBehaviour
             case 1: // re-order icons in hierarchy
                 _displayIcons.ForEach(displayIcon =>
                 {
-                    int siblingIndex = task.Data.holders.Find(holder => holder.ID == displayIcon.ID).transform.GetSiblingIndex();
+                    int siblingIndex = holders.Find(holder => holder.ID == displayIcon.ID).transform.GetSiblingIndex();
                     displayIcon.transform.SetSiblingIndex(siblingIndex);
                 });
                 task.StartDelayMs(0);

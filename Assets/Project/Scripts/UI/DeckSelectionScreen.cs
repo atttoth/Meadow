@@ -38,13 +38,12 @@ public class DeckSelectionScreen : MonoBehaviour
         }
     }
 
-    public void ToggleDeckSelectionScreenHandler(GameTask task)
+    public void ToggleDeckSelectionScreenHandler(GameTask task, DeckType deckType, bool value)
     {
         switch(task.State)
         {
             case 0:
-                DeckType deckType = task.Data.deckType;
-                if (task.Data.value)
+                if (value)
                 {
                     _blackOverlay.enabled = true;
                     List<float> positions = new() { -300f, 0f, 300f };
@@ -74,13 +73,13 @@ public class DeckSelectionScreen : MonoBehaviour
         }
     }
 
-    public void ShowCardSelectionHandler(GameTask task)
+    public void ShowCardSelectionHandler(GameTask task, List<Card> cards)
     {
         switch (task.State)
         {
             case 0:
                 List<float> positions = new() { -300f, 0f, 300f };
-                task.Data.cards.ForEach(card =>
+                cards.ForEach(card =>
                 {
                     card.SetParentTransform(transform);
                     card.transform.SetParent(transform);
@@ -92,11 +91,11 @@ public class DeckSelectionScreen : MonoBehaviour
                 break;
             case 1:
                 int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
-                task.Data.cards.ForEach(card => card.FlipDeckCard(true));
+                cards.ForEach(card => card.FlipDeckCard(true));
                 task.StartDelayMs(duration);
                 break;
             case 2:
-                task.Data.cards.ForEach(card =>
+                cards.ForEach(card =>
                 {
                     card.ToggleIcons(true);
                     card.ToggleSelection(true);
@@ -109,13 +108,13 @@ public class DeckSelectionScreen : MonoBehaviour
         }
     }
 
-    public void HideCardSelectionHandler(GameTask task)
+    public void HideCardSelectionHandler(GameTask task, List<Card> cards)
     {
         switch (task.State)
         {
             case 0:
                 int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
-                task.Data.cards.ForEach(card =>
+                cards.ForEach(card =>
                 {
                     card.ToggleIcons(false);
                     card.FlipDeckCard(false);
@@ -123,8 +122,8 @@ public class DeckSelectionScreen : MonoBehaviour
                 task.StartDelayMs(duration);
                 break;
             case 1:
-                task.Data.cards.ForEach(card => card.gameObject.SetActive(false));
-                _deckItems.Find(item => (DeckType)item.type == task.Data.cards.First().Data.deckType).gameObject.SetActive(false);
+                cards.ForEach(card => card.gameObject.SetActive(false));
+                _deckItems.Find(item => (DeckType)item.type == cards.First().Data.deckType).gameObject.SetActive(false);
                 task.StartDelayMs(500);
                 break;
             case 2:

@@ -50,13 +50,13 @@ public class InfoView : MonoBehaviour
         _totalScoreText.text = _totalScore.ToString();
     }
 
-    public void IncrementNumberOfCardPlacements(GameTaskItemData data)
+    public void IncrementNumberOfCardPlacements(params object[] args)
     {
         _cardPlacements++;
         UpdateCardPlacementsText();
     }
 
-    public void DecrementNumberOfCardPlacements(GameTaskItemData data)
+    public void DecrementNumberOfCardPlacements(object[] args)
     {
         _cardPlacements--;
         UpdateCardPlacementsText();

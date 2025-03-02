@@ -24,7 +24,7 @@ public class HandScreenHitArea : HitArea
 
     private void ToggleHandScreen(bool value)
     {
-        StartEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new GameTaskItemData() { value = value });
+        StartEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
     }
 
     public void SetupHitAreaImage(CardData cardData)

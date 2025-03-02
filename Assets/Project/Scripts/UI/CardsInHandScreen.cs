@@ -77,7 +77,7 @@ public class CardsInHandScreen : MonoBehaviour
         });
     }
 
-    public void ShowScreenHandler(GameTask task)
+    public void ShowScreenHandler(GameTask task, List<CardData> dataCollection)
     {
         switch(task.State)
         {
@@ -87,7 +87,7 @@ public class CardsInHandScreen : MonoBehaviour
                     _showSequences.ForEach(sequence => sequence.Kill());
                     _showSequences.Clear();
                 }
-                SetupFakeCards(task.Data.dataCollection);
+                SetupFakeCards(dataCollection);
                 float screenFadeSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardsInHandScreenFadeSpeed;
                 Color color = _blackOverlay.color;
                 color.a = 0f;
@@ -117,7 +117,7 @@ public class CardsInHandScreen : MonoBehaviour
         }
     }
 
-    public void HideScreenHandler(GameTask task)
+    public void HideScreenHandler(GameTask task, List<CardData> cards)
     {
         DisposeFakeCards();
         _blackOverlay.enabled = false;

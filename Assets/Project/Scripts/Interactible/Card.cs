@@ -127,7 +127,7 @@ public class Card : Interactable
         _prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
-        StartEventHandler(GameLogicEventType.CARD_MOVED, new GameTaskItemData() { card = this });
+        StartEventHandler(GameLogicEventType.CARD_MOVED, new object[] { _data.cardType });
     }
 
     public override void OnEndDrag(PointerEventData eventData)
@@ -139,7 +139,7 @@ public class Card : Interactable
 
         List<RaycastResult> raycastResults = new();
         EventSystem.current.RaycastAll(eventData, raycastResults);
-        StartEventHandler(GameLogicEventType.CARD_PLACED, new GameTaskItemData() { raycastResults = raycastResults, card = this });
+        StartEventHandler(GameLogicEventType.CARD_PLACED, new object[] { this, raycastResults});
     }
 
     public void SetCardReadyInHand()
@@ -162,7 +162,7 @@ public class Card : Interactable
         {
             if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
-                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new GameTaskItemData() { card = this });
+                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
             }
             else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus))
             {
@@ -170,7 +170,7 @@ public class Card : Interactable
                 {
                     transform.SetParent(_parent);
                 }
-                StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new GameTaskItemData() { card = this });
+                StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
             }
         }
 
@@ -182,7 +182,7 @@ public class Card : Interactable
             highlightFrame.color = Color.green;
             _zoomSequence.Kill();
             transform.localScale = new Vector3(1f, 1f, 1f);
-            StartEventHandler(GameLogicEventType.CARD_PICKED, new GameTaskItemData() { card = this, holder = _parent.GetComponent<CardHolder>() });
+            StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
         }
     }
 

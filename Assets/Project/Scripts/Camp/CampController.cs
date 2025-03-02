@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -43,7 +44,7 @@ public class CampController : GameLogicEvent
             if (_view.selectionsLeft < 1)
             {
                 campItems.ForEach(item => item.button.enabled = false);
-                StartEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, null);
+                StartEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, new object[0]);
             }
         }));
 
@@ -55,7 +56,7 @@ public class CampController : GameLogicEvent
             if (_view.isCampActionEnabled && score > 0)
             {
                 _view.OnItemButtonClick(item);
-                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new GameTaskItemData { score = score, originTransform = item.GetComponent<Transform>() });
+                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new object[] { score, item.GetComponent<Transform>().position });
             }
             else
             {
@@ -97,14 +98,14 @@ public class CampController : GameLogicEvent
                 task.StartDelayMs(delay1);
                 break;
             case 1:
-                task.StartHandler(_view.SetIconsPositionHandler);
+                task.StartHandler((Action<GameTask>)_view.SetIconsPositionHandler);
                 break;
             case 2:
                 int delay2 = 1000;
                 task.StartDelayMs(delay2);
                 break;
             case 3:
-                task.StartHandler(_view.ShowScoreButtonsHandler);
+                task.StartHandler((Action<GameTask>)_view.ShowScoreButtonsHandler);
                 break;
             case 4:
                 int delay3 = 2000;

@@ -16,6 +16,6 @@ public class TableCardHitArea : HitArea
 
     private void UpdateHitArea(string hitAreaTag = null)
     {
-        StartEventHandler(GameLogicEventType.TABLE_HITAREA_HOVERED_OVER, new GameTaskItemData() { subType = type, hitAreaTag = hitAreaTag });
+        StartEventHandler(GameLogicEventType.TABLE_HITAREA_HOVERED_OVER, new object[] { type, hitAreaTag });
     }
 }

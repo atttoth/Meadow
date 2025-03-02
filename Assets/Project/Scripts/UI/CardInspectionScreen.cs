@@ -23,12 +23,11 @@ public class CardInspectionScreen : MonoBehaviour
         return _screenButton;
     }
 
-    public void ShowCardHandler(GameTask task)
+    public void ShowCardHandler(GameTask task, Card card)
     {
         switch(task.State)
         {
             case 0:
-                Card card = task.Data.card;
                 float duration = ReferenceManager.Instance.gameLogicManager.GameSettings.cardInspectionFlipDuration;
                 float quarterOfDuration = duration * 0.25f;
                 Vector2 screenPosition = _blackOverlay.GetComponent<RectTransform>().anchoredPosition;

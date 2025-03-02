@@ -57,10 +57,7 @@ public class PlayerController : UserController<PlayerTableView>
             {
                 _tableApproveButton.enabled = false;
                 _tableView.UpdateApproveButton(false);
-                GameTaskItemData data = new GameTaskItemData();
-                data.cards = GetPlacedCardsWithScore();
-                data.targetTransform = GetScoreTransform();
-                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, data);
+                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), GetScorePosition() });
             }
             else
             {
@@ -68,13 +65,7 @@ public class PlayerController : UserController<PlayerTableView>
             }
         });
         _turnEndButton.onClick.AddListener(() => Debug.Log("turn ended"));
-        _campToggleButton.onClick.AddListener(() => 
-        {
-            _isCampVisible = !_isCampVisible;
-            StartEventHandler(GameLogicEventType.CAMP_TOGGLED, new GameTaskItemData() { value = _isCampVisible });
-            Transform parent = _isCampVisible ? transform.root : _infoView.transform;
-            _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
-        });
+        _campToggleButton.onClick.AddListener(() => ToggleCamp());
 
         _handScreenHitArea = transform.GetChild(4).GetComponent<HandScreenHitArea>();
         _handScreenHitArea.Init();
@@ -96,7 +87,15 @@ public class PlayerController : UserController<PlayerTableView>
         _markerView.Fade(_tableView.isTableVisible);
         FadeTurnEndButton(_tableView.isTableVisible);
         ToggleHandScreenHitarea(!_tableView.isTableVisible);
-        StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new GameTaskItemData() { value = _tableView.isTableVisible });
+        StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !_tableView.isTableVisible });
+    }
+
+    public void ToggleCamp()
+    {
+        _isCampVisible = !_isCampVisible;
+        StartEventHandler(GameLogicEventType.CAMP_TOGGLED, new object[] { _isCampVisible });
+        Transform parent = _isCampVisible ? transform.root : _infoView.transform;
+        _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
     }
 
     private void FadeTurnEndButton(bool value)
@@ -280,12 +279,12 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
-    public void AddCardToHandHandler(GameTask task)
+    public void AddCardToHandHandler(GameTask task, Card card)
     {
         switch(task.State)
         {
             case 0:
-                task.StartHandler(_handView.AddCardHandler, task.Data);
+                task.StartHandler((Action<GameTask, Card>)_handView.AddCardHandler, card);
                 break;
             default:
                 task.Complete();
@@ -293,9 +292,10 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
-    private void UpdateCurrentIconsOfHolder(GameTaskItemData data)
+    private void UpdateCurrentIconsOfHolder(params object[] args)
     {
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
         Dictionary<int, CardIcon[][]> collection = holder.holderSubType == HolderSubType.PRIMARY ? _allIconsOfPrimaryHoldersInOrder : _allIconsOfSecondaryHoldersInOrder;
         int ID = holder.ID;
         CardIcon[][] items = collection[ID];
@@ -306,19 +306,20 @@ public class PlayerController : UserController<PlayerTableView>
         {
             updatedItems.Add(item);
         }
-        updatedItems.Add(data.card.Data.icons);
+        updatedItems.Add(card.Data.icons);
 
         collection.Add(ID, updatedItems.ToArray());
     }
 
-    private void UpdateCurrentIconsOfHolderRewind(GameTaskItemData data)
+    private void UpdateCurrentIconsOfHolderRewind(object[] args)
     {
-        CardHolder holder = (CardHolder)data.holder;
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
         Dictionary<int, CardIcon[][]> collection = holder.holderSubType == HolderSubType.PRIMARY ? _allIconsOfPrimaryHoldersInOrder : _allIconsOfSecondaryHoldersInOrder;
         int ID = holder.ID;
         CardIcon[][] items = collection[ID];
         collection.Remove(ID);
-        if(!Array.Exists(new[] { CardType.Ground, CardType.Landscape }, cardType => cardType == data.card.Data.cardType))
+        if(!Array.Exists(new[] { CardType.Ground, CardType.Landscape }, cardType => cardType == card.Data.cardType))
         {
             List<CardIcon[]> updatedItems = new();
             for (int i = 0; i < items.Length - 1; i++)
@@ -329,35 +330,37 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
-    public void CreateEntryForCurrentIcons(GameTaskItemData data)
+    public void CreateEntryForCurrentIcons(params object[] args)
     {
-        if (data.card.Data.cardType == CardType.Ground)
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
+        if (card.Data.cardType == CardType.Ground)
         {
-            _allIconsOfPrimaryHoldersInOrder.Add(data.holder.ID, new CardIcon[][] { });
+            _allIconsOfPrimaryHoldersInOrder.Add(holder.ID, new CardIcon[][] { });
         }
-        else if(data.card.Data.cardType == CardType.Landscape)
+        else if(card.Data.cardType == CardType.Landscape)
         {
-            _allIconsOfSecondaryHoldersInOrder.Add(data.holder.ID, new CardIcon[][] { });
+            _allIconsOfSecondaryHoldersInOrder.Add(holder.ID, new CardIcon[][] { });
         }
     }
 
-    public void CreateEntryForCurrentIconsRewind(GameTaskItemData data)
+    public void CreateEntryForCurrentIconsRewind(object[] args)
     {
-        if (data.card.Data.cardType == CardType.Ground)
+        CardHolder holder = (CardHolder)args[1];
+        Card card = (Card)args[2];
+        if (card.Data.cardType == CardType.Ground)
         {
-            _allIconsOfPrimaryHoldersInOrder.Remove(data.holder.ID);
-            CardHolder holder = (CardHolder)data.holder;
+            _allIconsOfPrimaryHoldersInOrder.Remove(holder.ID);
             UpdateActiveCardHolders(holder.holderSubType, null);
         }
-        else if(data.card.Data.cardType == CardType.Landscape)
+        else if(card.Data.cardType == CardType.Landscape)
         {
-            _allIconsOfSecondaryHoldersInOrder.Remove(data.holder.ID);
-            CardHolder holder = (CardHolder)data.holder;
+            _allIconsOfSecondaryHoldersInOrder.Remove(holder.ID);
             UpdateActiveCardHolders(holder.holderSubType, null);
         }
     }
 
-    public void CreatePendingCardPlacement(GameTaskItemData data)
+    public void CreatePendingCardPlacement(CardHolder holder, Card card)
     {
         _tableToggleButton.enabled = false;
         PendingActionItem[] postActionItems = new PendingActionItem[] {
@@ -379,42 +382,45 @@ public class PlayerController : UserController<PlayerTableView>
             _infoView.DecrementNumberOfCardPlacements
         };
         _tableView.UpdateApproveButton(true);
-        data.pendingActionID = data.card.Data.ID;
-        _pendingActionCreator.Create(postActionItems, prevActionItems, data);
+        _pendingActionCreator.Create(postActionItems, prevActionItems, card.Data.ID, holder, card);
     }
 
-    public void CancelPendingCardPlacement(GameTask task)
+    public void CancelPendingCardPlacement(GameTask task, Card card)
     {
         switch(task.State)
         {
             case 0:
-                if (!_pendingActionCreator.TryCancel(task.Data))
+                if (!_pendingActionCreator.TryCancel(card.Data.ID))
                 {
                     task.Complete();
                     return;
                 }
-                _pendingActionCreator.GetDataCollection()?.ForEach(data => data.card.ToggleRayCast(false));
+                _pendingActionCreator.GetDataCollection()?
+                    .Select(data => (Card)data[2])
+                    .ToList()
+                    .ForEach(card => card.ToggleRayCast(false));
                 if (_pendingActionCreator.GetNumOfActions() == 0)
                 {
                     _tableView.UpdateApproveButton(false);
                     _tableToggleButton.enabled = true;
                 }
-                task.StartHandler(SnapCardHandler, task.Data);
+                task.StartHandler((Action<GameTask, CardHolder, Card>)SnapCardHandler, null, card);
                 break;
             default:
-                _pendingActionCreator.GetDataCollection()?.ForEach(data => data.card.ToggleRayCast(true));
+                _pendingActionCreator.GetDataCollection()?
+                    .Select(data => (Card)data[2])
+                    .ToList()
+                    .ForEach(card => card.ToggleRayCast(true));
                 task.Complete();
                 break;
         }
     }
 
-    public void SnapCardHandler(GameTask task)
+    public void SnapCardHandler(GameTask task, CardHolder holder, Card card)
     {
         switch(task.State)
         {
             case 0:
-                Card card = task.Data.card;
-                CardHolder holder = (CardHolder)task.Data.holder;
                 float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardPlacementSpeed;
                 bool isPlacement = card.cardStatus == CardStatus.PENDING_ON_TABLE;
                 int contentCount = isPlacement ? holder.GetContentListSize() - 1 : -1;
@@ -434,22 +440,22 @@ public class PlayerController : UserController<PlayerTableView>
         }
     }
 
-    public Transform GetScoreTransform()
+    public Vector3 GetScorePosition()
     {
-        return _infoView.scoreTransform;
+        return _infoView.scoreTransform.position;
     }
 
     private List<Card> GetPlacedCardsWithScore()
     {
-        List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
+        List<object[]> dataCollection = _pendingActionCreator.GetDataCollection();
         List<Card> primaryTableCards = dataCollection
-            .Select(data => data.card)
+            .Select(data => (Card)data[2])
             .Where(card => card.transform.parent.GetComponent<CardHolder>().holderSubType == HolderSubType.PRIMARY && card.Data.cardType != CardType.Ground)
             .OrderBy(card => card.transform.parent.GetSiblingIndex())
             .ToList();
 
         List<Card> secondaryTableCards = dataCollection
-            .Select(data => data.card)
+            .Select(data => (Card)data[2])
             .Where(card => card.transform.parent.GetComponent<CardHolder>().holderSubType == HolderSubType.SECONDARY)
             .OrderBy(card => card.transform.parent.GetSiblingIndex())
             .ToList();
@@ -467,12 +473,12 @@ public class PlayerController : UserController<PlayerTableView>
         switch (task.State)
         {
             case 0:
-                List<GameTaskItemData> dataCollection = _pendingActionCreator.GetDataCollection();
+                List<object[]> dataCollection = _pendingActionCreator.GetDataCollection();
                 List<Card> primaryTableCards = new();
                 for(int i = 0; i < dataCollection.Count; i++)
                 {
-                    Card card = dataCollection[i].card;
-                    CardHolder holder = (CardHolder)dataCollection[i].holder;
+                    CardHolder holder = (CardHolder)dataCollection[i][1];
+                    Card card = (Card)dataCollection[i][2];
                     if(holder.holderSubType == HolderSubType.PRIMARY && holder.IsTopCardOfHolder(card)) // filter top cards of primary table holders
                     {
                         primaryTableCards.Add(card);
@@ -482,9 +488,7 @@ public class PlayerController : UserController<PlayerTableView>
 
                 if(primaryTableCards.Count > 0)
                 {
-                    task.Data.cards = primaryTableCards;
-                    task.Data.holders = _tableView.ActivePrimaryCardHolders;
-                    task.StartHandler(_iconDisplayView.UpdateIcons, task.Data);
+                    task.StartHandler((Action<GameTask, List<Card>, List<CardHolder>>)_iconDisplayView.UpdateIcons, primaryTableCards, _tableView.ActivePrimaryCardHolders);
                 }
                 else
                 {

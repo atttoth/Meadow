@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,7 +12,6 @@ using System.Threading.Tasks;
  **/
 public class GameTask
 {
-    public delegate void GameTaskHandler(GameTask task);
     private List<ArrayList> _taskItems;
     private ArrayList _currentTaskItem;
     private int _duration;
@@ -23,35 +23,28 @@ public class GameTask
         _currentTaskItem = new ArrayList() { };
     }
 
-    public GameTaskItemData Data
-    {
-        get { return (GameTaskItemData)_currentTaskItem[1]; }
-        set { _currentTaskItem[1] = value; }
-    }
-
     public int State
     {
         get { return (int)_currentTaskItem[2]; }
         set { _currentTaskItem[2] = value; }
     }
 
-    public void StartHandler(GameTaskHandler handler, GameTaskItemData data = null)
+    public void StartHandler(Delegate f, params object[] args)
     {
         State++;
         _duration = 0;
-        CreateTaskItem(handler, data);
+        CreateTaskItem(f, args);
     }
 
-    public async void ExecHandler(GameTaskHandler handler, GameTaskItemData data = null)
+    public async void ExecHandler(Delegate f, params object[] args)
     {
-        CreateTaskItem(handler, data);
+        CreateTaskItem(f, args);
         await Task.WhenAll(Execute());
     }
 
-    private void CreateTaskItem(GameTaskHandler handler, GameTaskItemData data)
+    private void CreateTaskItem(Delegate f, object[] args)
     {
-        GameTaskItemData itemData = data is null ? new GameTaskItemData() : data;
-        ArrayList item = new() { handler, itemData, 0 };
+        ArrayList item = new() { f, args, 0 };
         _taskItems.Add(item);
         _currentTaskItem = item;
     }
@@ -70,8 +63,15 @@ public class GameTask
         if (State > -1)
         {
             await Task.Delay(_duration);
-            GameTaskHandler handler = (GameTaskHandler)_currentTaskItem[0];
-            handler(this);
+            Delegate f = (Delegate)_currentTaskItem[0];
+            object[] args = (object[])_currentTaskItem[1];
+            object[] updatedArgs = new object[args.Length + 1];
+            updatedArgs[0] = this;
+            for (int i = 0; i < args.Length; i++)
+            {
+                updatedArgs[i + 1] = args[i];
+            }
+            f.DynamicInvoke(updatedArgs);
             await Execute();
         }
         else
