@@ -18,9 +18,12 @@ public class OverlayController : GameLogicEvent
     public void CreateOverlay()
     {
         _cardInspectionScreen = transform.GetChild(0).GetComponent<CardInspectionScreen>();
-        Button screenButton = _cardInspectionScreen.Init();
-        screenButton.onClick.AddListener(() => StartEventHandler(GameLogicEventType.CARD_INSPECTION_ENDED, new object[0]));
-
+        Button approveIconRemoveButton = _cardInspectionScreen.Init();
+        approveIconRemoveButton.onClick.AddListener(() =>
+        {
+            approveIconRemoveButton.enabled = false;
+            StartEventHandler(GameLogicEventType.REMOVED_CARD_ICON, new object[] { _cardInspectionScreen.GetDisposedIconItem() });
+        });
         _markerActionScreen = transform.GetChild(1).GetComponent<MarkerActionScreen>();
         List<Button> actionIconButtons = _markerActionScreen.Init();
         actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
@@ -64,7 +67,8 @@ public class OverlayController : GameLogicEvent
                     Card card = cards.First();
                     cards.RemoveAt(0);
                     Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
-                    scoreTextPrefab.SetPositionAndRotation(card.GetScorePosition(), Quaternion.identity);
+                    card.CardIconItemsView.ToggleScoreItem(false);
+                    scoreTextPrefab.SetPositionAndRotation(card.CardIconItemsView.GetScoreItemPosition(), Quaternion.identity);
                     scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.Data.score.ToString();
                     DOTween.Sequence().Append(scoreTextPrefab.DOMove(targetPosition, speed).SetEase(Ease.InOutQuart).SetDelay(delay)).OnComplete(() =>
                     {
@@ -104,6 +108,21 @@ public class OverlayController : GameLogicEvent
         }
     }
 
+    public void UpdateInspectedCardIconsDisposeStatus(int iconItemID)
+    {
+        _cardInspectionScreen.SelectIconItemOnCard(iconItemID);
+    }
+
+    public void CheckCardIconRemoveConditions(bool hasEnoughDisposableCards)
+    {
+        _cardInspectionScreen.UpdateIconRemoveButtonStatus(hasEnoughDisposableCards);
+    }
+
+    public Delegate GetRemoveIconItemHandler()
+    {
+        return (Action<GameTask, CardIconItem>)_cardInspectionScreen.RemoveIconItemHandler;
+    }
+
     public Delegate GetToggleDeckSelectionScreenHandler()
     {
         return (Action<GameTask, DeckType, bool>)_deckSelectionScreen.ToggleDeckSelectionScreenHandler;
@@ -116,7 +135,7 @@ public class OverlayController : GameLogicEvent
 
     public Delegate GetCardInspectionScreenHandler(bool isShow)
     {
-        return isShow ? (Action<GameTask, Card>)_cardInspectionScreen.ShowCardHandler : (Action<GameTask>)_cardInspectionScreen.HideCardHandler;
+        return isShow ? (Action<GameTask, Card, bool>)_cardInspectionScreen.ShowCardHandler : (Action<GameTask>)_cardInspectionScreen.HideCardHandler;
     }
 
     public Delegate GetHandScreenToggleHandler(bool isToggled)

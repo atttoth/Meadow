@@ -51,10 +51,10 @@ public class GameTask
 
     private async Task Execute()
     {
-        if (State == -1) // check if current handler has finished
+        if (State == -1) // check if current Delegate f has finished
         {
             _taskItems.RemoveAt(_taskItems.Count - 1);
-            if (_taskItems.Count > 0) // check if any handlers left
+            if (_taskItems.Count > 0) // check if any Delegate f left
             {
                 _currentTaskItem = _taskItems[_taskItems.Count - 1];
             }

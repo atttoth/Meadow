@@ -5,6 +5,7 @@ using UnityEngine;
 
 public class PlayerHandView : MonoBehaviour
 {
+    private static readonly int REQUIRED_NUM_OF_DISPOSABLE_CARDS = 2;
     private List<Card> _cards;
     private HandLayout _handLayout;
     private bool _isHandDefault;
@@ -83,5 +84,54 @@ public class PlayerHandView : MonoBehaviour
             float posX = positions[i];
             card.MoveCardHorizontally(posX, isRapid);
         }
+    }
+
+    public void ToggleDisposableFlagOnCards(bool value)
+    {
+        _cards.ForEach(card =>
+        {
+            card.isDisposable = value;
+            if (!value)
+            {
+                card.ResetDisposeSelection();
+            }
+        });
+    }
+
+    public void ToggleBehaviorFlagsOnCards(bool value)
+    {
+        _cards.ForEach(card =>
+        {
+            card.canMove = value;
+            if(!value)
+            {
+                card.ToggleCanInspectFlag(false);
+            }
+        });
+    }
+
+    public void ResetIsInspectedFlagOnCard()
+    {
+        _cards.ForEach(card => card.ToggleIsInspectedFlag(false));
+    }
+
+    public bool HasDisposableCardsSelected()
+    {
+        return _cards.Where(card => card.selectedToDispose).ToList().Count == REQUIRED_NUM_OF_DISPOSABLE_CARDS;
+    }
+
+    public List<Card> GetDisposableCards()
+    {
+        List<Card> cards = _cards.Where(card => card.selectedToDispose).ToList();
+        for(int i = cards.Count - 1; i >= 0; i--)
+        {
+            _cards.Remove(cards[i]);
+        }
+        return cards;
+    }
+
+    public Card GetInspectedCard()
+    {
+        return _cards.Find(card => card.isInspected);
     }
 }

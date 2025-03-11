@@ -5,6 +5,7 @@ using static UnityEditor.Progress;
 
 public class CardIconItemsView : MonoBehaviour
 {
+    private static int ITEM_INDEX = 0;
     private readonly static float TOP_ICON_DIMENSION = 40f;
     private readonly static float REQUIRED_ICON_DIMENSION = 20f;
 
@@ -16,6 +17,11 @@ public class CardIconItemsView : MonoBehaviour
     public Vector3 GetScoreItemPosition()
     {
         return _scoreItem.transform.position;
+    }
+
+    public int GetRequiredIconItemsNumber()
+    {
+        return _requiredIconItemsHolder.GetContentListSize();
     }
 
     public void Init(CardData data)
@@ -30,6 +36,7 @@ public class CardIconItemsView : MonoBehaviour
         {
             _topIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
             _requiredIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
+            Destroy(_scoreItem.gameObject);
         }
         _topIconItemsHolder.Init(-1, HolderType.CardIcon);
         _requiredIconItemsHolder.Init(-1, HolderType.CardIcon);
@@ -37,7 +44,7 @@ public class CardIconItemsView : MonoBehaviour
         data.icons.ToList().ForEach(icon =>
         {
             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
-            item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, TOP_ICON_DIMENSION);
+            item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, TOP_ICON_DIMENSION, -1);
             item.ToggleRayCast(false);
             _topIconItemsHolder.AddToContentList(item);
         });
@@ -92,7 +99,7 @@ public class CardIconItemsView : MonoBehaviour
                     data.requirements.ToList().ForEach(icon =>
                     {
                         CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
-                        item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION);
+                        item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                         _requiredIconItemsHolder.AddToContentList(item);
                     });
                 }
@@ -109,7 +116,7 @@ public class CardIconItemsView : MonoBehaviour
                         CardIcon icon2 = optionalrequirements[i + 1];
                         List<CardIcon> pair = new() { icon1, icon2 };
                         CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
-                        item.Create(pair, IconItemType.OPTIONAL, REQUIRED_ICON_DIMENSION);
+                        item.Create(pair, IconItemType.OPTIONAL, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                         _requiredIconItemsHolder.AddToContentList(item);
                     }
                 }
@@ -120,7 +127,7 @@ public class CardIconItemsView : MonoBehaviour
                 if(data.adjacentRequirements.Length == 1)
                 {
                     CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
-                    item.Create(new List<CardIcon>() { data.adjacentRequirements[0] }, IconItemType.ADJACENT, REQUIRED_ICON_DIMENSION);
+                    item.Create(new List<CardIcon>() { data.adjacentRequirements[0] }, IconItemType.ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                     _requiredIconItemsHolder.AddToContentList(item);
                 }
                 else
@@ -134,30 +141,24 @@ public class CardIconItemsView : MonoBehaviour
                             CardIcon icon2 = optionalAndAdjacentRequirements[i + 1];
                             List<CardIcon> pair = new() { icon1, icon2 };
                             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
-                            item.Create(pair, IconItemType.OPTIONAL_AND_ADJACENT, REQUIRED_ICON_DIMENSION);
+                            item.Create(pair, IconItemType.OPTIONAL_AND_ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                             _requiredIconItemsHolder.AddToContentList(item);
                         }
                     }
                 }
             }
 
-            List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
-            Vector2[] requiredIconPositions = _iconItemsLayout.GetRequiredIconItemPositions(requiredIconItems.Count, REQUIRED_ICON_DIMENSION);
-            for (int i = 0; i < requiredIconPositions.Length; i++)
-            {
-                CardIconItem item = (CardIconItem)requiredIconItems[i];
-                RectTransform rect = item.GetComponent<RectTransform>();
-                rect.anchoredPosition = requiredIconPositions[i];
-            }
+            PositionRequiredIconItems();
 
             if(data.score > 0)
             {
                 _scoreItem = Instantiate(GameAssets.Instance.cardIconItemPrefab, transform).GetComponent<CardIconItem>();
-                _scoreItem.Create(null, IconItemType.SCORE, TOP_ICON_DIMENSION, data.score);
+                _scoreItem.Create(null, IconItemType.SCORE, TOP_ICON_DIMENSION, -1, data.score);
                 _scoreItem.ToggleRayCast(false);
                 _scoreItem.GetComponent<RectTransform>().anchoredPosition = _iconItemsLayout.GetScoreItemPosition();
             }
         }
+        ITEM_INDEX = 0;
         Toggle(false);
     }
 
@@ -167,7 +168,76 @@ public class CardIconItemsView : MonoBehaviour
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
-            item.ToggleRayCast(value);
+            if(!item.Icons.Contains(CardIcon.RoadToken)) // road token requirement cannot be removed
+            {
+                item.ToggleRayCast(value);
+            }
+        }
+    }
+
+    public void UpdateDisposeStatusOfItems(int iconItemID)
+    {
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        for (int i = 0; i < requiredIconItems.Count; i++)
+        {
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
+            item.selectedToDispose = item.ID == iconItemID;
+        }
+    }
+
+    public bool HasIconItemSelectedForDispose()
+    {
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        for (int i = 0; i < requiredIconItems.Count; i++)
+        {
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
+            if(item.selectedToDispose)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public CardIconItem GetIconItemByID(int iconItemID)
+    {
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        for (int i = 0; i < requiredIconItems.Count; i++)
+        {
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
+            if (item.ID == iconItemID)
+            {
+                return item;
+            }
+        }
+        return null;
+    }
+
+    public void DeleteIconItemByID(int iconItemID)
+    {
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        for (int i = 0; i < requiredIconItems.Count; i++)
+        {
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
+            if (item.ID == iconItemID)
+            {
+                _requiredIconItemsHolder.RemoveItemFromContentList(item);
+                Destroy(item.gameObject);
+                return;
+            }
+        }
+    }
+
+    public void PositionRequiredIconItems()
+    {
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        Vector2[] requiredIconPositions = _iconItemsLayout.GetRequiredIconItemPositions(requiredIconItems.Count, REQUIRED_ICON_DIMENSION);
+        for (int i = 0; i < requiredIconPositions.Length; i++)
+        {
+            CardIconItem item = (CardIconItem)requiredIconItems[i];
+            item.ToggleRayCast(false);
+            RectTransform rect = item.GetComponent<RectTransform>();
+            rect.anchoredPosition = requiredIconPositions[i];
         }
     }
 

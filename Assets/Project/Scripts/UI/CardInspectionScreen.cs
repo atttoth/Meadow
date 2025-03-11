@@ -5,43 +5,52 @@ using UnityEngine.UI;
 
 public class CardInspectionScreen : MonoBehaviour
 {
-    private Image _blackOverlay;
+    private InteractableScreen _interactableScreen;
     private Card _fakeCard;
     private RectTransform _fakeCardTransform;
-    private Button _screenButton;
+    private Button _approveIconRemoveButton;
+    private int _disposableIconItemID;
+
+    public CardIconItem GetDisposedIconItem()
+    {
+        return _fakeCard.CardIconItemsView.GetIconItemByID(_disposableIconItemID);
+    }
 
     public Button Init()
     {
-        _blackOverlay = transform.GetChild(0).GetComponent<Image>();
+        _interactableScreen = transform.GetChild(0).GetComponent<InteractableScreen>();
+        _interactableScreen.Init();
         _fakeCard = transform.GetChild(1).GetComponent<Card>();
         _fakeCard.Init(null, null, null);
         _fakeCard.ToggleRayCast(false);
         _fakeCard.MainImage.enabled = false;
         _fakeCardTransform = _fakeCard.GetComponent<RectTransform>();
-        _screenButton = GetComponent<Button>();
-        _screenButton.enabled = false;
-        return _screenButton;
+        _approveIconRemoveButton = transform.GetChild(2).GetComponent<Button>();
+        ToggleIconRemoveButton(false);
+        ToggleRayCast(false);
+        return _approveIconRemoveButton;
     }
 
-    public void ShowCardHandler(GameTask task, Card card)
+    public void ShowCardHandler(GameTask task, Card card, bool isTableVisible)
     {
         switch(task.State)
         {
             case 0:
+                _approveIconRemoveButton.enabled = true;
                 float duration = ReferenceManager.Instance.gameLogicManager.GameSettings.cardInspectionFlipDuration;
                 float quarterOfDuration = duration * 0.25f;
-                Vector2 screenPosition = _blackOverlay.GetComponent<RectTransform>().anchoredPosition;
+                Vector2 screenPosition = _interactableScreen.GetComponent<RectTransform>().anchoredPosition;
                 _fakeCardTransform.localScale = Vector3.one;
                 _fakeCardTransform.anchoredPosition = screenPosition;
                 _fakeCardTransform.eulerAngles = new Vector3(0f, 0f, 0f);
                 _fakeCard.InitIconItemsView(card.Data);
                 _fakeCard.MainImage.sprite = card.CardFront;
-                _blackOverlay.enabled = true;
+                _interactableScreen.MainImage.enabled = true;
                 _fakeCard.MainImage.enabled = true;
                 _fakeCard.gameObject.SetActive(true);
                 DOTween.Sequence()
                     .Append(_fakeCardTransform.DOMove(screenPosition, duration))
-                    .Join(_fakeCardTransform.DOScale(3.5f, duration).SetEase(Ease.InOutSine))
+                    .Join(_fakeCardTransform.DOScale(2.5f, duration).SetEase(Ease.InOutSine))
                     .Join(_fakeCardTransform.DOLocalRotate(new Vector3(0f, 360f, 0f), duration, RotateMode.FastBeyond360).SetRelative(true).SetEase(Ease.Linear));
 
                 DOTween.Sequence().SetDelay(quarterOfDuration).OnComplete(() =>
@@ -69,7 +78,11 @@ public class CardInspectionScreen : MonoBehaviour
                 task.StartDelayMs(0);
                 break;
             default:
-                ToggleScreenButton(true);
+                ToggleRayCast(true);
+                if(_fakeCard.CardIconItemsView.GetRequiredIconItemsNumber() > 1 && isTableVisible)
+                {
+                    _fakeCard.CardIconItemsView.ToggleRequiredIconsRaycast(true);
+                }
                 task.Complete();
                 break;
         }
@@ -80,14 +93,16 @@ public class CardInspectionScreen : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                ToggleScreenButton(false);
+                ToggleIconRemoveButton(false);
+                ToggleRayCast(false);
+                _fakeCard.CardIconItemsView.ToggleRequiredIconsRaycast(false);
                 _fakeCard.ToggleIcons(false);
                 task.StartDelayMs(0);
                 break;
             case 1:
                 _fakeCard.gameObject.SetActive(false);
                 _fakeCard.MainImage.enabled = false;
-                _blackOverlay.enabled = false;
+                _interactableScreen.MainImage.enabled = false;
                 task.StartDelayMs(0);
                 break;
             default:
@@ -96,8 +111,39 @@ public class CardInspectionScreen : MonoBehaviour
         }
     }
 
-    private void ToggleScreenButton(bool value)
+    public void RemoveIconItemHandler(GameTask task, CardIconItem item)
     {
-        _screenButton.enabled = value;
+        switch (task.State)
+        {
+            case 0:
+                float duration = ReferenceManager.Instance.gameLogicManager.GameSettings.fakeCardIconItemDelete;
+                item.PlayDeleteAnimation();
+                task.StartDelayMs((int)duration * 1000);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void SelectIconItemOnCard(int iconItemID)
+    {
+        _disposableIconItemID = iconItemID;
+        _fakeCard.CardIconItemsView.UpdateDisposeStatusOfItems(iconItemID);
+    }
+
+    public void UpdateIconRemoveButtonStatus(bool hasEnoughDisposableCards)
+    {
+        ToggleIconRemoveButton(hasEnoughDisposableCards && _fakeCard.CardIconItemsView.HasIconItemSelectedForDispose());
+    }
+
+    private void ToggleIconRemoveButton(bool value)
+    {
+        _approveIconRemoveButton.gameObject.SetActive(value);
+    }
+
+    private void ToggleRayCast(bool value)
+    {
+        _interactableScreen.MainImage.raycastTarget = value;
     }
 }

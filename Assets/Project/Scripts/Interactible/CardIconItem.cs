@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.U2D;
 using UnityEngine.UI;
+using DG.Tweening;
 using static UnityEditor.Progress;
 
 public enum IconItemType
@@ -17,26 +18,33 @@ public enum IconItemType
 
 public class CardIconItem : Interactable
 {
+    public int ID;
+    public bool selectedToDispose;
     private List<CardIcon> _icons;
+    private IconItemType _itemType;
     private Image _raycastTargetImage;
-    private TextMeshProUGUI _scoreText;
+    private Sequence _zoomSequence;
 
     public List<CardIcon> Icons {  get { return _icons; } }
 
-    public void Create(List<CardIcon> icons, IconItemType itemType, float iconDimension, int score = 0)
+    public IconItemType ItemType { get { return _itemType; } }
+
+    public void Create(List<CardIcon> icons, IconItemType itemType, float iconDimension, int itemID, int score = 0)
     {
+        ID = itemID;
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         RectTransform iconsParentRect = transform.GetChild((int)itemType).GetComponent<RectTransform>();
         _raycastTargetImage = iconsParentRect.GetComponent<Image>();
 
-        if(itemType == IconItemType.SCORE)
+        if (itemType == IconItemType.SCORE)
         {
-            _scoreText = iconsParentRect.GetChild(0).GetComponent<TextMeshProUGUI>();
-            _scoreText.text = score.ToString();
+            Image scoreImage = iconsParentRect.GetChild(0).GetComponent<Image>();
+            scoreImage.sprite = atlas.GetSprite(score.ToString()); // add text sprite
         }
         else
         {
             _icons = icons;
+            _itemType = itemType;
             Image icon1 = iconsParentRect.GetChild(0).GetComponent<Image>();
             icon1.GetComponent<RectTransform>().sizeDelta = new(iconDimension, iconDimension);
             icon1.sprite = atlas.GetSprite(((int)icons[0]).ToString());
@@ -49,6 +57,42 @@ public class CardIconItem : Interactable
             }
         }
         iconsParentRect.gameObject.SetActive(true);
+    }
+
+    public override void OnPointerClick(PointerEventData eventData)
+    {
+        if (eventData.button == PointerEventData.InputButton.Left)
+        {
+            StartEventHandler(GameLogicEventType.CARD_ICON_CLICKED, new object[] { ID });
+        }
+    }
+
+    public override void OnPointerEnter(PointerEventData eventData)
+    {
+        ZoomItem(true);
+    }
+
+    public override void OnPointerExit(PointerEventData eventData)
+    {
+        ZoomItem(false);
+    }
+
+    private void ZoomItem(bool value)
+    {
+        if (!value)
+        {
+            _zoomSequence.Kill();
+        }
+
+        float target = value ? 1.2f : 1f;
+        float duration = value ? 0.5f : 0.2f;
+        _zoomSequence = DOTween.Sequence();
+        _zoomSequence.Append(transform.DOScale(target, duration));
+    }
+
+    public void PlayDeleteAnimation()
+    {
+        // show delete anim on icon item
     }
 
     public override void ToggleRayCast(bool value)

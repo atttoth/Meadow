@@ -10,8 +10,18 @@ public abstract class UserController<T> : GameLogicEvent where T : TableView
     protected Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
     protected Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
 
+    protected void EndTurn(bool isEndedByPlayer)
+    {
+        StartEventHandler(GameLogicEventType.TURN_ENDED, new object[] { isEndedByPlayer });
+    }
+
     public bool CanCardBePlaced(CardHolder holder, Card card)
     {
+        if(!_infoView.HasEnoughCardPlacements())
+        {
+            return false;
+        }
+
         List<CardIcon> primaryTableIcons = GetAllCurrentIcons(HolderSubType.PRIMARY);
         List<CardIcon> mainRequirements = card.Data.requirements.ToList();
 

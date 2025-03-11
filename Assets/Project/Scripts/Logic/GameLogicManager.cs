@@ -28,6 +28,7 @@ public class GameLogicManager : MonoBehaviour
         _playerController = ReferenceManager.Instance.playerController;
         _overlayController = ReferenceManager.Instance.overlayController;
         _logicEventHandlers = new Delegate[] {
+            (Action<GameTask, bool>)TurnEndedHandler,
             (Action<GameTask, bool>)TableToggleHandler,
             (Action<GameTask>)CampIconsSelectHandler,
             (Action<GameTask, bool>)CampToggleHandler,
@@ -38,7 +39,10 @@ public class GameLogicManager : MonoBehaviour
             (Action<GameTask, Card, List<RaycastResult>>)PendingCardPlaceHandler,
             (Action<GameTask, Card>)CardInspectionStartHandler,
             (Action<GameTask>)CardInspectionEndHandler,
-            (Action<GameTask, List <Card>, Vector3>)ApprovedPendingCardPlaceHandler,
+            (Action<GameTask, int>)CardIconSelectedHandler,
+            (Action<GameTask>)CardSelectedForDisposeHandler,
+            (Action<GameTask, CardIconItem>)RemovedCardIconHandler,
+            (Action<GameTask, List<Card>, Vector3>)ApprovedPendingCardPlaceHandler,
             (Action<GameTask, Card>)CancelledPendingCardPlaceHandler,
             (Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler,
             (Action<GameTask, HolderType>)MarkerCancelHandler,
@@ -246,6 +250,11 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void TurnEndedHandler(GameTask task, bool isEndedByPlayer)
+    {
+        task.Complete();
+    }
+
     private void TableToggleHandler(GameTask task, bool value)
     {
         switch(task.State)
@@ -390,14 +399,18 @@ public class GameLogicManager : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                if(!_playerController.TableView.isTableVisible)
+                if (_playerController.IsTableVisible())
+                {
+                    _playerController.UpdateHandCardsStatus(true);
+                }
+                else
                 {
                     _playerController.EnableTableView(false);
                     _boardController.ToggleRayCastOfCards(false);
                     _boardController.ToggleRayCastOfMarkerHolders(false);
                     _campController.ToggleRayCastOfMarkerHolders(false);
                 }
-                task.StartHandler(_overlayController.GetCardInspectionScreenHandler(true), card);
+                task.StartHandler(_overlayController.GetCardInspectionScreenHandler(true), card, _playerController.IsTableVisible());
                 break;
             default:
                 task.Complete();
@@ -413,13 +426,51 @@ public class GameLogicManager : MonoBehaviour
                 task.StartHandler(_overlayController.GetCardInspectionScreenHandler(false));
                 break;
             default:
-                if(!_playerController.TableView.isTableVisible)
+                if(_playerController.IsTableVisible())
+                {
+                    _playerController.UpdateHandCardsStatus(false);
+                }
+                else
                 {
                     _playerController.EnableTableView(true);
                     _boardController.ToggleRayCastOfCards(true);
                     _boardController.ToggleRayCastOfMarkerHolders(true);
                     _campController.ToggleRayCastOfMarkerHolders(true);
                 }
+                task.Complete();
+                break;
+        }
+    }
+
+    private void CardIconSelectedHandler(GameTask task, int iconItemID)
+    {
+        _overlayController.UpdateInspectedCardIconsDisposeStatus(iconItemID);
+        _overlayController.CheckCardIconRemoveConditions(_playerController.HandView.HasDisposableCardsSelected());
+        task.Complete();
+    }
+
+    private void CardSelectedForDisposeHandler(GameTask task)
+    {
+        _overlayController.CheckCardIconRemoveConditions(_playerController.HandView.HasDisposableCardsSelected());
+        task.Complete();
+    }
+
+    private void RemovedCardIconHandler(GameTask task, CardIconItem item)
+    {
+        switch(task.State)
+        {
+            case 0:
+                _playerController.DisposeHandCardsHandler();
+                task.StartHandler(_overlayController.GetRemoveIconItemHandler(), item);
+                break;
+            case 1:
+                _playerController.RemoveCardIconItem(item);
+                task.StartHandler((Action<GameTask>)_playerController.CenterCardsInHandHandler);
+                break;
+            case 2:
+                task.StartHandler((Action<GameTask>)CardInspectionEndHandler);
+                break;
+            default:
                 task.Complete();
                 break;
         }
@@ -511,8 +562,11 @@ public class GameLogicManager : MonoBehaviour
         }
         else if (args.isHoverIn)
         {
-            _boardController.ShowMarkersAtBoard(sender as MarkerHolder, markers);
-            _playerController.ShowSelectedMarker(0, markers);
+            if(markers.Count > 0)
+            {
+                _boardController.ShowMarkersAtBoard(sender as MarkerHolder, markers);
+                _playerController.ShowSelectedMarker(0, markers);
+            }
         }
         else
         {

@@ -19,6 +19,11 @@ public class InfoView : MonoBehaviour
         return required <= _roadTokens;
     }
 
+    public bool HasEnoughCardPlacements()
+    {
+        return _cardPlacements < _maxCardPlacements;
+    }
+
     public void Init()
     {
         _roadTokens = 2;

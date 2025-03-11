@@ -64,7 +64,7 @@ public class PlayerController : UserController<PlayerTableView>
                 ToggleTable();
             }
         });
-        _turnEndButton.onClick.AddListener(() => Debug.Log("turn ended"));
+        _turnEndButton.onClick.AddListener(() => EndTurn(true));
         _campToggleButton.onClick.AddListener(() => ToggleCamp());
 
         _handScreenHitArea = transform.GetChild(4).GetComponent<HandScreenHitArea>();
@@ -79,6 +79,11 @@ public class PlayerController : UserController<PlayerTableView>
     public PlayerTableView TableView { get { return _tableView; } }
 
     public PlayerHandView HandView { get { return _handView; } }
+
+    public bool IsTableVisible()
+    {
+        return _tableView.isTableVisible;
+    }
 
     private void ToggleTable()
     {
@@ -136,21 +141,19 @@ public class PlayerController : UserController<PlayerTableView>
         return topIcons;
     }
 
-    public bool IsTableVisible()
-    {
-        return _tableView.isTableVisible;
-    }
-
     public void ToggleHitArea(CardType cardType)
     {
         draggingCardType = cardType;
-        if (cardType == CardType.Ground)
+        if(_infoView.HasEnoughCardPlacements())
         {
-            _tableView.TogglePrimaryHitAreas(true);
-        }
-        else if (cardType == CardType.Landscape)
-        {
-            _tableView.ToggleSecondaryHitArea(true);
+            if (cardType == CardType.Ground)
+            {
+                _tableView.TogglePrimaryHitAreas(true);
+            }
+            else if (cardType == CardType.Landscape)
+            {
+                _tableView.ToggleSecondaryHitArea(true);
+            }
         }
     }
 
@@ -544,5 +547,37 @@ public class PlayerController : UserController<PlayerTableView>
         _handScreenHitArea.ToggleHitAreaImage(isToggled);
         _handView.gameObject.SetActive(!isToggled);
         return isToggled ? dataCollection : null;
+    }
+
+    public void UpdateHandCardsStatus(bool isInspectionStarted)
+    {
+        if(isInspectionStarted)
+        {
+            _handView.transform.SetParent(transform.root);
+            _handView.ToggleDisposableFlagOnCards(true);
+            _handView.ToggleBehaviorFlagsOnCards(false);
+        }
+        else
+        {
+            _handView.transform.SetParent(transform);
+            _handView.transform.SetSiblingIndex(2);
+            _handView.ToggleDisposableFlagOnCards(false);
+            _handView.ToggleBehaviorFlagsOnCards(true);
+            _handView.ResetIsInspectedFlagOnCard();
+        }
+    }
+
+    public void DisposeHandCardsHandler()
+    {
+        List<Card> cards = _handView.GetDisposableCards();
+        cards.ForEach(card => Destroy(card.gameObject)); // play card destroy anim
+    }
+
+    public void RemoveCardIconItem(CardIconItem item) //todo update icon layout on card
+    {
+        Card card = _handView.GetInspectedCard();
+        card.RemoveRequirementsFromCardData(item);
+        card.CardIconItemsView.DeleteIconItemByID(item.ID);
+        card.CardIconItemsView.PositionRequiredIconItems();
     }
 }

@@ -16,6 +16,7 @@ public class GameSettings
     public float cardsInHandScreenFadeSpeed = 0.2f;
     public float fakeCardFadeDelay = 0.05f;
     public float fakeCardFadeSpeed = 0.1f;
+    public float fakeCardIconItemDelete = 1f;
     public float cardInspectionFlipDuration = 1f;
     public float displayIconHorizontalSlideSpeed = 0.5f;
     public float displayIconVerticalSlideSpeed = 0.5f;

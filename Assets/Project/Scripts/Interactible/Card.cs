@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
+using static UnityEditor.Progress;
 
 public enum CardType
 {
@@ -57,8 +58,11 @@ public enum CardStatus
 public class Card : Interactable
 {
     public CardStatus cardStatus;
-    public Image highlightFrame; // refactor this
+    public Image highlightFrame;
     public bool isSelected;
+    public bool selectedToDispose;
+    public bool isDisposable;
+    public bool isInspected;
     public bool canMove;
     public bool canHover;
     public float hoverOriginY;
@@ -89,8 +93,8 @@ public class Card : Interactable
         _mainImage = GetComponent<Image>();
         _mainImage.sprite = cardBack;
         highlightFrame = transform.GetChild(0).GetComponent<Image>();
-        highlightFrame.color = Color.green;
-        highlightFrame.gameObject.SetActive(false);
+        highlightFrame.color = Color.red;
+        ToggleHighlight(false);
         gameObject.SetActive(false);
     }
 
@@ -107,6 +111,8 @@ public class Card : Interactable
     public Sprite CardFront { get { return _cardFront; } }
 
     public Sprite CardBack { get { return _cardBack; } }
+
+    public CardIconItemsView CardIconItemsView {  get { return _iconItemsView; } }
 
     public override void OnDrag(PointerEventData eventData)
     {
@@ -158,7 +164,7 @@ public class Card : Interactable
 
     public override void OnPointerClick(PointerEventData eventData)
     {
-        if (eventData.button == PointerEventData.InputButton.Right)
+        if (eventData.button == PointerEventData.InputButton.Right && !isSelected && !isDisposable)
         {
             if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
@@ -170,30 +176,55 @@ public class Card : Interactable
                 {
                     transform.SetParent(_parent);
                 }
+                ToggleIsInspectedFlag(true);
                 StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
             }
         }
 
-        if (eventData.button == PointerEventData.InputButton.Left && isSelected)
+        if (eventData.button == PointerEventData.InputButton.Left)
         {
-            transform.SetParent(_parent);
-            _canInspect = false;
-            highlightFrame.gameObject.SetActive(false);
-            highlightFrame.color = Color.green;
-            _zoomSequence.Kill();
-            transform.localScale = new Vector3(1f, 1f, 1f);
-            StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
+            if(isSelected)
+            {
+                transform.SetParent(_parent);
+                ToggleCanInspectFlag(false);
+                ToggleHighlight(false);
+                _zoomSequence.Kill();
+                transform.localScale = new Vector3(1f, 1f, 1f);
+                StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
+            }
+            else if(isDisposable && !isInspected)
+            {
+                selectedToDispose = !selectedToDispose;
+                ToggleHighlight(selectedToDispose);
+                StartEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
+            }
         }
     }
 
-    public void HighlightCard(bool value)
+    private void ToggleHighlight(bool value)
     {
         highlightFrame.gameObject.SetActive(value);
+    }
+
+    public void ResetDisposeSelection()
+    {
+        selectedToDispose = false;
+        ToggleHighlight(false);
     }
 
     public void ToggleSelection(bool value)
     {
         isSelected = value;
+    }
+
+    public void ToggleCanInspectFlag(bool value)
+    {
+        _canInspect = value;
+    }
+
+    public void ToggleIsInspectedFlag(bool value)
+    {
+        isInspected = value;
     }
 
     public void SetParentTransform(Transform transform)
@@ -212,17 +243,6 @@ public class Card : Interactable
         _iconItemsView.Toggle(value);
     }
 
-    public Vector3 GetScorePosition()
-    {
-        _iconItemsView.ToggleScoreItem(false);
-        return _iconItemsView.GetScoreItemPosition();
-    }
-
-    public void ToggleIconsRaycast(bool value)
-    {
-        _iconItemsView.ToggleRequiredIconsRaycast(value);
-    }
-
     public override void OnPointerEnter(PointerEventData eventData)
     {
         if (cardStatus == CardStatus.IN_HAND && canHover)
@@ -230,15 +250,9 @@ public class Card : Interactable
             MoveCard(hoverTargetY, 0.4f);
         }
 
-        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
-        {
-            HighlightCard(true);
-        }
-
         if (isSelected)
         {
-            HighlightCard(true);
-            highlightFrame.GetComponent<Image>().color = Color.red;
+            ToggleHighlight(true);
         }
 
         if (_canInspect)
@@ -254,14 +268,9 @@ public class Card : Interactable
             MoveCard(hoverOriginY, 0.2f);
         }
 
-        if (Array.Exists(new[] { CardStatus.IN_HAND, CardStatus.PENDING_ON_TABLE }, status => status == cardStatus) && !canHover)
-        {
-            HighlightCard(false);
-        }
-
         if (isSelected)
         {
-            HighlightCard(false);
+            ToggleHighlight(false);
         }
 
         if (_canInspect)
@@ -287,8 +296,41 @@ public class Card : Interactable
         float target = value ? 1.2f : 1f;
         float duration = value ? 0.5f : 0.2f;
         _zoomSequence = DOTween.Sequence();
-
         _zoomSequence.Append(transform.DOScale(target, duration));
+    }
+
+    public void RemoveRequirementsFromCardData(CardIconItem item)
+    {
+        switch(item.ItemType)
+        {
+            case IconItemType.SINGLE:
+                _data.requirements = UpdateDataIcons(item.Icons, _data.requirements.ToList());
+                break;
+            case IconItemType.OPTIONAL:
+                _data.optionalRequirements = UpdateDataIcons(item.Icons, _data.optionalRequirements.ToList());
+                break;
+            default:
+                _data.adjacentRequirements = UpdateDataIcons(item.Icons, _data.adjacentRequirements.ToList());
+                break;
+        }
+    }
+
+    private CardIcon[] UpdateDataIcons(List<CardIcon> itemIcons, List<CardIcon> dataIcons)
+    {
+        int itemIconIndex = itemIcons.Count - 1;
+        for (int i = dataIcons.Count - 1; i >= 0; i--)
+        {
+            if ((int)dataIcons[i] == (int)itemIcons[itemIconIndex])
+            {
+                dataIcons.RemoveAt(i);
+                itemIconIndex--;
+                if (itemIconIndex < 0)
+                {
+                    break;
+                }
+            }
+        }
+        return dataIcons.ToArray();
     }
 
     public void MoveCard(float endYvalue, float duration)
@@ -336,7 +378,7 @@ public class Card : Interactable
         {
             transform.SetParent(_parent);
             transform.SetAsFirstSibling();
-            _canInspect = true;
+            ToggleCanInspectFlag(true);
         });
     }
 
