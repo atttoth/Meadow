@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TMPro;
 using UnityEngine;
+using UnityEngine.U2D;
 using UnityEngine.UI;
 using static GameTask;
 
@@ -57,6 +58,7 @@ public class OverlayController : GameLogicEvent
         switch (task.State)
         {
             case 0:
+                SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
                 float cardScoreDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreDelay;
                 float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
                 int duration = (int)(((cards.Count - 1) * cardScoreDelay + speed) * 1000);
@@ -67,9 +69,9 @@ public class OverlayController : GameLogicEvent
                     Card card = cards.First();
                     cards.RemoveAt(0);
                     Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
+                    scoreTextPrefab.GetComponent<Image>().sprite = atlas.GetSprite("score_" + card.Data.score.ToString());
                     card.CardIconItemsView.ToggleScoreItem(false);
                     scoreTextPrefab.SetPositionAndRotation(card.CardIconItemsView.GetScoreItemPosition(), Quaternion.identity);
-                    scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = card.Data.score.ToString();
                     DOTween.Sequence().Append(scoreTextPrefab.DOMove(targetPosition, speed).SetEase(Ease.InOutQuart).SetDelay(delay)).OnComplete(() =>
                     {
                         StartEventHandler(GameLogicEventType.SCORE_COLLECTED, new object[] { card.Data.score });

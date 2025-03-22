@@ -25,7 +25,7 @@ public class MarkerActionScreen : MonoBehaviour
             ScreenDisplayItem item = transform.GetChild(1 + i).GetComponent<ScreenDisplayItem>();
             item.Init();
             item.type = (MarkerAction)i;
-            item.mainImage.sprite = atlas.GetSprite(i.ToString());
+            item.mainImage.sprite = atlas.GetSprite("action_" + i.ToString());
             _actionIconItems.Add(item);
         }
         return _actionIconItems.Select(item => item.button).ToList();

@@ -59,7 +59,7 @@ public class Marker : Interactable
         _mainImage = GetComponent<Image>();
         action = (MarkerAction)ID;
         actionIcon = transform.GetChild(1).GetComponent<Image>();
-        actionIcon.sprite = atlas.GetSprite(index.ToString());
+        actionIcon.sprite = atlas.GetSprite("action_" + index.ToString());
     }
 
     public override void OnPointerClick(PointerEventData eventData)

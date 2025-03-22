@@ -33,16 +33,16 @@ public class InfoView : MonoBehaviour
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         Transform roadTokeItem = transform.GetChild(0);
         _roadTokensText = roadTokeItem.GetChild(0).GetComponent<TextMeshProUGUI>();
-        roadTokeItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("1");
+        roadTokeItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("action_1");
 
         Transform cardPlacementItem = transform.GetChild(1);
         _remainingCardPlacementsText = cardPlacementItem.GetChild(0).GetComponent<TextMeshProUGUI>();
-        cardPlacementItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("3");
+        cardPlacementItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("action_3");
 
         Transform scoreItem = transform.GetChild(2);
-        _totalScoreText = scoreItem.GetChild(0).GetComponent<TextMeshProUGUI>();
-        scoreTransform = scoreItem.GetChild(1);
-        scoreTransform.GetComponent<Image>().sprite = atlas.GetSprite("21");
+        _totalScoreText = scoreItem.GetChild(1).GetComponent<TextMeshProUGUI>();
+        scoreTransform = scoreItem.GetChild(0);
+        scoreTransform.GetComponent<Image>().sprite = atlas.GetSprite("score");
 
         UpdateRoadTokensText();
         UpdateCardPlacementsText();

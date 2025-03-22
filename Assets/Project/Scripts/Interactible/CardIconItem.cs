@@ -39,12 +39,13 @@ public class CardIconItem : Interactable
         if (itemType == IconItemType.SCORE)
         {
             Image scoreImage = iconsParentRect.GetChild(0).GetComponent<Image>();
-            scoreImage.sprite = atlas.GetSprite(score.ToString()); // add text sprite
+            scoreImage.sprite = atlas.GetSprite("score_" + score.ToString());
         }
         else
         {
             _icons = icons;
             _itemType = itemType;
+            _raycastTargetImage.sprite = atlas.GetSprite(GetBackgroundSpriteNameOfType());
             Image icon1 = iconsParentRect.GetChild(0).GetComponent<Image>();
             icon1.GetComponent<RectTransform>().sizeDelta = new(iconDimension, iconDimension);
             icon1.sprite = atlas.GetSprite(((int)icons[0]).ToString());
@@ -57,6 +58,17 @@ public class CardIconItem : Interactable
             }
         }
         iconsParentRect.gameObject.SetActive(true);
+    }
+
+    private string GetBackgroundSpriteNameOfType()
+    {
+        switch(_itemType)
+        {
+            case IconItemType.OPTIONAL: return "bg_optional";
+            case IconItemType.ADJACENT: return "bg_adjacent";
+            case IconItemType.OPTIONAL_AND_ADJACENT: return "bg_optionalAndAdjacent";
+            default: return "bg_single";
+        }
     }
 
     public override void OnPointerClick(PointerEventData eventData)

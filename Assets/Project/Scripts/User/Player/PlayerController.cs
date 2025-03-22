@@ -42,13 +42,22 @@ public class PlayerController : UserController<PlayerTableView>
         Transform turnEndButtonTransform = transform.GetChild(0);
         turnEndButtonTransform.GetComponent<Image>().sprite = atlas.GetSprite("endTurn_base");
         _turnEndButton = turnEndButtonTransform.GetComponent<Button>();
-        SpriteState spriteState = _turnEndButton.spriteState;
-        spriteState.selectedSprite = atlas.GetSprite("endTurn_base");
-        spriteState.highlightedSprite = atlas.GetSprite("endTurn_highlighted");
-        spriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
-        spriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
-        _turnEndButton.spriteState = spriteState;
-        _campToggleButton = _infoView.transform.GetChild(3).GetComponent<Button>();
+        SpriteState turnEndSpriteState = _turnEndButton.spriteState;
+        turnEndSpriteState.selectedSprite = atlas.GetSprite("endTurn_base");
+        turnEndSpriteState.highlightedSprite = atlas.GetSprite("endTurn_highlighted");
+        turnEndSpriteState.pressedSprite = atlas.GetSprite("endTurn_highlighted");
+        turnEndSpriteState.disabledSprite = atlas.GetSprite("endTurn_disabled");
+        _turnEndButton.spriteState = turnEndSpriteState;
+
+        Transform campToggleButtonTransform = _infoView.transform.GetChild(3);
+        campToggleButtonTransform.GetComponent<Image>().sprite = atlas.GetSprite("campfire_base");
+        _campToggleButton = campToggleButtonTransform.GetComponent<Button>();
+        SpriteState campToggleSpriteState = _campToggleButton.spriteState;
+        campToggleSpriteState.selectedSprite = atlas.GetSprite("campfire_base");
+        campToggleSpriteState.highlightedSprite = atlas.GetSprite("campfire_highlighted");
+        campToggleSpriteState.pressedSprite = atlas.GetSprite("campfire_base");
+        campToggleSpriteState.disabledSprite = atlas.GetSprite("campfire_disabled");
+        _campToggleButton.spriteState = campToggleSpriteState;
 
         _tableToggleButton.onClick.AddListener(() => ToggleTable());
         _tableApproveButton.onClick.AddListener(() =>

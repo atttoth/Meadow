@@ -7,7 +7,7 @@ public class CardIconItemsView : MonoBehaviour
 {
     private static int ITEM_INDEX = 0;
     private readonly static float TOP_ICON_DIMENSION = 40f;
-    private readonly static float REQUIRED_ICON_DIMENSION = 20f;
+    private readonly static float REQUIRED_ICON_DIMENSION = 25f;
 
     private CardIconItemsLayout _iconItemsLayout;
     private Holder _topIconItemsHolder;
@@ -36,7 +36,10 @@ public class CardIconItemsView : MonoBehaviour
         {
             _topIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
             _requiredIconItemsHolder.transform.GetComponentsInChildren<CardIconItem>().ToList().ForEach(item => Destroy(item.gameObject));
-            Destroy(_scoreItem.gameObject);
+            if(_scoreItem)
+            {
+                Destroy(_scoreItem.gameObject);
+            }
         }
         _topIconItemsHolder.Init(-1, HolderType.CardIcon);
         _requiredIconItemsHolder.Init(-1, HolderType.CardIcon);
