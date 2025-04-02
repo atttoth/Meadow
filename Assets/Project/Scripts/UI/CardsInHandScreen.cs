@@ -88,7 +88,7 @@ public class CardsInHandScreen : MonoBehaviour
                     _showSequences.Clear();
                 }
                 SetupFakeCards(dataCollection);
-                float screenFadeSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardsInHandScreenFadeSpeed;
+                float screenFadeSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardsInHandScreenFadeSpeed;
                 Color color = _blackOverlay.color;
                 color.a = 0f;
                 _blackOverlay.color = color;
@@ -97,8 +97,8 @@ public class CardsInHandScreen : MonoBehaviour
                 task.StartDelayMs((int)(screenFadeSpeed * 1000));
                 break;
             case 1:
-                float fadeDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.fakeCardFadeDelay;
-                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.fakeCardFadeSpeed;
+                float fadeDelay = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardFadeDelay;
+                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardFadeSpeed;
                 int i = 0;
                 while (_activeFakeCards.Count > i)
                 {

@@ -14,6 +14,7 @@ public class OverlayController : GameLogicEvent
     private MarkerActionScreen _markerActionScreen;
     private DeckSelectionScreen _deckSelectionScreen;
     private ScoreCollectionScreen _scoreCollectionScreen;
+    private NextRoundScreen _nextRoundScreen;
     private CardsInHandScreen _cardsInHandScreen;
 
     public void CreateOverlay()
@@ -44,7 +45,10 @@ public class OverlayController : GameLogicEvent
         _scoreCollectionScreen = transform.GetChild(3).GetComponent<ScoreCollectionScreen>();
         _scoreCollectionScreen.Init();
 
-        _cardsInHandScreen = transform.GetChild(4).GetComponent<CardsInHandScreen>();
+        _nextRoundScreen = transform.GetChild(4).GetComponent<NextRoundScreen>();
+        _nextRoundScreen.Init();
+
+        _cardsInHandScreen = transform.GetChild(5).GetComponent<CardsInHandScreen>();
         _cardsInHandScreen.Init();
     }
 
@@ -59,8 +63,8 @@ public class OverlayController : GameLogicEvent
         {
             case 0:
                 SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-                float cardScoreDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreDelay;
-                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
+                float cardScoreDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreDelay;
+                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreCollectingSpeed;
                 int duration = (int)(((cards.Count - 1) * cardScoreDelay + speed) * 1000);
                 int i = 0;
                 while (cards.Count > 0)
@@ -92,7 +96,7 @@ public class OverlayController : GameLogicEvent
         switch (task.State)
         {
             case 0:
-                float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardScoreCollectingSpeed;
+                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreCollectingSpeed;
                 int duration = (int)(speed * 1000);
                 Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
                 scoreTextPrefab.SetPositionAndRotation(originPosition, Quaternion.identity);
@@ -138,6 +142,11 @@ public class OverlayController : GameLogicEvent
     public Delegate GetCardInspectionScreenHandler(bool isShow)
     {
         return isShow ? (Action<GameTask, Card, bool>)_cardInspectionScreen.ShowCardHandler : (Action<GameTask>)_cardInspectionScreen.HideCardHandler;
+    }
+
+    public Delegate GetNextRoundScreenHandler()
+    {
+        return (Action<GameTask>)_nextRoundScreen.StartShowHandler;
     }
 
     public Delegate GetHandScreenToggleHandler(bool isToggled)

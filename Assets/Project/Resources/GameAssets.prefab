@@ -45,6 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cardDataJson: {fileID: 4900000, guid: aa5b2f5fe717cc14e8691dc879f4f2c4, type: 3}
+  npcControllerPrefab: {fileID: 2574006946091603895, guid: 3acfdfef33f9780478f2d1d93c21bee6, type: 3}
   deckPrefab: {fileID: 507146776534277429, guid: 5c7562ab37821bd4dadba068928a28a2, type: 3}
   cardPrefab: {fileID: 6090333228907795711, guid: 3cf8631f39959c3498134d201016f7eb, type: 3}
   topIconsHolderPrefab: {fileID: 1344820618171853396, guid: 19a93bcf1fadf204d9fd833fa70e2e9e, type: 3}

@@ -1,3 +1,4 @@
+using System.Linq;
 using TMPro;
 using UnityEngine;
 using UnityEngine.U2D;
@@ -5,7 +6,7 @@ using UnityEngine.UI;
 
 public class InfoView : MonoBehaviour
 {
-    public Transform scoreTransform;
+    [HideInInspector]public Transform scoreTransform;
     protected TextMeshProUGUI _roadTokensText;
     protected TextMeshProUGUI _remainingCardPlacementsText;
     protected TextMeshProUGUI _totalScoreText;
@@ -26,44 +27,66 @@ public class InfoView : MonoBehaviour
 
     public void Init()
     {
-        _roadTokens = 2;
-        _maxCardPlacements = 1;
-        _cardPlacements = 0;
-        _totalScore = 0;
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         Transform roadTokeItem = transform.GetChild(0);
-        _roadTokensText = roadTokeItem.GetChild(0).GetComponent<TextMeshProUGUI>();
-        roadTokeItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("action_1");
+        roadTokeItem.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("action_1");
+        _roadTokensText = roadTokeItem.GetChild(1).GetComponent<TextMeshProUGUI>();
 
         Transform cardPlacementItem = transform.GetChild(1);
-        _remainingCardPlacementsText = cardPlacementItem.GetChild(0).GetComponent<TextMeshProUGUI>();
-        cardPlacementItem.GetChild(1).GetComponent<Image>().sprite = atlas.GetSprite("action_3");
+        cardPlacementItem.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("action_3");
+        _remainingCardPlacementsText = cardPlacementItem.GetChild(1).GetComponent<TextMeshProUGUI>();
 
         Transform scoreItem = transform.GetChild(2);
         _totalScoreText = scoreItem.GetChild(1).GetComponent<TextMeshProUGUI>();
         scoreTransform = scoreItem.GetChild(0);
         scoreTransform.GetComponent<Image>().sprite = atlas.GetSprite("score");
 
-        UpdateRoadTokensText();
-        UpdateCardPlacementsText();
-        RegisterScore(0);
+        SetRoadTokens(2);
+        SetMaxCardPlacement(1);
+        SetCardPlacement(0);
+        SetScore(0);
     }
 
-    public void RegisterScore(int score)
+    private void SetScore(int score)
+    {
+        _totalScore = score;
+        _totalScoreText.text = _totalScore.ToString();
+    }
+
+    public void IncrementScore(int score)
     {
         _totalScore += score;
         _totalScoreText.text = _totalScore.ToString();
     }
 
-    public void IncrementNumberOfCardPlacements(params object[] args)
+    private void IncrementNumberOfCardPlacements()
     {
         _cardPlacements++;
         UpdateCardPlacementsText();
     }
 
-    public void DecrementNumberOfCardPlacements(object[] args)
+    private void DecrementNumberOfCardPlacements()
     {
         _cardPlacements--;
+        UpdateCardPlacementsText();
+    }
+
+    public void UpdateNumberOfCardPlacementsAction(object[] args)
+    {
+        bool isActionCancelled = (bool)args[1];
+        if(isActionCancelled)
+        {
+            DecrementNumberOfCardPlacements();
+        }
+        else
+        {
+            IncrementNumberOfCardPlacements();
+        }
+    }
+
+    public void SetCardPlacement(int value)
+    {
+        _cardPlacements = value;
         UpdateCardPlacementsText();
     }
 
@@ -78,10 +101,40 @@ public class InfoView : MonoBehaviour
         _remainingCardPlacementsText.text = $"{_cardPlacements} / {_maxCardPlacements}";
     }
 
+    private void SetRoadTokens(int value)
+    {
+        _roadTokens = value;
+        UpdateRoadTokensText();
+    }
+
     public void AddRoadTokens(int value)
     {
         _roadTokens += value;
         UpdateRoadTokensText();
+    }
+
+    private void RemoveRoadTokens(int value)
+    {
+        _roadTokens -= value;
+        UpdateRoadTokensText();
+    }
+
+    public void UpdateRoadTokensAction(object[] args)
+    {
+        bool isActionCancelled = (bool)args[1];
+        Card card = (Card)args[3];
+        if (card.Data.cardType == CardType.Landscape)
+        {
+            int numOfRoadIcons = card.Data.requirements.ToList().Where(icon => CardIcon.RoadToken == icon).Count();
+            if (isActionCancelled)
+            {
+                AddRoadTokens(numOfRoadIcons);
+            }
+            else
+            {
+                RemoveRoadTokens(numOfRoadIcons);
+            }
+        }
     }
 
     private void UpdateRoadTokensText()

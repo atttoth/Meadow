@@ -17,6 +17,8 @@ public abstract class TableView : MonoBehaviour
     protected List<CardHolder> _activeSecondaryCardHolders;
     protected Transform _secondaryCardHolderContainer;
 
+    public abstract void Init();
+
     public List<CardHolder> ActivePrimaryCardHolders { get { return _activePrimaryCardHolders; } }
 
     public List<List<CardIcon>> GetAdjacentHolderIcons(CardHolder holder)

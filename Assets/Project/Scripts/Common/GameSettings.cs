@@ -23,4 +23,5 @@ public class GameSettings
     public float tableViewOpenSpeed = 0.5f;
     public float tableHolderCenteringSpeed = 0.3f;
     public float cardPlacementSpeed = 0.3f;
+    public float overlayScreenFadeDuration = 1f;
 }

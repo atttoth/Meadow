@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-public class PlayerHandView : MonoBehaviour
+public class PlayerHandView : HandView
 {
     private static readonly int REQUIRED_NUM_OF_DISPOSABLE_CARDS = 2;
-    private List<Card> _cards;
     private HandLayout _handLayout;
     private bool _isHandDefault;
 
-    public void Init()
+    public override void Init()
     {
-        _cards = new();
+        base.Init();
         float cardWidth = GameAssets.Instance.cardPrefab.GetComponent<RectTransform>().rect.width;
         _handLayout = new HandLayout(cardWidth);
         _isHandDefault = true;
@@ -28,13 +27,13 @@ public class PlayerHandView : MonoBehaviour
         return _cards.Select(card => card.Data).ToList();
     }
 
-    public void AddCardHandler(GameTask task, Card card)
+    public override void AddCardHandler(GameTask task, Card card)
     {
         switch(task.State)
         {
             case 0:
-                float drawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromBoard;
-                _cards.Add(card);
+                float drawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromBoard;
+                AddCard(card);
                 float[] positions = GetLayoutPositions();
                 MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
                 float newCardPosition = positions[^1];
@@ -56,14 +55,18 @@ public class PlayerHandView : MonoBehaviour
         MoveCardsHorizontallyInHand(GetLayoutPositions());
     }
 
-    public void RemoveCardFromHand(params object[] args)
+    public void PlaceCardFromHandAction(object[] args)
     {
-        _cards.Remove((Card)args[2]);
-    }
-
-    public void RemoveCardFromHandRewind(object[] args)
-    {
-        _cards.Add((Card)args[2]);
+        bool isActionCancelled = (bool)args[1];
+        Card card = (Card)args[3];
+        if (isActionCancelled)
+        {
+            AddCard(card);
+        }
+        else
+        {
+            RemoveCard(card);
+        }
     }
 
     public float[] GetLayoutPositions()
@@ -100,19 +103,12 @@ public class PlayerHandView : MonoBehaviour
 
     public void ToggleBehaviorFlagsOnCards(bool value)
     {
+        bool flag = !value;
         _cards.ForEach(card =>
         {
-            card.canMove = value;
-            if(!value)
-            {
-                card.ToggleCanInspectFlag(false);
-            }
+            card.canMove = flag;
+            card.ToggleCanInspectFlag(flag);
         });
-    }
-
-    public void ResetIsInspectedFlagOnCard()
-    {
-        _cards.ForEach(card => card.ToggleIsInspectedFlag(false));
     }
 
     public bool HasDisposableCardsSelected()

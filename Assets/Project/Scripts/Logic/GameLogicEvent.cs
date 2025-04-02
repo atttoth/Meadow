@@ -3,6 +3,7 @@ using UnityEngine;
 
 public enum GameLogicEventType
 {
+    TURN_STARTED,
     TURN_ENDED,
     TABLE_TOGGLED,
     CAMP_ICONS_SELECTED,
@@ -33,7 +34,7 @@ public class GameLogicEvent : MonoBehaviour
 
     private void Start()
     {
-        _logicEventHandler += ReferenceManager.Instance.gameLogicManager.OnLogicEvent;
+        _logicEventHandler += ReferenceManager.Instance.gameLogicController.OnLogicEvent;
     }
 
     protected void StartEventHandler(GameLogicEventType type, object[] args)

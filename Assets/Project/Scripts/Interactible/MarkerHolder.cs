@@ -26,7 +26,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     public override void Init(int id, HolderType type)
     {
         base.Init(id, type);
-        _interactionEventHandler += ReferenceManager.Instance.gameLogicManager.OnMarkerHolderInteraction;
+        _interactionEventHandler += ReferenceManager.Instance.gameLogicController.OnMarkerHolderInteraction;
         _mainImage = GetComponent<Image>();
         switch (transform.parent.gameObject.tag)
         {

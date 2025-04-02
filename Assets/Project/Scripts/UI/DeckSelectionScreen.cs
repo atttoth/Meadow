@@ -90,14 +90,14 @@ public class DeckSelectionScreen : MonoBehaviour
                 task.StartDelayMs(500);
                 break;
             case 1:
-                int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
+                int duration = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000);
                 cards.ForEach(card => card.FlipDeckCard(true));
                 task.StartDelayMs(duration);
                 break;
             case 2:
                 cards.ForEach(card =>
                 {
-                    card.ToggleIcons(true);
+                    card.CardIconItemsView.Toggle(true);
                     card.ToggleSelection(true);
                 });
                 task.StartDelayMs(0);
@@ -113,10 +113,10 @@ public class DeckSelectionScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                int duration = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000);
+                int duration = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000);
                 cards.ForEach(card =>
                 {
-                    card.ToggleIcons(false);
+                    card.CardIconItemsView.Toggle(false);
                     card.FlipDeckCard(false);
                 });
                 task.StartDelayMs(duration);

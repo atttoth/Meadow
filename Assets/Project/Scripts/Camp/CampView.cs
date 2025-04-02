@@ -118,7 +118,7 @@ public class CampView : MonoBehaviour
         selectionsLeft--;
         _selectedItems.Add(item);
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         Sequence iconFlip = DOTween.Sequence();
         iconFlip.Append(item.transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(item.transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => item.mainImage.sprite = atlas.GetSprite(((int)((CardIcon)item.type)).ToString())));
         iconFlip.Append(item.transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
@@ -130,13 +130,13 @@ public class CampView : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                float iconFadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconFadeDuration;
+                float iconFadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.campIconFadeDuration;
                 _campItemSelection.Except(_selectedItems).ToList().ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(0f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;
             case 1:
                 _selectedItems.Sort((a, b) => (a.transform.position.x).CompareTo(b.transform.position.x));
-                float iconGroupPositionSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconGroupPositionSpeed;
+                float iconGroupPositionSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.campIconGroupPositionSpeed;
                 Rect screenRect = _display.rect;
                 Rect itemRect = _selectedItems.First().GetComponent<RectTransform>().rect;
                 float gap = 40f;
@@ -177,8 +177,8 @@ public class CampView : MonoBehaviour
                     buttonItem.type = new List<CardIcon>() { icon1, icon2 };
                 }
 
-                float iconPositionSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconSinglePositionSpeed;
-                float iconPositionDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconPositionDelay;
+                float iconPositionSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.campIconSinglePositionSpeed;
+                float iconPositionDelay = ReferenceManager.Instance.gameLogicController.GameSettings.campIconPositionDelay;
                 int duration = (int)(((_selectedItems.Count - 1) * iconPositionDelay + iconPositionSpeed) * 1000);
                 int index = 0;
                 while (_selectedItems.Count > index) // position icons
@@ -218,7 +218,7 @@ public class CampView : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                float iconFadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.campIconFadeDuration;
+                float iconFadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.campIconFadeDuration;
                 _scoreButtonItems.ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(1f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;

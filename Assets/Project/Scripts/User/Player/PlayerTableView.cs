@@ -21,7 +21,7 @@ public class PlayerTableView : TableView
     private TableLayout _tableLayout;
     public bool isTableVisible;
 
-    public void Init()
+    public override void Init()
     {
         _primaryTableContentScroll = transform.GetChild(0).GetChild(0).GetComponent<ScrollRect>();
         _primaryCardHolderPoolContainer = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(1); // .../TableContents/Primary/Content/CardHolderPool
@@ -141,31 +141,32 @@ public class PlayerTableView : TableView
         _secondaryHitArea.Toggle(false);
     }
 
-    public void UpdateHitAreaSize(params object[] args)
+    public void UpdateHitAreaSizeAction(object[] args)
     {
-        Card card = (Card)args[2];
+        bool isActionCancelled = (bool)args[1];
+        Card card = (Card)args[3];
         CardType cardType = card.Data.cardType;
-        if (cardType == CardType.Ground && _activePrimaryCardHolders.Count < _MAX_PRIMARY_HOLDER_NUM)
+        if(isActionCancelled)
         {
-            CalculatePrimaryHitAreaSizeAndPosition(cardType, 1);
+            if (cardType == CardType.Ground)
+            {
+                CalculatePrimaryHitAreaSizeAndPosition(cardType, -1);
+            }
+            else if (cardType == CardType.Landscape)
+            {
+                CalculateSecondaryHitAreaSizeAndPosition(cardType, -1);
+            }
         }
-        else if(cardType == CardType.Landscape && _activeSecondaryCardHolders.Count < _MAX_SECONDARY_HOLDER_NUM)
+        else
         {
-            CalculateSecondaryHitAreaSizeAndPosition(cardType, 1);
-        }
-    }
-
-    public void UpdateHitAreaSizeRewind(object[] args)
-    {
-        Card card = (Card)args[2];
-        CardType cardType = card.Data.cardType;
-        if (cardType == CardType.Ground)
-        {
-            CalculatePrimaryHitAreaSizeAndPosition(cardType, -1);
-        }
-        else if(cardType == CardType.Landscape)
-        {
-            CalculateSecondaryHitAreaSizeAndPosition(cardType, -1);
+            if (cardType == CardType.Ground && _activePrimaryCardHolders.Count < _MAX_PRIMARY_HOLDER_NUM)
+            {
+                CalculatePrimaryHitAreaSizeAndPosition(cardType, 1);
+            }
+            else if (cardType == CardType.Landscape && _activeSecondaryCardHolders.Count < _MAX_SECONDARY_HOLDER_NUM)
+            {
+                CalculateSecondaryHitAreaSizeAndPosition(cardType, 1);
+            }
         }
     }
 
@@ -206,7 +207,7 @@ public class PlayerTableView : TableView
 
     public void TogglePanel()
     {
-        float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableViewOpenSpeed;
+        float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableViewOpenSpeed;
         isTableVisible = !isTableVisible;
         float posY = _tableLayout.GetTargetTableViewPosY(isTableVisible);
         if(isTableVisible)
@@ -222,44 +223,33 @@ public class PlayerTableView : TableView
         _approveButtonImage.color = isPendingAction ? Color.green : Color.black;
     }
 
-    public void ExpandHolderVertically(params object[] args)
+    public void AdjustHolderVerticallyAction(object[] args)
     {
-        CardHolder holder = (CardHolder)args[1];
+        CardHolder holder = (CardHolder)args[2];
         if (holder.holderSubType == HolderSubType.PRIMARY)
         {
+            bool isActionCancelled = (bool)args[1];
             RectTransform rect = holder.GetComponent<RectTransform>();
-            holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(1);
-            rect.sizeDelta = _tableLayout.GetUpdatedPrimaryHolderSize(rect, 1);
+            holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(isActionCancelled ? -1 : 1);
+            rect.sizeDelta = _tableLayout.GetUpdatedPrimaryHolderSize(rect, isActionCancelled ? -1 : 1);
         }
     }
 
-    public void ExpandHolderVerticallyRewind(object[] args)
+    public void RegisterCardPlacementAction(object[] args)
     {
-        CardHolder holder = (CardHolder)args[1];
-        if (holder.holderSubType == HolderSubType.PRIMARY)
+        bool isActionCancelled = (bool)args[1];
+        CardHolder holder = (CardHolder)args[2];
+        Card card = (Card)args[3];
+        if(isActionCancelled)
         {
-            RectTransform rect = holder.GetComponent<RectTransform>();
-            holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(-1);
-            rect.sizeDelta = _tableLayout.GetUpdatedPrimaryHolderSize(rect, -1);
+            holder.RemoveItemFromContentList(card);
         }
-    }
-
-    public void RegisterCardPlacement(params object[] args)
-    {
-        CardHolder holder = (CardHolder)args[1];
-        Card card = (Card)args[2];
-        holder.AddToContentList(card);
-        card.canMove = false;
-        card.cardStatus = CardStatus.PENDING_ON_TABLE;
-    }
-
-    public void RegisterCardPlacementRewind(object[] args)
-    {
-        CardHolder holder = (CardHolder)args[1];
-        Card card = (Card)args[2];
-        holder.RemoveItemFromContentList(card);
-        card.canMove = true;
-        card.cardStatus = CardStatus.IN_HAND;
+        else
+        {
+            holder.AddToContentList(card);
+        }
+        card.canMove = isActionCancelled;
+        card.cardStatus = isActionCancelled ? CardStatus.IN_HAND : CardStatus.PENDING_ON_TABLE;
     }
 
     public void PositionTableCard(Card card, int contentCount, float speed, float lastPosX)
@@ -291,7 +281,7 @@ public class PlayerTableView : TableView
     {
         if(_activePrimaryCardHolders.Count > 0)
         {
-            float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableHolderCenteringSpeed;
+            float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableHolderCenteringSpeed;
             float[] positions = _tableLayout.GetPrimaryCardHolderPositions(_activePrimaryCardHolders.Count);
             for (int i = 0; i < positions.Length; i++)
             {
@@ -304,7 +294,7 @@ public class PlayerTableView : TableView
 
     public void AlignSecondaryCardHoldersToLeft()
     {
-        float speed = ReferenceManager.Instance.gameLogicManager.GameSettings.tableHolderCenteringSpeed;
+        float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableHolderCenteringSpeed;
         for (int i = 0; i < _activeSecondaryCardHolders.Count; i++)
         {
             CardHolder holder = _activeSecondaryCardHolders[i];

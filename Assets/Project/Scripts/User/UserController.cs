@@ -1,21 +1,65 @@
+using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 
-public abstract class UserController<T> : GameLogicEvent where T : TableView
+public abstract class UserController : GameLogicEvent
 {
-    protected T _tableView;
+    [HideInInspector]public int userID;
+    protected UserControllerLayout _userControllerLayout;
+    protected TableView _tableView;
+    protected HandView _handView;
+    protected MarkerView _markerView;
     protected InfoView _infoView;
     protected IconDisplayView _iconDisplayView;
+    protected List<int> _campScoreTokens;
+    protected CanvasGroup _canvasGroup;
     protected Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
     protected Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
 
-    protected void EndTurn(bool isEndedByPlayer)
+    public virtual void CreateUser()
     {
-        StartEventHandler(GameLogicEventType.TURN_ENDED, new object[] { isEndedByPlayer });
+        _userControllerLayout = new UserControllerLayout();
+        if(userID > 0) // ignore player layout for now
+        {
+            Vector2[] screenPosition = _userControllerLayout.GetNpcControllerScreenPositionByUserID(userID);
+            GetComponent<RectTransform>().anchoredPosition = screenPosition[0];
+            _infoView.GetComponent<RectTransform>().anchoredPosition = screenPosition[1];
+        }
+        _canvasGroup = GetComponent<CanvasGroup>();
     }
 
-    public bool CanCardBePlaced(CardHolder holder, Card card)
+    public InfoView InfoView { get { return _infoView; } }
+
+    public MarkerView MarkerView { get { return _markerView; } }
+
+    public Delegate GetAddCardToHandHandler()
+    {
+        return (Action<GameTask, Card>)_handView.AddCardHandler;
+    }
+
+    public void StartTurn()
+    {
+        StartEventHandler(GameLogicEventType.TURN_STARTED, new object[0]);
+    }
+
+    public void EndTurn()
+    {
+        StartEventHandler(GameLogicEventType.TURN_ENDED, new object[0]);
+    }
+
+    public void Fade(bool value)
+    {
+        if(userID > 0)
+        {
+            float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+            float targetValue = value ? 1f : 0f;
+            DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
+        }
+    }
+
+    public bool TryPlaceCard(CardHolder holder, Card card)
     {
         if(!_infoView.HasEnoughCardPlacements())
         {
@@ -291,5 +335,54 @@ public abstract class UserController<T> : GameLogicEvent where T : TableView
             }
         }
         return false;
+    }
+
+    public void SetMarkerUsed()
+    {
+        _markerView.SetPlacedMarkerToUsed();
+        _markerView.IsMarkerConsumed = true;
+    }
+
+    public List<Marker> GetRemainingMarkers()
+    {
+        return _markerView.GetRemainingMarkers();
+    }
+
+    public void AddRoadTokensHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                _infoView.AddRoadTokens(2);
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void AddExtraCardPlacementHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                _infoView.SetMaxCardPlacement(2);
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void UpdateScore(int score)
+    {
+        _infoView.IncrementScore(score);
+    }
+
+    public void UpdateCampScoreTokens()
+    {
+        _campScoreTokens.RemoveAt(0);
     }
 }

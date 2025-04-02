@@ -11,6 +11,7 @@ public class CampController : GameLogicEvent
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
     private List<MarkerHolder> _markerHolders;
     private CampView _view;
+    private CanvasGroup _canvasGroup;
 
     public void CreateCamp()
     {
@@ -26,6 +27,7 @@ public class CampController : GameLogicEvent
         }
         _view = transform.GetChild(1).GetComponent<CampView>();
         _view.Init();
+        _canvasGroup = GetComponent<CanvasGroup>();
     }
 
     public void DisposeCampForRound()
@@ -94,7 +96,7 @@ public class CampController : GameLogicEvent
         switch (task.State)
         {
             case 0:
-                int delay1 = (int)(ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 1000); // wait for last icon to flip
+                int delay1 = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000); // wait for last icon to flip
                 task.StartDelayMs(delay1);
                 break;
             case 1:
@@ -140,8 +142,8 @@ public class CampController : GameLogicEvent
 
     public void Fade(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
+        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
         float targetValue = value ? 1f : 0f;
-        DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
+        DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 }

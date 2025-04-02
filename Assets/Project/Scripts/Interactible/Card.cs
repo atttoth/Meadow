@@ -65,6 +65,7 @@ public class Card : Interactable
     public bool isInspected;
     public bool canMove;
     public bool canHover;
+    public bool canScale;
     public float hoverOriginY;
     public float hoverTargetY;
 
@@ -73,7 +74,7 @@ public class Card : Interactable
     private Sprite _cardFront;
     private Sprite _cardBack;
     private Sequence _hoverSequence;
-    private Sequence _zoomSequence;
+    private Sequence _scaleSequence;
     private bool _canInspect;
     
     // to reset card position on invalid placement
@@ -170,13 +171,12 @@ public class Card : Interactable
             {
                 StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
             }
-            else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus))
+            else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus) && _canInspect)
             {
                 if(cardStatus == CardStatus.NONE)
                 {
                     transform.SetParent(_parent);
                 }
-                ToggleIsInspectedFlag(true);
                 StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
             }
         }
@@ -188,7 +188,8 @@ public class Card : Interactable
                 transform.SetParent(_parent);
                 ToggleCanInspectFlag(false);
                 ToggleHighlight(false);
-                _zoomSequence.Kill();
+                canScale = false;
+                _scaleSequence.Kill();
                 transform.localScale = new Vector3(1f, 1f, 1f);
                 StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
             }
@@ -238,11 +239,6 @@ public class Card : Interactable
         highlightFrame.raycastTarget = value;
     }
 
-    public void ToggleIcons(bool value)
-    {
-        _iconItemsView.Toggle(value);
-    }
-
     public override void OnPointerEnter(PointerEventData eventData)
     {
         if (cardStatus == CardStatus.IN_HAND && canHover)
@@ -255,9 +251,9 @@ public class Card : Interactable
             ToggleHighlight(true);
         }
 
-        if (_canInspect)
+        if (canScale)
         {
-            ZoomCard(true);
+            ScaleCard(true);
         }
     }
 
@@ -273,30 +269,29 @@ public class Card : Interactable
             ToggleHighlight(false);
         }
 
-        if (_canInspect)
+        if (canScale)
         {
-            ZoomCard(false);
+            ScaleCard(false);
         }
     }
 
-    private void ZoomCard(bool value)
+    private void ScaleCard(bool value)
     {
-        if (!value)
-        {
-            transform.SetParent(_parent);
-            _zoomSequence.Kill();
-        }
-
         if (value)
         {
             _parent = transform.parent;
             transform.SetParent(transform.root);
         }
+        else
+        {
+            transform.SetParent(_parent);
+            _scaleSequence.Kill();
+        }
 
         float target = value ? 1.2f : 1f;
         float duration = value ? 0.5f : 0.2f;
-        _zoomSequence = DOTween.Sequence();
-        _zoomSequence.Append(transform.DOScale(target, duration));
+        _scaleSequence = DOTween.Sequence();
+        _scaleSequence.Append(transform.DOScale(target, duration));
     }
 
     public void RemoveRequirementsFromCardData(CardIconItem item)
@@ -346,12 +341,13 @@ public class Card : Interactable
         float posY = canHover ? hoverTargetY : hoverOriginY;
         canHover = !canHover;
         canMove = !canMove;
+        ToggleCanInspectFlag(canMove);
         DOTween.Sequence().Append(transform.DOLocalMoveY(posY, 0.4f));
     }
 
     public void PlayDrawingAnimation(float delay, CardHolder holder, Transform cardDrawContainer)
     {
-        float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
+        float cardDrawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromDeck;
         _parent = holder.transform;
         gameObject.SetActive(true);
         canHover = false;
@@ -369,7 +365,7 @@ public class Card : Interactable
 
     private void FlipBoardCard(Transform cardDrawContainer)
     {
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         transform.SetParent(cardDrawContainer);
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardFront));
@@ -378,13 +374,13 @@ public class Card : Interactable
         {
             transform.SetParent(_parent);
             transform.SetAsFirstSibling();
-            ToggleCanInspectFlag(true);
+            canScale = true;
         });
     }
 
     public void FlipDeckCard(bool value)
     {
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
         Sprite sprite = value ? _cardFront : _cardBack;
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = sprite));

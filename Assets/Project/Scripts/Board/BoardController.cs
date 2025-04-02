@@ -1,11 +1,9 @@
 using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
-using UnityEngine.WSA;
 using static UnityEditor.Progress;
 
 public class BoardController : MonoBehaviour
@@ -15,6 +13,7 @@ public class BoardController : MonoBehaviour
     private Dictionary<int, List<MarkerHolder>> _markerHolders;
     private DeckController _deckController;
     private Transform _cardDrawContainer;
+    private CanvasGroup _canvasGroup;
 
     // drawing sequence
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
@@ -64,6 +63,7 @@ public class BoardController : MonoBehaviour
         _deckController = transform.GetChild(2).GetComponent<DeckController>();
         _deckController.Init();
         _cardDrawContainer = transform.GetChild(3).transform;
+        _canvasGroup = GetComponent<CanvasGroup>();
     }
 
     private void SaveTargetHoldersAndCards(DeckType activeDeckType)
@@ -109,9 +109,9 @@ public class BoardController : MonoBehaviour
                 int duration = 0;
                 if (_emptyHolders.Count > 0)
                 {
-                    float cardDrawDelay = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawDelayFromDeck;
-                    float cardDrawSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardDrawSpeedFromDeck;
-                    float cardRotationSpeed = ReferenceManager.Instance.gameLogicManager.GameSettings.cardRotationSpeedOnBoard;
+                    float cardDrawDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawDelayFromDeck;
+                    float cardDrawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromDeck;
+                    float cardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard;
                     duration = (int)(((_emptyHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
                     int i = 0;
                     while (_emptyHolders.Count > 0)
@@ -125,8 +125,8 @@ public class BoardController : MonoBehaviour
                 }
                 task.StartDelayMs(duration);
                 break;
-                case 2:
-                cards.ForEach(card => card.ToggleIcons(true));
+            case 2:
+                cards.ForEach(card => card.CardIconItemsView.Toggle(true));
                 task.StartDelayMs(0);
                 break;
             default:
@@ -317,22 +317,25 @@ public class BoardController : MonoBehaviour
         _deckController.ClearTopCards();
     }
 
-    public void Fade(bool value)
+    public void ToggleCanInspectFlagOfCards(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicManager.GameSettings.gameUIFadeDuration;
-        float targetValue = value ? 1f : 0f;
-        DOTween.Sequence().Append(GetComponent<Image>().DOFade(targetValue, fadeDuration));
         _cardHolders.Select(e => e.Value).ToList().ForEach(holders =>
         {
             holders.ForEach(holder =>
             {
-                if (!holder.IsEmpty())
+                if(!holder.IsEmpty())
                 {
                     Card card = (Card)holder.GetItemFromContentListByIndex(0);
-                    card.ToggleIcons(value);
-                    DOTween.Sequence().Append(card.GetComponent<Image>().DOFade(targetValue, fadeDuration));
+                    card.ToggleCanInspectFlag(value);
                 }
             });
         });
+    }
+
+    public void Fade(bool value)
+    {
+        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 1f : 0f;
+        DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 }

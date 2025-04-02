@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class CardInspectionScreen : MonoBehaviour
 {
     private InteractableScreen _interactableScreen;
+    private Card _inspectedCard;
     private Card _fakeCard;
     private RectTransform _fakeCardTransform;
     private Button _approveIconRemoveButton;
@@ -36,8 +37,10 @@ public class CardInspectionScreen : MonoBehaviour
         switch(task.State)
         {
             case 0:
+                _inspectedCard = card;
+                _inspectedCard.ToggleIsInspectedFlag(true);
                 _approveIconRemoveButton.enabled = true;
-                float duration = ReferenceManager.Instance.gameLogicManager.GameSettings.cardInspectionFlipDuration;
+                float duration = ReferenceManager.Instance.gameLogicController.GameSettings.cardInspectionFlipDuration;
                 float quarterOfDuration = duration * 0.25f;
                 Vector2 screenPosition = _interactableScreen.GetComponent<RectTransform>().anchoredPosition;
                 _fakeCardTransform.localScale = Vector3.one;
@@ -74,7 +77,7 @@ public class CardInspectionScreen : MonoBehaviour
                 task.StartDelayMs((int)duration * 1000);
                 break;
             case 1:
-                _fakeCard.ToggleIcons(true);
+                _fakeCard.CardIconItemsView.Toggle(true);
                 task.StartDelayMs(0);
                 break;
             default:
@@ -96,13 +99,15 @@ public class CardInspectionScreen : MonoBehaviour
                 ToggleIconRemoveButton(false);
                 ToggleRayCast(false);
                 _fakeCard.CardIconItemsView.ToggleRequiredIconsRaycast(false);
-                _fakeCard.ToggleIcons(false);
+                _fakeCard.CardIconItemsView.Toggle(false);
                 task.StartDelayMs(0);
                 break;
             case 1:
                 _fakeCard.gameObject.SetActive(false);
                 _fakeCard.MainImage.enabled = false;
                 _interactableScreen.MainImage.enabled = false;
+                _inspectedCard.ToggleIsInspectedFlag(false);
+                _inspectedCard = null;
                 task.StartDelayMs(0);
                 break;
             default:
@@ -116,7 +121,7 @@ public class CardInspectionScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float duration = ReferenceManager.Instance.gameLogicManager.GameSettings.fakeCardIconItemDelete;
+                float duration = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardIconItemDelete;
                 item.PlayDeleteAnimation();
                 task.StartDelayMs((int)duration * 1000);
                 break;

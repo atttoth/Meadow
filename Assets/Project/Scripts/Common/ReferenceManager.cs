@@ -4,6 +4,7 @@ public class ReferenceManager : MonoBehaviour
 {
     public static ReferenceManager Instance; // A static reference to the GameManager instance
     public GameLogicManager gameLogicManager;
+    public GameLogicController gameLogicController;
     public BoardController boardController;
     public PlayerController playerController;
     public CampController campController;

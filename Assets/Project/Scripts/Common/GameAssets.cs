@@ -29,6 +29,7 @@ public class GameAssets : MonoBehaviour
 
     public TextAsset cardDataJson;
 
+    public Transform npcControllerPrefab;
     public Transform deckPrefab;
     public Transform cardPrefab;
     public Transform topIconsHolderPrefab;

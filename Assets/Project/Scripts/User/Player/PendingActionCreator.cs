@@ -1,44 +1,46 @@
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
 public class PendingActionCreator
 {
-    public delegate void PendingActionItem(object[] args);
-    private readonly Dictionary<int, PendingActionItem[]> _actionItemsCollection;
-    private readonly Dictionary<int, object[]> _dataCollection; // index 0 in array should always represent pendingActionID
-    private readonly bool _canOnlyCancelLastAction;
+    public delegate void PendingActionFunction(object[] args);
+    private readonly Dictionary<int, PendingActionFunction[]> _actionFunctionsCollection;
+    private readonly Dictionary<int, object[]> _dataCollection; // in object array index 0 represents pendingActionID, index 1 represents isActionCancelled flag
+    private readonly bool _cancelLastActionOnly;
 
-    public PendingActionCreator(bool canOnlyCancelLastAction)
+    public PendingActionCreator(bool cancelLastActionOnly)
     {
-        _actionItemsCollection = new();
+        _actionFunctionsCollection = new();
         _dataCollection = new();
-        _canOnlyCancelLastAction = canOnlyCancelLastAction;
+        _cancelLastActionOnly = cancelLastActionOnly;
     }
 
     public int GetNumOfActions()
     {
-        return _actionItemsCollection.Count;
+        return _actionFunctionsCollection.Count;
     }
 
-    public void Create(PendingActionItem[] postActionItems, PendingActionItem[] prevActionItems, params object[] args)
+    public void Create(PendingActionFunction[] actionFunctions, PendingActionFunction[] cancelledActionFunctions, params object[] args)
     {
-        int ID = _canOnlyCancelLastAction ? _actionItemsCollection.Count : (int)args[0];
-        _actionItemsCollection.Add(ID, prevActionItems);
+        int ID = _cancelLastActionOnly ? _actionFunctionsCollection.Count : (int)args[0];
+        _actionFunctionsCollection.Add(ID, cancelledActionFunctions);
         _dataCollection.Add(ID, args);
-        postActionItems.ToList().ForEach(item => item(args));
+        actionFunctions.ToList().ForEach(item => item(args));
     }
 
     public bool TryCancel(int pendingActionID)
     {
-        if (_canOnlyCancelLastAction && (int)_dataCollection.ToList().Last().Value[0] != pendingActionID) // check if cancelled action was the last action
+        if (_cancelLastActionOnly && (int)_dataCollection.ToList().Last().Value[0] != pendingActionID) // check if cancelled action was the last action
         {
             return false;
         }
 
-        int ID = _canOnlyCancelLastAction ? _actionItemsCollection.Count - 1 : pendingActionID;
-        PendingActionItem[] prevActionItems = _actionItemsCollection[ID];
+        int ID = _cancelLastActionOnly ? _actionFunctionsCollection.Count - 1 : pendingActionID;
+        PendingActionFunction[] prevActionItems = _actionFunctionsCollection[ID];
         object[] args = _dataCollection[ID];
-        _actionItemsCollection.Remove(ID);
+        args[1] = true; // setting isActionCancelled to true
+        _actionFunctionsCollection.Remove(ID);
         _dataCollection.Remove(ID);
         prevActionItems.ToList().ForEach(item => item(args));
         return true;
@@ -51,7 +53,7 @@ public class PendingActionCreator
 
     public void Dispose()
     {
-        _actionItemsCollection.Clear();
+        _actionFunctionsCollection.Clear();
         _dataCollection.Clear();
     }
 }
