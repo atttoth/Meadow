@@ -14,7 +14,7 @@ public class OverlayController : GameLogicEvent
     private MarkerActionScreen _markerActionScreen;
     private DeckSelectionScreen _deckSelectionScreen;
     private ScoreCollectionScreen _scoreCollectionScreen;
-    private NextRoundScreen _nextRoundScreen;
+    private GameRoundScreen _gameRoundScreen;
     private CardsInHandScreen _cardsInHandScreen;
 
     public void CreateOverlay()
@@ -45,8 +45,8 @@ public class OverlayController : GameLogicEvent
         _scoreCollectionScreen = transform.GetChild(3).GetComponent<ScoreCollectionScreen>();
         _scoreCollectionScreen.Init();
 
-        _nextRoundScreen = transform.GetChild(4).GetComponent<NextRoundScreen>();
-        _nextRoundScreen.Init();
+        _gameRoundScreen = transform.GetChild(4).GetComponent<GameRoundScreen>();
+        _gameRoundScreen.Init();
 
         _cardsInHandScreen = transform.GetChild(5).GetComponent<CardsInHandScreen>();
         _cardsInHandScreen.Init();
@@ -144,9 +144,9 @@ public class OverlayController : GameLogicEvent
         return isShow ? (Action<GameTask, Card, bool>)_cardInspectionScreen.ShowCardHandler : (Action<GameTask>)_cardInspectionScreen.HideCardHandler;
     }
 
-    public Delegate GetNextRoundScreenHandler()
+    public Delegate GetRoundScreenHandler(bool isGameFinished = false)
     {
-        return (Action<GameTask>)_nextRoundScreen.StartShowHandler;
+        return isGameFinished ? (Action<GameTask>)_gameRoundScreen.ShowGameFinishedScreenHandler : (Action<GameTask>)_gameRoundScreen.ShowNextRoundScreenHandler;
     }
 
     public Delegate GetHandScreenToggleHandler(bool isToggled)

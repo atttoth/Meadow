@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class NextRoundScreen : MonoBehaviour
+public class GameRoundScreen : MonoBehaviour
 {
     private CanvasGroup _canvasGroup;
     private Image _blackOverlay;
@@ -17,7 +17,7 @@ public class NextRoundScreen : MonoBehaviour
         _text = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
     }
 
-    public void StartShowHandler(GameTask task)
+    public void ShowNextRoundScreenHandler(GameTask task)
     {
         switch (task.State)
         {
@@ -39,6 +39,23 @@ public class NextRoundScreen : MonoBehaviour
             default:
                 _blackOverlay.enabled = false;
                 _text.enabled = false;
+                task.Complete();
+                break;
+        }
+    }
+
+    public void ShowGameFinishedScreenHandler(GameTask task) //todo
+    {
+        switch (task.State)
+        {
+            case 0:
+                float fadeInDuration = ReferenceManager.Instance.gameLogicController.GameSettings.overlayScreenFadeDuration;
+                _blackOverlay.enabled = true;
+                _text.enabled = true;
+                Fade(true, fadeInDuration);
+                task.StartDelayMs((int)fadeInDuration * 1000);
+                break;
+            default:
                 task.Complete();
                 break;
         }

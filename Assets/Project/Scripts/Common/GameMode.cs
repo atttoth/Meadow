@@ -13,6 +13,12 @@ public class GameMode
     private GameModeType _modeType;
     private int _numOfPlayerControllers;
     private int _numOfNpcControllers;
+    private Color32[] _markerColors = new Color32[] { 
+        new Color32(33, 85, 229, 255),
+        new Color32(255, 18, 0, 255),
+        new Color32(255, 18, 0, 255),
+        new Color32(255, 18, 0, 255)
+    };
 
     // gameplay
     private int[][] _usersOrderMap;
@@ -28,10 +34,14 @@ public class GameMode
         CreateOrderOfUsers();
     }
 
-    public int numOfPlayerControllers { get { return _numOfPlayerControllers; } }
-    public int numOfNpcControllers {  get { return _numOfNpcControllers; } }
-    public int activeUserIndex { get { return _activeUserIndex; } }
-    public int currentRoundIndex { get { return _currentRoundIndex; } }
+    public GameModeType ModeType { get { return _modeType; } }
+    public int NumOfPlayerControllers { get { return _numOfPlayerControllers; } }
+    public int NumOfNpcControllers {  get { return _numOfNpcControllers; } }
+    public int ActiveUserIndex { get { return _activeUserIndex; } }
+    public int CurrentRoundIndex { get { return _currentRoundIndex; } }
+    public int[][] UsersOrderMap {  get { return _usersOrderMap; } }
+
+    public bool IsGameEnded => _currentRoundIndex == _usersOrderMap.Length - 1;
 
     private void CreateOrderOfUsers()
     {
@@ -68,10 +78,27 @@ public class GameMode
         }
     }
 
+    public Color32 GetMarkerColorByUserID(int userID)
+    {
+        return _markerColors[userID];
+    }
+
     public void SetNextRound()
     {
         _currentRoundIndex++;
         _activeUserIndex = _usersOrderMap[_currentRoundIndex][0];
+    }
+
+    public bool IsOverHalfTime(int roundIndex = -1)
+    {
+        int index = roundIndex > -1 ? roundIndex : _currentRoundIndex;
+        return index > (int)(_usersOrderMap.Length * 0.5f) - 1;
+    }
+
+    public int PeekNextUserID()
+    {
+        int userOrderIndex = _userOrderIndex == (_numOfPlayerControllers + _numOfNpcControllers) - 1 ? 0 : _userOrderIndex + 1;
+        return _usersOrderMap[_currentRoundIndex][userOrderIndex];
     }
 
     public void SetNextActiveUserIndex()

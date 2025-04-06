@@ -18,7 +18,7 @@ public class PlayerController : UserController
     private bool _isCampVisible;
     public CardType draggingCardType;
 
-    public override void CreateUser()
+    public override void CreateUser(GameMode gameMode)
     {
         _tableView = transform.GetChild(0).GetComponent<PlayerTableView>();
         _iconDisplayView = _tableView.transform.GetChild(2).GetChild(0).GetComponent<IconDisplayView>();
@@ -29,7 +29,7 @@ public class PlayerController : UserController
         _iconDisplayView.Init();
         _infoView.Init();
         (_handView as PlayerHandView).Init();
-        _markerView.Init();
+        _markerView.Init(gameMode.GetMarkerColorByUserID(userID));
         _pendingPlacementActionCreator = new PendingActionCreator(true);
 
         _tableToggleButton = _tableView.transform.GetChild(2).GetComponent<Button>();
@@ -81,7 +81,7 @@ public class PlayerController : UserController
         _allIconsOfPrimaryHoldersInOrder = new();
         _allIconsOfSecondaryHoldersInOrder = new();
         draggingCardType = CardType.None;
-        base.CreateUser();
+        base.CreateUser(gameMode);
     }
 
     public PlayerTableView TableView { get { return _tableView as PlayerTableView; } }
@@ -458,13 +458,8 @@ public class PlayerController : UserController
 
     public void ShowSelectedMarker(int value, List<Marker> markers)
     {
-        Marker currentMarker = (_markerView as PlayerMarkerView).GetCurrentMarker(value);
+        Marker currentMarker = _markerView.GetCurrentMarker(value);
         markers.ForEach(marker => marker.gameObject.SetActive(marker == currentMarker));
-    }
-
-    public void ResetMarkers()
-    {
-        _markerView.Reset();
     }
 
     public void ToggleHandScreenHitarea(bool value)

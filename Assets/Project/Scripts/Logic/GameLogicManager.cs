@@ -24,7 +24,7 @@ public class GameLogicManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.R)) // for testing
         {
-            (_gameLogicController.GetActiveUserController() as PlayerController).ResetMarkers(); // make markers disappear in a pattern?
+            (_gameLogicController.GetActiveUserController() as PlayerController).MarkerView.Reset(); // make markers disappear in a pattern?
             (_gameLogicController.GetActiveUserController() as PlayerController).EnableTableView(true);
             _gameLogicController.TestFunction1();
         }
@@ -45,9 +45,9 @@ public class GameLogicManager : MonoBehaviour
     {
         List<UserController> userControllers = new() { ReferenceManager.Instance.playerController };
         Transform userControllerContainer = GameObject.Find("GameCanvas").transform.GetChild(1);
-        if (gameMode.numOfNpcControllers > 0)
+        if (gameMode.ModeType == GameModeType.SINGLE_PLAYER_RANDOM)
         {
-            for (int i = 0; i < gameMode.numOfNpcControllers; i++)
+            for (int i = 0; i < gameMode.NumOfNpcControllers; i++)
             {
                 NpcController npcController = Instantiate(GameAssets.Instance.npcControllerPrefab, userControllerContainer).GetComponent<NpcController>();
                 npcController.userID = userControllers.Count;

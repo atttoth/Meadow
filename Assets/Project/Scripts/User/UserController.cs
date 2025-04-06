@@ -18,7 +18,7 @@ public abstract class UserController : GameLogicEvent
     protected Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
     protected Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
 
-    public virtual void CreateUser()
+    public virtual void CreateUser(GameMode gameMode)
     {
         _userControllerLayout = new UserControllerLayout();
         if(userID > 0) // ignore player layout for now
@@ -31,8 +31,8 @@ public abstract class UserController : GameLogicEvent
     }
 
     public InfoView InfoView { get { return _infoView; } }
-
     public MarkerView MarkerView { get { return _markerView; } }
+    public IconDisplayView IconDisplayView { get { return _iconDisplayView; } }
 
     public Delegate GetAddCardToHandHandler()
     {
@@ -47,6 +47,16 @@ public abstract class UserController : GameLogicEvent
     public void EndTurn()
     {
         StartEventHandler(GameLogicEventType.TURN_ENDED, new object[0]);
+    }
+
+    public void EndRound()
+    {
+        StartEventHandler(GameLogicEventType.ROUND_ENDED, new object[0]);
+    }
+
+    public void EndGame()
+    {
+        StartEventHandler(GameLogicEventType.GAME_ENDED, new object[0]);
     }
 
     public void Fade(bool value)
@@ -341,11 +351,6 @@ public abstract class UserController : GameLogicEvent
     {
         _markerView.SetPlacedMarkerToUsed();
         _markerView.IsMarkerConsumed = true;
-    }
-
-    public List<Marker> GetRemainingMarkers()
-    {
-        return _markerView.GetRemainingMarkers();
     }
 
     public void AddRoadTokensHandler(GameTask task)

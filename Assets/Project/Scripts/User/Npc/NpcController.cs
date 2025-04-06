@@ -1,8 +1,15 @@
-using UnityEngine;
+using System;
+using System.Collections.Generic;
 
 public class NpcController : UserController
 {
-    public override void CreateUser()
+    private MarkerHolder _selectedMarkerHolder;
+    private Marker _selectedMarker;
+
+    public MarkerHolder SelectedMarkerHolder {  get { return _selectedMarkerHolder; } }
+    public Marker SelectedMarker { get { return _selectedMarker; } }
+
+    public override void CreateUser(GameMode gameMode)
     {
         _tableView = transform.GetChild(0).GetComponent<NpcTableView>();
         _iconDisplayView = _tableView.transform.GetChild(0).GetComponent<IconDisplayView>();
@@ -13,24 +20,37 @@ public class NpcController : UserController
         _iconDisplayView.Init();
         _infoView.Init();
         _handView.Init();
-        _markerView.Init();
+        _markerView.Init(gameMode.GetMarkerColorByUserID(userID));
         _allIconsOfPrimaryHoldersInOrder = new();
         _allIconsOfSecondaryHoldersInOrder = new();
-        base.CreateUser();
+        base.CreateUser(gameMode);
     }
 
-    public void DoTurnAction(GameTask task)
+    public void SelectRandomMarkerAndMarkerHolder(List<MarkerHolder> holders)
+    {
+        List<Marker> remainingMarkers = _markerView.GetRemainingMarkers();
+        System.Random random = new();
+        _selectedMarkerHolder = holders[random.Next(0, holders.Count - 1)];
+        _selectedMarker = _markerView.GetCurrentMarker(random.Next(0, remainingMarkers.Count - 1));
+        remainingMarkers.ForEach(marker => marker.gameObject.SetActive(marker == _selectedMarker));
+    }
+
+    public void ShowMarkerPlacementHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                Debug.Log(userID);
-                task.StartDelayMs(1000);
+                task.StartHandler((Action<GameTask, MarkerHolder, Marker>)(_markerView as NpcMarkerView).PlaceMarkerToHolder, _selectedMarkerHolder, _selectedMarker);
                 break;
             default:
-                EndTurn();
                 task.Complete();
                 break;
         }
+    }
+
+    public void RegisterScoreHandler(GameTask task)
+    {
+        UpdateScore((_handView as NpcHandView).GetLastCardInHand().Data.score);
+        task.Complete();
     }
 }

@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static GameTask;
 using static MarkerHolder;
 
 public class GameLogicController : MonoBehaviour
@@ -43,8 +42,10 @@ public class GameLogicController : MonoBehaviour
         _overlayController = ReferenceManager.Instance.overlayController;
         _overlayController.CreateOverlay();
         _logicEventHandlers = new Delegate[] {
-            (Action<GameTask>)TurnStartedHandler,
-            (Action<GameTask>)TurnEndedHandler,
+            (Action<GameTask>)TurnStartHandler,
+            (Action<GameTask>)TurnEndHandler,
+            (Action<GameTask>)RoundEndHandler,
+            (Action<GameTask>)GameEndHandler,
             (Action<GameTask, bool>)TableToggleHandler,
             (Action<GameTask>)CampIconsSelectHandler,
             (Action<GameTask, bool>)CampToggleHandler,
@@ -61,7 +62,7 @@ public class GameLogicController : MonoBehaviour
             (Action<GameTask, List<Card>, Vector3>)ApprovedPendingCardPlaceHandler,
             (Action<GameTask, Card>)CancelledPendingCardPlaceHandler,
             (Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler,
-            (Action<GameTask, HolderType>)MarkerCancelHandler,
+            (Action<GameTask, HolderType, Marker>)MarkerCancelHandler,
             (Action<GameTask, MarkerAction>)MarkerActionSelectHandler,
             (Action<GameTask, DeckType>)DeckSelectHandler,
             (Action<GameTask, int>)ScoreCollectHandler,
@@ -73,7 +74,7 @@ public class GameLogicController : MonoBehaviour
     {
         _currentGameMode = gameMode;
         _userControllers = userControllers;
-        _userControllers.ToList().ForEach(controller => controller.CreateUser());
+        _userControllers.ToList().ForEach(controller => controller.CreateUser(gameMode));
         SetNextActiveUserController(true);
     }
 
@@ -82,8 +83,10 @@ public class GameLogicController : MonoBehaviour
         if(!isGameStart)
         {
             _currentGameMode.SetNextActiveUserIndex();
+            _activeUserController.IconDisplayView.ToggleActiveUserFrame(false);
         }
-        _activeUserController = _userControllers[_currentGameMode.activeUserIndex];
+        _activeUserController = _userControllers[_currentGameMode.ActiveUserIndex];
+        _activeUserController.IconDisplayView.ToggleActiveUserFrame(true);
     }
 
     public GameSettings GameSettings { get { return _gameSettings; } }
@@ -116,7 +119,42 @@ public class GameLogicController : MonoBehaviour
 
     private DeckType GetActiveDeckType()
     {
-        return DeckType.South; // changes to North after half-time
+        return _currentGameMode.IsOverHalfTime() ? DeckType.North : DeckType.South;
+    }
+
+    private void NpcRandomTurnActionHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                (_activeUserController as NpcController).SelectRandomMarkerAndMarkerHolder(_boardController.GetAvailableMarkerHolders());
+                _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
+                task.StartDelayMs(0);
+                break;
+            case 1:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).ShowMarkerPlacementHandler);
+                break;
+            case 2:
+                task.StartHandler((Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler, (_activeUserController as NpcController).SelectedMarkerHolder, (_activeUserController as NpcController).SelectedMarker);
+                break;
+            case 3:
+                Card card = _boardController.GetSelectedCard();
+                CardHolder holder = card.transform.parent.GetComponent<CardHolder>();
+                task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, holder, card);
+                break;
+            case 4:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).RegisterScoreHandler);
+                break;
+            default:
+                _activeUserController.EndTurn();
+                task.Complete();
+                break;
+        }
+    }
+
+    private void NpcEvaluatedTurnActionHandler(GameTask task)
+    {
+        task.Complete(); //todo
     }
 
     public void MarkerPlaceHandler(GameTask task, MarkerHolder holder, Marker marker)
@@ -124,19 +162,27 @@ public class GameLogicController : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                marker.AdjustAlpha(true);
-                (_activeUserController as PlayerController).ToggleTurnEndButton(false);
-                (_activeUserController as PlayerController).EnableTableView(false);
-                _boardController.ToggleRayCastOfMarkerHolders(false);
-                _campController.ToggleRayCastOfMarkerHolders(false);
-                if (holder.holderType == HolderType.BoardMarker)
+                marker.Status = MarkerStatus.PLACED;
+                if(_activeUserController.GetType() == typeof(PlayerController))
+                {
+                    marker.SetAlpha(true);
+                    (_activeUserController as PlayerController).ToggleTurnEndButton(false);
+                    (_activeUserController as PlayerController).EnableTableView(false);
+                    _boardController.ToggleRayCastOfMarkerHolders(false);
+                    _campController.ToggleRayCastOfMarkerHolders(false);
+                    if (holder.holderType == HolderType.BoardMarker)
+                    {
+                        _boardController.SelectCard(marker, holder);
+                    }
+                    else if (holder.holderType == HolderType.CampMarker)
+                    {
+                        _campController.ToggleCampAction(true);
+                        _overlayController.ToggleMarkerActionScreen(marker);
+                    }
+                }
+                else
                 {
                     _boardController.SelectCard(marker, holder);
-                }
-                else if (holder.holderType == HolderType.CampMarker)
-                {
-                    _campController.ToggleCampAction(true);
-                    _overlayController.ToggleMarkerActionScreen(marker);
                 }
                 task.StartDelayMs(0);
                 break;
@@ -146,11 +192,13 @@ public class GameLogicController : MonoBehaviour
         }
     }
 
-    private void MarkerCancelHandler(GameTask task, HolderType type)
+    private void MarkerCancelHandler(GameTask task, HolderType type, Marker marker)
     {
         switch (task.State)
         {
             case 0:
+                marker.Status = MarkerStatus.NONE;
+                marker.SetAlpha(false);
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (type == HolderType.BoardMarker)
                 {
@@ -163,7 +211,6 @@ public class GameLogicController : MonoBehaviour
                 }
                 _boardController.ToggleRayCastOfMarkerHolders(true);
                 _campController.ToggleRayCastOfMarkerHolders(true);
-                (_activeUserController as PlayerController).GetRemainingMarkers().ForEach(marker => marker.AdjustAlpha(false));
                 (_activeUserController as PlayerController).EnableTableView(true);
                 (_activeUserController as PlayerController).ToggleTurnEndButton(true);
                 task.StartDelayMs(0);
@@ -259,7 +306,7 @@ public class GameLogicController : MonoBehaviour
         }
     }
 
-    private void TurnStartedHandler(GameTask task)
+    private void TurnStartHandler(GameTask task)
     {
         switch(task.State)
         {
@@ -272,16 +319,19 @@ public class GameLogicController : MonoBehaviour
             case 1:
                 if(_activeUserController.GetType() == typeof(PlayerController))
                 {
-                    Debug.Log("player");
                     (_activeUserController as PlayerController).EnableTableView(true);
                     _boardController.ToggleRayCastOfMarkerHolders(true);
                     _boardController.ToggleCanInspectFlagOfCards(true);
+                    _boardController.ToggleRayCastOfCards(true);
                     _campController.ToggleRayCastOfMarkerHolders(true);
                     task.StartDelayMs(0);
                 }
                 else
                 {
-                    task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).DoTurnAction);
+                    task.StartHandler(_currentGameMode.ModeType == GameModeType.SINGLE_PLAYER_RANDOM 
+                        ? (Action<GameTask>)NpcRandomTurnActionHandler 
+                        : (Action<GameTask>)NpcEvaluatedTurnActionHandler
+                        );
                 }
                 break;
             default:
@@ -290,7 +340,7 @@ public class GameLogicController : MonoBehaviour
         }
     }
 
-    private void TurnEndedHandler(GameTask task)
+    private void TurnEndHandler(GameTask task)
     {
         switch(task.State)
         {
@@ -300,26 +350,76 @@ public class GameLogicController : MonoBehaviour
                     (_activeUserController as PlayerController).ToggleTurnEndButton(false);
                     (_activeUserController as PlayerController).EnableTableView(false);
                     _boardController.ToggleRayCastOfMarkerHolders(false);
+                    _boardController.ToggleRayCastOfCards(false);
                     _boardController.ToggleCanInspectFlagOfCards(false);
                     _campController.ToggleRayCastOfMarkerHolders(false);
                 }
-                SetNextActiveUserController();
-                if (_activeUserController.GetRemainingMarkers().Count > 0)
+                int nextUserID = _currentGameMode.PeekNextUserID();
+                if (_userControllers.ToList().Find(controller => controller.userID == nextUserID).MarkerView.GetRemainingMarkers().Count > 0)
                 {
-                    task.StartDelayMs(0);
+                    SetNextActiveUserController();
+                    _activeUserController.StartTurn();
+                }
+                else if(_currentGameMode.IsGameEnded)
+                {
+                    _activeUserController.EndGame();
                 }
                 else
                 {
-                    // todo reset all markers
-                    _currentGameMode.SetNextRound();
-                    task.StartHandler(_overlayController.GetNextRoundScreenHandler());
+                    _activeUserController.EndRound();
                 }
-                break;
-            case 1:
-                _activeUserController.StartTurn();
                 task.StartDelayMs(0);
                 break;
             default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void RoundEndHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler(_overlayController.GetRoundScreenHandler());
+                break;
+            case 1: // marker reset animation?
+                _userControllers.ToList().ForEach(controller => controller.MarkerView.Reset());
+                task.StartDelayMs(1000);
+                break;
+            case 2:
+                int prevRoundIndex = _currentGameMode.CurrentRoundIndex;
+                _currentGameMode.SetNextRound();
+                if(!_currentGameMode.IsOverHalfTime(prevRoundIndex) && _currentGameMode.IsOverHalfTime()) // check if session just reached half-time
+                {
+                    task.StartHandler((Action<GameTask>)_boardController.BoardClearHandler);
+                }
+                else
+                {
+                    task.NextState(4);
+                }
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
+                break;
+            default:
+                Debug.Log("round: " + (_currentGameMode.CurrentRoundIndex + 1));
+                SetNextActiveUserController();
+                _activeUserController.StartTurn();
+                task.Complete();
+                break;
+        }
+    }
+
+    private void GameEndHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler(_overlayController.GetRoundScreenHandler(true));
+                break;
+            default:
+                Debug.Log("finished");
                 task.Complete();
                 break;
         }
@@ -417,8 +517,8 @@ public class GameLogicController : MonoBehaviour
                     (_activeUserController as PlayerController).ToggleTurnEndButton(false);
                     (_activeUserController as PlayerController).ToggleHandScreenHitarea(false);
                     (_activeUserController as PlayerController).EnableTableView(false);
-                    _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 }
+                _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (holder == null) // card-pick from deck selection action
                 {
                     task.StartHandler(_overlayController.GetCardSelectionToggleHandler(false), _boardController.GetUnselectedTopCardsOfDeck(card.Data.ID));
@@ -633,7 +733,7 @@ public class GameLogicController : MonoBehaviour
     public void OnMarkerHolderInteraction(object sender, InteractableHolderEventArgs args)
     {
         PlayerController playerController = (_activeUserController as PlayerController);
-        List<Marker> markers = playerController.GetRemainingMarkers();
+        List<Marker> markers = playerController.MarkerView.GetRemainingMarkers();
         if (args.scrollDirection == 1 || args.scrollDirection == -1)
         {
             playerController.ShowSelectedMarker(args.scrollDirection, markers);

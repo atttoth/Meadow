@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class IconDisplayView : MonoBehaviour
 {
@@ -13,6 +14,7 @@ public class IconDisplayView : MonoBehaviour
     protected List<DisplayIcon> _displayIcons;
     protected List<DisplayIcon> _preparedDisplayIcons;
     private IconDisplayLayout _iconDisplayLayout;
+    protected Image _activeUserFrame;
 
     public void Init()
     {
@@ -23,6 +25,13 @@ public class IconDisplayView : MonoBehaviour
         _displayIcons = new();
         _preparedDisplayIcons = new();
         _iconDisplayLayout = new IconDisplayLayout();
+        _activeUserFrame = transform.GetChild(3).GetComponent<Image>();
+        ToggleActiveUserFrame(false);
+    }
+
+    public void ToggleActiveUserFrame(bool value)
+    {
+        _activeUserFrame.enabled = value;
     }
 
     public void UpdateIcons(GameTask task, List<Card> cards, List<CardHolder> holders)

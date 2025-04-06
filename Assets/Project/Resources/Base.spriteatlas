@@ -67,6 +67,7 @@ SpriteAtlas:
     - 194ab826e9c684841885fac6bdf6adae: 21300000
     - 873d5a2637f45024bb7849be2e985b05: 21300000
     - a7111436d92f319469d0e0d142dd92e8: 21300000
+    - 55969347ab99ce047b816f780f2c73b2: 21300000
     - 5209bcc71c3f3654586ec317e9b8d773: 21300000
     - 329b99d72ac646647acf90d408ab86b1: 21300000
     - d1bd5e08e5de5fe4d8c8cbd3c49936e8: 21300000
@@ -119,6 +120,7 @@ SpriteAtlas:
   - {fileID: 21300000, guid: 194ab826e9c684841885fac6bdf6adae, type: 3}
   - {fileID: 21300000, guid: 873d5a2637f45024bb7849be2e985b05, type: 3}
   - {fileID: 21300000, guid: a7111436d92f319469d0e0d142dd92e8, type: 3}
+  - {fileID: 21300000, guid: 55969347ab99ce047b816f780f2c73b2, type: 3}
   - {fileID: 21300000, guid: 5209bcc71c3f3654586ec317e9b8d773, type: 3}
   - {fileID: 21300000, guid: 329b99d72ac646647acf90d408ab86b1, type: 3}
   - {fileID: 21300000, guid: d1bd5e08e5de5fe4d8c8cbd3c49936e8, type: 3}
@@ -170,6 +172,7 @@ SpriteAtlas:
   - 6
   - 2
   - board_frame
+  - activeUser_frame
   - score_3
   - 8
   - 218

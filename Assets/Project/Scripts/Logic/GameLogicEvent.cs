@@ -5,6 +5,8 @@ public enum GameLogicEventType
 {
     TURN_STARTED,
     TURN_ENDED,
+    ROUND_ENDED,
+    GAME_ENDED,
     TABLE_TOGGLED,
     CAMP_ICONS_SELECTED,
     CAMP_TOGGLED,

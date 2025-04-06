@@ -11,7 +11,7 @@ public abstract class MarkerView : MonoBehaviour
     protected List<Marker> _remainingMarkers;
     protected int _currentMarkerIndex;
 
-    public void Init()
+    public void Init(Color32 color)
     {
         _allMarkers = new();
         for (int index = 0; index < 5; index++)
@@ -19,7 +19,7 @@ public abstract class MarkerView : MonoBehaviour
             Marker marker = Instantiate(GameAssets.Instance.markerPrefab).GetComponent<Marker>();
             marker.gameObject.SetActive(false);
             marker.transform.SetParent(transform);
-            marker.CreateMarker(index);
+            marker.CreateMarker(index, color);
             _allMarkers.Add(marker);
         }
         Reset();

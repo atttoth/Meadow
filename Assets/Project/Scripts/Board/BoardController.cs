@@ -135,6 +135,29 @@ public class BoardController : MonoBehaviour
         }
     }
 
+    public void BoardClearHandler(GameTask task) // todo: put back unused cards to deck with tween
+    {
+        switch(task.State)
+        {
+            case 0:
+                for (int col = 0; col < _cardHolders.Count; col++)
+                {
+                    for (int row = 0; row < _cardHolders[col].Count; row++)
+                    {
+                        CardHolder holder = _cardHolders[col][row];
+                        Card card = (Card)holder.GetItemFromContentListByIndex(0);
+                        holder.RemoveItemFromContentList(card);
+                        card.gameObject.SetActive(false);
+                    }
+                }
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private List<CardHolder> GetEmptyCardHoldersByColumn(int colIndex)
     {
         List<CardHolder> list = _cardHolders[colIndex];
@@ -226,7 +249,7 @@ public class BoardController : MonoBehaviour
             holder.AddToContentList(marker);
             marker.transform.position = holder.transform.position;
             marker.Rotate(holder.Direction);
-            marker.AdjustAlpha(false);
+            marker.SetAlpha(false);
         });
     }
 
@@ -330,6 +353,38 @@ public class BoardController : MonoBehaviour
                 }
             });
         });
+    }
+
+    public List<MarkerHolder> GetAvailableMarkerHolders()
+    {
+        List<MarkerHolder> availableHolders = new();
+        foreach (List<MarkerHolder> holders in _markerHolders.Values)
+        {
+            holders.ForEach(holder =>
+            {
+                if(holder.IsEmpty())
+                {
+                    availableHolders.Add(holder);
+                }
+            });
+        }
+        return availableHolders;
+    }
+
+    public Card GetSelectedCard()
+    {
+        for (int i = 0; i < _GRID_SIZE; i++)
+        {
+            for (int j = 0; j < _GRID_SIZE; j++)
+            {
+                Card card = GetCardFromCardHolder(i, j);
+                if(card.isSelected)
+                {
+                    return card;
+                }
+            }
+        }
+        return null;
     }
 
     public void Fade(bool value)

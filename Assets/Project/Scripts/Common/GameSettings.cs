@@ -24,4 +24,5 @@ public class GameSettings
     public float tableHolderCenteringSpeed = 0.3f;
     public float cardPlacementSpeed = 0.3f;
     public float overlayScreenFadeDuration = 1f;
+    public float npcMarkerPlacementDuration = 0.5f;
 }

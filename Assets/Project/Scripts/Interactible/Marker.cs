@@ -1,6 +1,7 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
+using UnityEngine.Timeline;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
@@ -46,7 +47,7 @@ public class Marker : Interactable
         return actionIcon.sprite;
     }
 
-    public void CreateMarker(int index)
+    public void CreateMarker(int index, Color32 color)
     {
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         name = $"marker{index}";
@@ -57,6 +58,7 @@ public class Marker : Interactable
         string value = ID < 4 ? numberOnMarker.ToString() : "?";
         numberOnMarkerText.text = value;
         _mainImage = GetComponent<Image>();
+        _mainImage.color = color;
         action = (MarkerAction)ID;
         actionIcon = transform.GetChild(1).GetComponent<Image>();
         actionIcon.sprite = atlas.GetSprite("action_" + index.ToString());
@@ -68,14 +70,13 @@ public class Marker : Interactable
         {
             if (_status == MarkerStatus.PLACED)
             {
-                _status = MarkerStatus.NONE;
                 MarkerHolder holder;
                 holder = transform.parent.GetComponent<MarkerHolder>();
                 if (holder == null)
                 {
                     holder = _parent.GetComponent<MarkerHolder>();
                 }
-                StartEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.holderType });
+                StartEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.holderType, this });
             }
         }
 
@@ -83,7 +84,6 @@ public class Marker : Interactable
         {
             if (_status == MarkerStatus.NONE)
             {
-                _status = MarkerStatus.PLACED;
                 MarkerHolder holder = transform.parent.GetComponent<MarkerHolder>();
                 StartEventHandler(GameLogicEventType.MARKER_PLACED, new object[] { holder, this });
             }
@@ -113,7 +113,7 @@ public class Marker : Interactable
         iconTransform.eulerAngles = new(0f, 0f, 0f);
     }
 
-    public void AdjustAlpha(bool isPlaced)
+    public void SetAlpha(bool isPlaced)
     {
         Color tempColor = _mainImage.color;
         tempColor.a = isPlaced ? 1f : 0.5f;
