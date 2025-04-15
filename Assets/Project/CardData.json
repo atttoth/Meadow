@@ -2163,7 +2163,7 @@
     },
     {
       "ID": 217,
-      "deckType": -1,
+      "deckType": 2,
       "cardType": 0,
       "requirements": [],
       "optionalRequirements": [],
@@ -2173,7 +2173,7 @@
     },
     {
       "ID": 218,
-      "deckType": -1,
+      "deckType": 2,
       "cardType": 0,
       "requirements": [],
       "optionalRequirements": [],

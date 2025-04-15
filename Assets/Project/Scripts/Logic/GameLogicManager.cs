@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -14,34 +13,14 @@ public class GameLogicManager : MonoBehaviour
 
     private void Update()
     {
-        if (Input.GetKeyDown(KeyCode.E)) // for testing
+        if (Input.GetKeyDown(KeyCode.P)) //todo: create game menu
         {
-            (_gameLogicController.GetActiveUserController() as PlayerController).ResetCampScoreTokens();
-            (_gameLogicController.GetActiveUserController() as PlayerController).EnableTableView(false);
-            //new GameTask().ExecHandler((Action<GameTask>)_campController.ShowViewSetupHandler);
-            new GameTask().ExecHandler((Action<GameTask>)_gameLogicController.TestHandler);
-        }
-
-        if (Input.GetKeyDown(KeyCode.R)) // for testing
-        {
-            (_gameLogicController.GetActiveUserController() as PlayerController).MarkerView.Reset(); // make markers disappear in a pattern?
-            (_gameLogicController.GetActiveUserController() as PlayerController).EnableTableView(true);
-            _gameLogicController.TestFunction1();
-        }
-
-        if (Input.GetKeyDown(KeyCode.S)) // for testing
-        {
-            _gameLogicController.TestFunction2();
-        }
-
-        if (Input.GetKeyDown(KeyCode.P)) // for testing
-        {
-            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 1, 1);
-            _gameLogicController.SetupSession(gameMode, CreateUserControllersForRound(gameMode));
+            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 1);
+            _gameLogicController.StartSession(gameMode, CreateUserControllersForSession(gameMode));
         }
     }
 
-    private UserController[] CreateUserControllersForRound(GameMode gameMode)
+    private UserController[] CreateUserControllersForSession(GameMode gameMode)
     {
         List<UserController> userControllers = new() { ReferenceManager.Instance.playerController };
         Transform userControllerContainer = GameObject.Find("GameCanvas").transform.GetChild(1);
@@ -55,6 +34,7 @@ public class GameLogicManager : MonoBehaviour
                 userControllers.Add(npcController);
             }
         }
+        userControllers.ForEach(controller => controller.CreateUser(gameMode));
         return userControllers.ToArray();
     }
 }

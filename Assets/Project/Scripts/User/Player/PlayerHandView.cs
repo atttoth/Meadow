@@ -27,19 +27,43 @@ public class PlayerHandView : HandView
         return _cards.Select(card => card.Data).ToList();
     }
 
-    public override void AddCardHandler(GameTask task, Card card)
+    public override void AddCardHandler(GameTask task, List<Card> cards)
     {
         switch(task.State)
         {
             case 0:
+                int duration = 0;
                 float drawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromBoard;
-                AddCard(card);
-                float[] positions = GetLayoutPositions();
-                MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
-                float newCardPosition = positions[^1];
-                card.transform.SetParent(transform);
-                DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetEase(Ease.InOutBack));
-                task.StartDelayMs((int)(drawSpeed * 1000));
+                if (cards.Count > 1)
+                {
+                    float drawDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedDelayFromBoard;
+                    duration = (int)(((cards.Count - 1) * drawDelay + drawSpeed) * 1000);
+                    cards.ForEach(card => AddCard(card));
+                    float[] positions = GetLayoutPositions();
+                    int i = 0;
+                    while (cards.Count > 0)
+                    {
+                        float delay = i * drawDelay;
+                        Card card = cards.First();
+                        cards.Remove(card);
+                        float newCardPosition = positions[i];
+                        card.transform.SetParent(transform);
+                        DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetDelay(delay).SetEase(Ease.InOutBack));
+                        i++;
+                    }
+                }
+                else
+                {
+                    Card card = cards.First();
+                    duration = (int)(drawSpeed * 1000);
+                    AddCard(card);
+                    float[] positions = GetLayoutPositions();
+                    MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
+                    float newCardPosition = positions[^1];
+                    card.transform.SetParent(transform);
+                    DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetEase(Ease.InOutBack));
+                }
+                task.StartDelayMs(duration);
                 break;
             default:
                 _cards.ForEach(card => card.SetCardReadyInHand());
@@ -129,5 +153,10 @@ public class PlayerHandView : HandView
     public Card GetInspectedCard()
     {
         return _cards.Find(card => card.isInspected);
+    }
+
+    public void EnableCardsRaycast(bool value)
+    {
+        _cards.ForEach(card => card.ToggleRayCast(value));
     }
 }

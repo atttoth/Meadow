@@ -5,11 +5,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class DeckSelectionScreen : MonoBehaviour
+public class SelectionScreen : MonoBehaviour
 {
     private Image _blackOverlay;
     private TextMeshProUGUI _selectText;
     private List<ScreenDisplayItem> _deckItems;
+    private SelectionScreenLayout _selectionScreenLayout;
 
     public List<Button> Init()
     {
@@ -24,6 +25,7 @@ public class DeckSelectionScreen : MonoBehaviour
             item.mainImage.sprite = GetBackImageOfDeck((DeckType)item.type);
             _deckItems.Add(item);
         }
+        _selectionScreenLayout = new SelectionScreenLayout(GetComponent<RectTransform>(), _deckItems.First().mainImage.GetComponent<RectTransform>());
         return _deckItems.Select(item => item.button).ToList();
     }
 
@@ -46,15 +48,16 @@ public class DeckSelectionScreen : MonoBehaviour
                 if (value)
                 {
                     _blackOverlay.enabled = true;
-                    List<float> positions = new() { -300f, 0f, 300f };
-                    DeckType[] currentTypes = new DeckType[3] { DeckType.West, DeckType.East, deckType };
+                    List<Vector2> positions = _selectionScreenLayout.GetCenteredPositions(_deckItems.Count - 1);
+                    DeckType[] currentTypes = new DeckType[3] { DeckType.West, deckType, DeckType.East };
                     _deckItems
                         .Where(item => Array.Exists(currentTypes, type => type == (DeckType)item.type))
                         .ToList()
                         .ForEach(item =>
                         {
                             item.button.enabled = true;
-                            item.GetComponent<RectTransform>().anchoredPosition = new(positions.First(), 300f);
+                            Vector2 pos = positions.First();
+                            item.GetComponent<RectTransform>().position = new(pos.x, pos.y + _selectionScreenLayout.GetPosYOffset());
                             positions.RemoveAt(0);
                             item.gameObject.SetActive(true);
                         });
@@ -78,12 +81,13 @@ public class DeckSelectionScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                List<float> positions = new() { -300f, 0f, 300f };
+                _blackOverlay.enabled = true;
+                List<Vector2> positions = _selectionScreenLayout.GetCenteredPositions(cards.Count);
                 cards.ForEach(card =>
                 {
                     card.SetParentTransform(transform);
                     card.transform.SetParent(transform);
-                    card.GetComponent<RectTransform>().anchoredPosition = new(positions.First(), 0f);
+                    card.GetComponent<RectTransform>().position = positions.First();
                     positions.RemoveAt(0);
                     card.gameObject.SetActive(true);
                 });
@@ -123,7 +127,10 @@ public class DeckSelectionScreen : MonoBehaviour
                 break;
             case 1:
                 cards.ForEach(card => card.gameObject.SetActive(false));
-                _deckItems.Find(item => (DeckType)item.type == cards.First().Data.deckType).gameObject.SetActive(false);
+                if(cards.Count > 1) // ignore at initial ground card pick
+                {
+                    _deckItems.Find(item => (DeckType)item.type == cards.First().Data.deckType).gameObject.SetActive(false);
+                }
                 task.StartDelayMs(500);
                 break;
             case 2:

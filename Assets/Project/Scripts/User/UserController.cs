@@ -28,7 +28,10 @@ public abstract class UserController : GameLogicEvent
             _infoView.GetComponent<RectTransform>().anchoredPosition = screenPosition[1];
         }
         _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 0f;
     }
+
+    public abstract void PlaceInitialGroundCardOnTable(GameTask task, Card card);
 
     public InfoView InfoView { get { return _infoView; } }
     public MarkerView MarkerView { get { return _markerView; } }
@@ -36,7 +39,7 @@ public abstract class UserController : GameLogicEvent
 
     public Delegate GetAddCardToHandHandler()
     {
-        return (Action<GameTask, Card>)_handView.AddCardHandler;
+        return (Action<GameTask, List<Card>>)_handView.AddCardHandler;
     }
 
     public void StartTurn()
@@ -61,12 +64,9 @@ public abstract class UserController : GameLogicEvent
 
     public void Fade(bool value)
     {
-        if(userID > 0)
-        {
-            float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
-            float targetValue = value ? 1f : 0f;
-            DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
-        }
+        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float targetValue = value ? 1f : 0f;
+        DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 
     public bool TryPlaceCard(CardHolder holder, Card card)
@@ -384,6 +384,16 @@ public abstract class UserController : GameLogicEvent
     public void UpdateScore(int score)
     {
         _infoView.IncrementScore(score);
+    }
+
+    public void ResetCampScoreTokens()
+    {
+        _campScoreTokens = new() { 2, 3, 4 };
+    }
+
+    public int GetNextCampScoreToken()
+    {
+        return _campScoreTokens.Count > 0 ? _campScoreTokens.First() : 0;
     }
 
     public void UpdateCampScoreTokens()

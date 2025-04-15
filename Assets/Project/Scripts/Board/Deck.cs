@@ -16,18 +16,16 @@ public class Deck : MonoBehaviour
 {
     public DeckType deckType;
     private List<Card> _cards;
-    private SpriteAtlas _atlas;
-    public bool testOver;
 
-    public void Init(int index, List<CardData> cardData, SpriteAtlas atlas)
+    public void Init(int index, List<CardData> cardData)
     {
         deckType = (DeckType)index;
         _cards = new();
-        _atlas = atlas;
+        SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
         cardData.ForEach(data =>
         {
             Card card = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
-            card.Init(data, _atlas.GetSprite(data.ID.ToString()), _atlas.GetSprite("back"));
+            card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
             AddCard(card);
         });
     }
@@ -42,23 +40,14 @@ public class Deck : MonoBehaviour
         Random rand = new();
         int cardIndex = rand.Next(0, _cards.Count - 1);
         Card card = _cards[cardIndex];
-        _cards.RemoveAt(cardIndex);
+        _cards.Remove(card);
         return card;
     }
 
-    // for testing only!
-    public Card GetCardByID(int id, DeckType type)
+    public Card GetCardByID(int cardID)
     {
-        Card card = null;
-        if (type == deckType && !testOver)
-        {
-            card = _cards.Find(c => c.Data.ID == id);
-            testOver = true;
-        }
-        else
-        {
-            card = GetRandomCard();
-        }
+        Card card = _cards.Find(c => c.Data.ID == cardID);
+        _cards.Remove(card);
         return card;
     }
 }

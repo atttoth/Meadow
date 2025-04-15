@@ -8,7 +8,7 @@ public class ReferenceManager : MonoBehaviour
     public BoardController boardController;
     public PlayerController playerController;
     public CampController campController;
-    public OverlayController overlayController;
+    public ScreenController screenController;
 
     void Awake()
     {

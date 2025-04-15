@@ -39,6 +39,7 @@ public class PlayerController : UserController
         Transform turnEndButtonTransform = GameObject.Find("GameCanvas").transform.GetChild(2);
         turnEndButtonTransform.GetComponent<Image>().sprite = atlas.GetSprite("endTurn_base");
         _turnEndButton = turnEndButtonTransform.GetComponent<Button>();
+        _turnEndButton.GetComponent<CanvasGroup>().alpha = 0f;
         SpriteState turnEndSpriteState = _turnEndButton.spriteState;
         turnEndSpriteState.selectedSprite = atlas.GetSprite("endTurn_base");
         turnEndSpriteState.highlightedSprite = atlas.GetSprite("endTurn_highlighted");
@@ -61,7 +62,7 @@ public class PlayerController : UserController
         {
             if (_pendingPlacementActionCreator.GetNumOfActions() > 0)
             {
-                _tableApproveButton.enabled = false;
+                EnableTableApproveButton(false);
                 (_tableView as PlayerTableView).UpdateApproveButton(false);
                 StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), _infoView.scoreTransform.position });
             }
@@ -88,13 +89,16 @@ public class PlayerController : UserController
 
     public PlayerHandView HandView { get { return _handView as PlayerHandView; } }
 
-    private void ToggleTable()
+    public void ToggleTable(bool isGameSetup = false)
     {
         (_tableView as PlayerTableView).TogglePanel();
         (_handView as PlayerHandView).ToggleHand();
-        _markerView.Fade((_tableView as PlayerTableView).isTableVisible);
-        FadeTurnEndButton((_tableView as PlayerTableView).isTableVisible);
-        ToggleHandScreenHitarea(!(_tableView as PlayerTableView).isTableVisible);
+        if(!isGameSetup)
+        {
+            _markerView.Fade((_tableView as PlayerTableView).isTableVisible);
+            FadeTurnEndButton(!(_tableView as PlayerTableView).isTableVisible);
+            ToggleHandScreenHitarea(!(_tableView as PlayerTableView).isTableVisible);
+        }
         StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !(_tableView as PlayerTableView).isTableVisible });
     }
 
@@ -106,11 +110,10 @@ public class PlayerController : UserController
         _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
     }
 
-    private void FadeTurnEndButton(bool value)
+    public void FadeTurnEndButton(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
-        float targetValue = value ? 0f : 1f;
-        DOTween.Sequence().Append(_turnEndButton.GetComponent<Image>().DOFade(targetValue, fadeDuration));
+        float targetValue = value ? 1f : 0f;
+        DOTween.Sequence().Append(_turnEndButton.GetComponent<CanvasGroup>().DOFade(targetValue, ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration));
     }
 
     public void ToggleTurnEndButton(bool value)
@@ -120,16 +123,6 @@ public class PlayerController : UserController
             return;
         }
         _turnEndButton.enabled = value;
-    }
-
-    public void ResetCampScoreTokens()
-    {
-        _campScoreTokens = new() { 2, 3, 4 };
-    }
-
-    public int GetNextCampScoreToken()
-    {
-        return _campScoreTokens.Count > 0 ? _campScoreTokens.First() : 0;
     }
 
     private List<CardIcon[]> GetTopPrimaryIcons() // sorted primary holders (left to right)
@@ -204,9 +197,14 @@ public class PlayerController : UserController
         }
     }
 
-    public void EnableTableView(bool value)
+    public void EnableTableToggleButton(bool value)
     {
-        _tableToggleButton.interactable = value;
+        _tableToggleButton.enabled = value;
+    }
+
+    public void EnableTableApproveButton(bool value)
+    {
+        _tableApproveButton.enabled = value;
     }
 
     public List<List<CardIcon>> GetAdjacentPrimaryIconPairs() 
@@ -256,6 +254,33 @@ public class PlayerController : UserController
                 task.StartDelayMs(500);
                 break;
             default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card)
+    {
+        switch(task.State)
+        {
+            case 0:
+                ToggleTable(true);
+                task.StartDelayMs(2000);
+                break;
+            case 1:
+                UpdateActiveCardHolders(HolderSubType.PRIMARY, "RectLeft");
+                CardHolder holder = (_tableView as PlayerTableView).GetActivePrimaryCardHolderByID(0);
+                CreatePendingCardPlacement(holder, card);
+                task.StartHandler((Action<GameTask, CardHolder, Card>)SnapCardHandler, holder, card);
+                break;
+            case 2:
+                task.StartDelayMs(1000);
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask>)ApplyPendingCardPlacementHandler);
+                break;
+            default:
+                ToggleTable(true);
                 task.Complete();
                 break;
         }
@@ -327,7 +352,6 @@ public class PlayerController : UserController
 
     public void CreatePendingCardPlacement(CardHolder holder, Card card)
     {
-        _tableToggleButton.enabled = false;
         PendingActionFunction[] actionFunctions = new PendingActionFunction[] {
             _infoView.UpdateNumberOfCardPlacementsAction,
             _infoView.UpdateRoadTokensAction,
@@ -338,7 +362,6 @@ public class PlayerController : UserController
             (_tableView as PlayerTableView).UpdateHitAreaSizeAction,
             UpdateCurrentIconsOfHolderAction
         };
-        (_tableView as PlayerTableView).UpdateApproveButton(true);
         _pendingPlacementActionCreator.Create(actionFunctions, actionFunctions.Reverse().ToArray(), card.Data.ID, false, holder, card);
     }
 
@@ -352,10 +375,7 @@ public class PlayerController : UserController
                     task.Complete();
                     return;
                 }
-                _pendingPlacementActionCreator.GetDataCollection()?
-                    .Select(data => (Card)data[3])
-                    .ToList()
-                    .ForEach(card => card.ToggleRayCast(false));
+
                 if (_pendingPlacementActionCreator.GetNumOfActions() == 0)
                 {
                     (_tableView as PlayerTableView).UpdateApproveButton(false);
@@ -364,10 +384,26 @@ public class PlayerController : UserController
                 task.StartHandler((Action<GameTask, CardHolder, Card>)SnapCardHandler, null, card);
                 break;
             default:
-                _pendingPlacementActionCreator.GetDataCollection()?
-                    .Select(data => (Card)data[3])
-                    .ToList()
-                    .ForEach(card => card.ToggleRayCast(true));
+                task.Complete();
+                break;
+        }
+    }
+
+    public void ApplyPendingCardPlacementHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)UpdateDisplayIconsHandler);
+                break;
+            case 1:
+                task.StartHandler((Action<GameTask>)CenterCardsInHandHandler);
+                break;
+            case 2:
+                _pendingPlacementActionCreator.Dispose();
+                task.StartDelayMs(0);
+                break;
+            default:
                 task.Complete();
                 break;
         }
@@ -378,20 +414,18 @@ public class PlayerController : UserController
         switch(task.State)
         {
             case 0:
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardPlacementSpeed;
-                bool isPlacement = card.cardStatus == CardStatus.PENDING_ON_TABLE;
-                int contentCount = isPlacement ? holder.GetContentListSize() - 1 : -1;
+                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardSnapSpeed;
                 float[] positions = (_handView as PlayerHandView).GetLayoutPositions();
-                float lastPosX = positions.Length > 0 ? positions[^1] : 0f;
+                Transform parentTransform = card.cardStatus == CardStatus.PENDING_ON_TABLE ? _tableView.transform.GetChild(0).transform : _handView.transform;
                 (_handView as PlayerHandView).MoveCardsHorizontallyInHand(positions);
-                if(!isPlacement)
-                {
-                    card.transform.SetParent(_handView.transform);
-                }
-                (_tableView as PlayerTableView).PositionTableCard(card, contentCount, speed, lastPosX);
+                (_tableView as PlayerTableView).PositionTableCard(holder, card, speed, positions, parentTransform);
                 task.StartDelayMs((int)(speed * 1000));
                 break;
             default:
+                if(card.cardStatus == CardStatus.PENDING_ON_TABLE)
+                {
+                    card.transform.SetParent(holder.transform);
+                }
                 task.Complete();
                 break;
         }
@@ -415,7 +449,7 @@ public class PlayerController : UserController
         return primaryTableCards;
     }
 
-    public void UpdateDisplayIconsHandler(GameTask task)
+    private void UpdateDisplayIconsHandler(GameTask task)
     {
         switch (task.State)
         {
@@ -448,18 +482,17 @@ public class PlayerController : UserController
         }
     }
 
-    public void ApplyPendingCardPlacement()
-    {
-        _pendingPlacementActionCreator.Dispose();
-        _tableToggleButton.enabled = true;
-        _tableApproveButton.enabled = true;
-        ToggleTable();
-    }
-
     public void ShowSelectedMarker(int value, List<Marker> markers)
     {
-        Marker currentMarker = _markerView.GetCurrentMarker(value);
-        markers.ForEach(marker => marker.gameObject.SetActive(marker == currentMarker));
+        if (markers[0].ID == 5)
+        {
+            markers[0].gameObject.SetActive(true);
+        }
+        else
+        {
+            Marker currentMarker = _markerView.GetCurrentMarker(value);
+            markers.ForEach(marker => marker.gameObject.SetActive(marker == currentMarker));
+        }
     }
 
     public void ToggleHandScreenHitarea(bool value)

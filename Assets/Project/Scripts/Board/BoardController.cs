@@ -14,10 +14,12 @@ public class BoardController : MonoBehaviour
     private DeckController _deckController;
     private Transform _cardDrawContainer;
     private CanvasGroup _canvasGroup;
+    private BoardLayout _boardLayout;
+    private List<Card> _cardsForSelection; // cards saved for selection screen
 
-    // drawing sequence
+    // used for board fill
     private List<CardHolder> _emptyHolders; // saved empty card holders to fill
-    private List<Card> _cardsToDraw; // saved cards to draw
+    private List<Card> _cardsToDraw; // saved cards to fill card holders
 
     private T GetNextItem<T>(List<T> list)
     {
@@ -26,7 +28,7 @@ public class BoardController : MonoBehaviour
         return item;
     }
 
-    public void CreateBoard()
+    public void Create()
     {
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         GetComponent<Image>().sprite = atlas.GetSprite("board_frame");
@@ -64,6 +66,23 @@ public class BoardController : MonoBehaviour
         _deckController.Init();
         _cardDrawContainer = transform.GetChild(3).transform;
         _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 0f;
+        _boardLayout = new BoardLayout(GetComponent<RectTransform>());
+        ToggleRayCastOfMarkerHolders(false);
+    }
+
+    public void EnableRightSideMarkerHoldersForRowPick()
+    {
+        foreach (List<MarkerHolder> holders in _markerHolders.Values)
+        {
+            holders.ForEach(holder =>
+            {
+                if(holder.transform.parent.CompareTag("RightHolder"))
+                {
+                    holder.ToggleRayCast(true);
+                }
+            });
+        }
     }
 
     private void SaveTargetHoldersAndCards(DeckType activeDeckType)
@@ -189,7 +208,7 @@ public class BoardController : MonoBehaviour
 
     private int[][] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey, int numberOnMarker)
     {
-        int length = numberOnMarker <= 4 ? 1 : _GRID_SIZE;
+        int length = numberOnMarker < MarkerView.BLANK_MARKER_ID ? 1 : _GRID_SIZE;
         int[][] indices = new int[length][];
         if (length == 1) // 1-2-3-4 markers point to a single position
         {
@@ -222,6 +241,24 @@ public class BoardController : MonoBehaviour
         }
     }
 
+    public List<Card> GetRowCards()
+    {
+        List<Card> cards = new();
+        for (int i = 0; i < _GRID_SIZE; i++)
+        {
+            for (int j = 0; j < _GRID_SIZE; j++)
+            {
+                Card card = GetCardFromCardHolder(i, j);
+                if (card.isSelected)
+                {
+                    cards.Add(card);
+                    card.OnPick();
+                }
+            }
+        }
+        return cards;
+    }
+
     public void ToggleRayCastOfCards(bool value)
     {
         for (int col = 0; col < _cardHolders.Count; col++)
@@ -246,7 +283,7 @@ public class BoardController : MonoBehaviour
             {
                 prevHolder.RemoveItemFromContentList(marker);
             }
-            holder.AddToContentList(marker);
+            holder.AddToHolder(marker);
             marker.transform.position = holder.transform.position;
             marker.Rotate(holder.Direction);
             marker.SetAlpha(false);
@@ -315,29 +352,55 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public List<Card> GetUnselectedTopCardsOfDeck(int cardID)
+    public List<Card> GetUnselectedCards(int cardID)
     {
-        List<Card> topCards = _deckController.TopCards;
-        topCards.ForEach(card => card.ToggleSelection(false));
-        List<Card> unselectedTopCards = topCards.Where(card => card.Data.ID != cardID).ToList();
-        _deckController.TopCards = unselectedTopCards;
+        _cardsForSelection.ForEach(card => card.ToggleSelection(false));
+        List<Card> unselectedTopCards = _cardsForSelection.Where(card => card.Data.ID != cardID).ToList();
+        _cardsForSelection = unselectedTopCards;
         return unselectedTopCards;
     }
 
     public List<Card> GetTopCardsOfDeck(DeckType deckType)
     {
         int num = 3;
-        _deckController.TopCards = new();
         for (int i = 0; i < num; i++)
         {
-            _deckController.TopCards.Add(_deckController.GetCardFromDeck(deckType));
+            _cardsForSelection.Add(_deckController.GetCardFromDeck(deckType));
         }
-        return _deckController.TopCards;
+        return _cardsForSelection;
     }
 
-    public void DisposeTopCards()
+    public List<Card> CreateInitialGroundCards()
     {
-        _deckController.ClearTopCards();
+        SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(DeckType.East.ToString());
+        _cardsForSelection = new();
+        _deckController.InitialGroundCardData.ForEach(data =>
+        {
+            Card card = Instantiate(GameAssets.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
+            card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
+            _cardsForSelection.Add(card);
+        });
+        return _cardsForSelection;
+    }
+
+    public void DisposeUnselectedCards(bool isHandSetup)
+    {
+        if(isHandSetup)
+        {
+            Object.Destroy(_cardsForSelection.First().gameObject);
+        }
+        else
+        {
+            DeckType deckType = _cardsForSelection.First().Data.deckType;
+            Deck deck = _deckController.GetDeckByDeckType(deckType);
+            _cardsForSelection.ForEach(card =>
+            {
+                card.transform.SetParent(deck.transform);
+                card.GetComponent<RectTransform>().anchoredPosition = new(0f, 0f);
+                deck.AddCard(card);
+            });
+        }
+        _cardsForSelection.Clear();
     }
 
     public void ToggleCanInspectFlagOfCards(bool value)
@@ -355,23 +418,30 @@ public class BoardController : MonoBehaviour
         });
     }
 
-    public List<MarkerHolder> GetAvailableMarkerHolders()
+    public List<MarkerHolder> GetAvailableMarkerHolders(int holderParentID = -1)
     {
-        List<MarkerHolder> availableHolders = new();
-        foreach (List<MarkerHolder> holders in _markerHolders.Values)
+        if(holderParentID > -1)
         {
-            holders.ForEach(holder =>
-            {
-                if(holder.IsEmpty())
-                {
-                    availableHolders.Add(holder);
-                }
-            });
+            return _markerHolders[holderParentID];
         }
-        return availableHolders;
+        else
+        {
+            List<MarkerHolder> availableHolders = new();
+            foreach (List<MarkerHolder> holders in _markerHolders.Values)
+            {
+                holders.ForEach(holder =>
+                {
+                    if (holder.IsEmpty())
+                    {
+                        availableHolders.Add(holder);
+                    }
+                });
+            }
+            return availableHolders;
+        }
     }
 
-    public Card GetSelectedCard()
+    public Card GetSingleSelectedCard()
     {
         for (int i = 0; i < _GRID_SIZE; i++)
         {

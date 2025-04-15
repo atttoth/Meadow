@@ -33,10 +33,10 @@ public class Holder : MonoBehaviour
         return _contentList.Count;
     }
 
-    public void AddToContentList(Interactable item)
+    public void AddToHolder(Interactable item)
     {
         item.transform.SetParent(transform);
-        _contentList.Add(item);
+        AddItemToContentList(item);
     }
 
     public Interactable GetItemFromContentListByIndex(int index)
@@ -46,6 +46,11 @@ public class Holder : MonoBehaviour
             return _contentList[index];
         }
         return default;
+    }
+
+    public void AddItemToContentList(Interactable item)
+    {
+        _contentList.Add(item);
     }
 
     public void RemoveItemFromContentList(Interactable item)

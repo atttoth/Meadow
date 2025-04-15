@@ -36,18 +36,16 @@ public class TableLayout
         return new Vector2(transform.sizeDelta.x, transform.sizeDelta.y + (_Y_GAP_BETWEEN_STACKED_CARDS * modifier));
     }
 
-    public Vector2 GetCardTargetPosition(Card card, int contentCount, float lastPosX)
+    public Vector2 GetPlacedCardPosition(CardType cardType, int contentCount, float posX)
     {
-        if (card.cardStatus == CardStatus.PENDING_ON_TABLE)
-        {
-            float startingPosY = Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType) ? 70f : 105f;
-            float posY = contentCount < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * contentCount;
-            return new(0f, posY);
-        }
-        else
-        {
-            return new(lastPosX, card.hoverTargetY * 2);
-        }
+        float startingPosY = Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == cardType) ? 690f : 275f; // random values to fit with holder pos
+        float posY = contentCount < 1 ? startingPosY : startingPosY + _Y_GAP_BETWEEN_STACKED_CARDS * contentCount;
+        return new(posX, posY);
+    }
+
+    public Vector2 GetCancelledCardPosition(float posX, float hoverTargetY)
+    {
+        return new(posX, hoverTargetY * 2);
     }
 
     public Vector2 GetPrimaryHolderPosition(RectTransform prevHolderTransform, int direction, float posY)
@@ -61,6 +59,17 @@ public class TableLayout
         float startingPosX = -((_tableWidth * 0.5f) - ((_secondaryHolderWidth * 0.5f) + _X_GAP_BETWEEN_HOLDERS));
         float posX = startingPosX + ((_secondaryHolderWidth + _X_GAP_BETWEEN_HOLDERS) * holderCount);
         return new(posX, posY);
+    }
+
+    public float[] GetSecondaryCardHolderPositions(int numOfHolders)
+    {
+        float[] positions = new float[numOfHolders];
+        for (int i = 0; i < numOfHolders; i++)
+        {
+            float position = GetSecondaryCardHolderPosition(i, 0f).x;
+            positions[i] = position;
+        }
+        return positions;
     }
 
     public float[] GetPrimaryCardHolderPositions(int numOfHolders)

@@ -185,12 +185,7 @@ public class Card : Interactable
         {
             if(isSelected)
             {
-                transform.SetParent(_parent);
-                ToggleCanInspectFlag(false);
-                ToggleHighlight(false);
-                canScale = false;
-                _scaleSequence.Kill();
-                transform.localScale = new Vector3(1f, 1f, 1f);
+                OnPick();
                 StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
             }
             else if(isDisposable && !isInspected)
@@ -200,6 +195,16 @@ public class Card : Interactable
                 StartEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
             }
         }
+    }
+
+    public void OnPick()
+    {
+        transform.SetParent(_parent);
+        ToggleCanInspectFlag(false);
+        ToggleHighlight(false);
+        canScale = false;
+        _scaleSequence.Kill();
+        transform.localScale = new Vector3(1f, 1f, 1f);
     }
 
     private void ToggleHighlight(bool value)
@@ -358,7 +363,7 @@ public class Card : Interactable
             .SetDelay(delay))
             .OnComplete(() =>
             {
-                holder.AddToContentList(this);
+                holder.AddToHolder(this);
                 FlipBoardCard(cardDrawContainer);
             });
     }
@@ -395,12 +400,11 @@ public class Card : Interactable
         DOTween.Sequence().Append(transform.DOLocalMoveX(posX, duration).SetEase(ease));
     }
 
-    public void PositionCardOnTable(Vector3 position, float speed)
+    public void PositionCard(Vector3 position, float speed, bool isPlacement)
     {
         RectTransform rect = GetComponent<RectTransform>();
         if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == Data.cardType))
         {
-            bool isPlacement = cardStatus == CardStatus.PENDING_ON_TABLE;
             Vector3 rotation = new(0f, 0f, isPlacement ? 90f : 0f);
             _iconItemsView.Rotate(isPlacement ? -90f : 90f);
             DOTween.Sequence()

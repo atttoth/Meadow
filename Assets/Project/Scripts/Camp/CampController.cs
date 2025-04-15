@@ -13,12 +13,12 @@ public class CampController : GameLogicEvent
     private CampView _view;
     private CanvasGroup _canvasGroup;
 
-    public void CreateCamp()
+    public void Create()
     {
         _markerHolders = new();
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-        GetComponent<Image>().sprite = atlas.GetSprite("campDisplay");
-        Transform markerDisplayHolders = transform.GetChild(0);
+        RectTransform markerDisplayHolders = transform.GetChild(0).GetComponent<RectTransform>();
+        markerDisplayHolders.GetComponent<Image>().sprite = atlas.GetSprite("campDisplay");
         for (int i = 0; i < NUM_OF_MARKER_SLOTS; i++)
         {
             MarkerHolder markerHolder = markerDisplayHolders.GetChild(i).GetComponent<MarkerHolder>();
@@ -27,7 +27,9 @@ public class CampController : GameLogicEvent
         }
         _view = transform.GetChild(1).GetComponent<CampView>();
         _view.Init();
-        _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup = markerDisplayHolders.GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 0f;
+        ToggleRayCastOfMarkerHolders(false);
     }
 
     public void DisposeCampForRound()
@@ -35,7 +37,7 @@ public class CampController : GameLogicEvent
         _view.ResetCampView();
     }
 
-    private void InitCampForRound()
+    private void InitCampForSession()
     {
         _view.SetNumOfIconsForRound(2); // locked to 2 players for now
         List<ScreenDisplayItem> campItems = _view.CreateCampItems();
@@ -72,12 +74,12 @@ public class CampController : GameLogicEvent
         _view.gameObject.SetActive(value);
     }
 
-    public void ShowViewSetupHandler(GameTask task)
+    public void StartViewSetupHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                InitCampForRound();
+                InitCampForSession();
                 ToggleCampView(true);
                 task.StartDelayMs(500);
                 break;
@@ -91,27 +93,24 @@ public class CampController : GameLogicEvent
         }
     }
 
-    public void StartViewSetupHandler(GameTask task)
+    public void EndViewSetupHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                int delay1 = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000); // wait for last icon to flip
-                task.StartDelayMs(delay1);
+                task.StartDelayMs((int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000)); // wait for last icon to flip
                 break;
             case 1:
                 task.StartHandler((Action<GameTask>)_view.SetIconsPositionHandler);
                 break;
             case 2:
-                int delay2 = 1000;
-                task.StartDelayMs(delay2);
+                task.StartDelayMs(1000);
                 break;
             case 3:
                 task.StartHandler((Action<GameTask>)_view.ShowScoreButtonsHandler);
                 break;
             case 4:
-                int delay3 = 2000;
-                task.StartDelayMs(delay3);
+                task.StartDelayMs(2000);
                 break;
             default:
                 ToggleCampView(false);

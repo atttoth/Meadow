@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -6,7 +5,7 @@ public class PendingActionCreator
 {
     public delegate void PendingActionFunction(object[] args);
     private readonly Dictionary<int, PendingActionFunction[]> _actionFunctionsCollection;
-    private readonly Dictionary<int, object[]> _dataCollection; // in object array index 0 represents pendingActionID, index 1 represents isActionCancelled flag
+    private readonly Dictionary<int, object[]> _dataCollection; // stores arguments, index 0 represents pendingActionID, index 1 represents isActionCancelled flag
     private readonly bool _cancelLastActionOnly;
 
     public PendingActionCreator(bool cancelLastActionOnly)

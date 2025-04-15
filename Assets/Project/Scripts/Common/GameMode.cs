@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum GameModeType
@@ -8,12 +6,19 @@ public enum GameModeType
     SINGLE_PLAYER_NORMAL // todo
 }
 
+public enum GameState
+{
+    SETUP,
+    GAMEPLAY
+}
+
 public class GameMode
 {
     private GameModeType _modeType;
+    private GameState _state;
     private int _numOfPlayerControllers;
     private int _numOfNpcControllers;
-    private Color32[] _markerColors = new Color32[] { 
+    private Color32[] _markerColors = new Color32[] {
         new Color32(33, 85, 229, 255),
         new Color32(255, 18, 0, 255),
         new Color32(255, 18, 0, 255),
@@ -26,15 +31,17 @@ public class GameMode
     private int _activeUserIndex;
     private int _currentRoundIndex;
 
-    public GameMode(GameModeType modeType, int numOfPlayerControllers, int numOfNpcControllers)
+    public GameMode(GameModeType modeType, int numOfNpcControllers, int numOfPlayerControllers = 1)
     {
         _modeType = modeType;
+        _state = GameState.SETUP;
         _numOfPlayerControllers = numOfPlayerControllers;
         _numOfNpcControllers = numOfNpcControllers;
         CreateOrderOfUsers();
     }
 
     public GameModeType ModeType { get { return _modeType; } }
+    public GameState State { get { return _state; } set { _state = value; } }
     public int NumOfPlayerControllers { get { return _numOfPlayerControllers; } }
     public int NumOfNpcControllers {  get { return _numOfNpcControllers; } }
     public int ActiveUserIndex { get { return _activeUserIndex; } }

@@ -49,7 +49,7 @@ public class CardIconItemsView : MonoBehaviour
             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
             item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, TOP_ICON_DIMENSION, -1);
             item.ToggleRayCast(false);
-            _topIconItemsHolder.AddToContentList(item);
+            _topIconItemsHolder.AddToHolder(item);
         });
 
         List<Interactable> topIconItems = new();
@@ -103,7 +103,7 @@ public class CardIconItemsView : MonoBehaviour
                     {
                         CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                         item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
-                        _requiredIconItemsHolder.AddToContentList(item);
+                        _requiredIconItemsHolder.AddToHolder(item);
                     });
                 }
             }
@@ -120,7 +120,7 @@ public class CardIconItemsView : MonoBehaviour
                         List<CardIcon> pair = new() { icon1, icon2 };
                         CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                         item.Create(pair, IconItemType.OPTIONAL, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
-                        _requiredIconItemsHolder.AddToContentList(item);
+                        _requiredIconItemsHolder.AddToHolder(item);
                     }
                 }
             }
@@ -131,7 +131,7 @@ public class CardIconItemsView : MonoBehaviour
                 {
                     CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                     item.Create(new List<CardIcon>() { data.adjacentRequirements[0] }, IconItemType.ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
-                    _requiredIconItemsHolder.AddToContentList(item);
+                    _requiredIconItemsHolder.AddToHolder(item);
                 }
                 else
                 {
@@ -145,7 +145,7 @@ public class CardIconItemsView : MonoBehaviour
                             List<CardIcon> pair = new() { icon1, icon2 };
                             CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                             item.Create(pair, IconItemType.OPTIONAL_AND_ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
-                            _requiredIconItemsHolder.AddToContentList(item);
+                            _requiredIconItemsHolder.AddToHolder(item);
                         }
                     }
                 }

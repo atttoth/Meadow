@@ -1,43 +1,47 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.U2D;
 
 [System.Serializable]
 public class DeckController : MonoBehaviour
 {
+    private static readonly List<int> INITIAL_GROUND_CARD_IDS = new() { 217, 218 };
+    private List<CardData>[] _cardDataByDeckType;
+    private List<CardData> _initialGroundCardData;
     private Dictionary<DeckType, Deck> _decks;
     private Dictionary<int, Transform> _displayDecks;
-    private List<Card> _topCards;
-
-    public List<Card> TopCards
-    {
-        get { return _topCards; }
-        set { _topCards = value; }
-    }
+    
+    public List<CardData> InitialGroundCardData { get  { return _initialGroundCardData; } }
 
     public void Init()
     {
-        List<CardData> cardDataCollection = ParseDataFromJSON();
-        _decks = new();
-        for (int index = 0; index < (int)DeckType.NUM_OF_DECKS; index++)
-        {
-            DeckType deckType = ((DeckType)index);
-            SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
-            GameObject obj = Instantiate(GameAssets.Instance.deckPrefab, transform).gameObject;
-            obj.transform.SetParent(transform.GetChild(0));
-            obj.name = deckType.ToString();
-            Deck deck = obj.GetComponent<Deck>();
-            List<CardData> list = cardDataCollection.Where(data => (int)data.deckType == index).ToList();
-            deck.Init(index, list, atlas);
-            _decks.Add((DeckType)index, deck);
-        }
+        _cardDataByDeckType = new List<CardData>[] { new(), new(), new(), new() };
+        ParseDataFromJSON().ForEach(data => _cardDataByDeckType[(int)data.deckType].Add(data));
+        _initialGroundCardData = _cardDataByDeckType[(int)DeckType.East].Where(data => Array.Exists(INITIAL_GROUND_CARD_IDS.ToArray(), ID => ID == data.ID)).ToList();
+        _initialGroundCardData.ForEach(data => _cardDataByDeckType[(int)DeckType.East].Remove(data));
 
         _displayDecks = new();
         for (int i = 0; i < (int)DeckType.NUM_OF_DECKS; i++)
         {
             Transform dummyDeck = transform.GetChild(1).GetChild(i);
             _displayDecks.Add(i, dummyDeck);
+        }
+        CreateDecks();
+    }
+
+    public void CreateDecks()
+    {
+        _decks = new();
+        for (int index = 0; index < _cardDataByDeckType.Length; index++)
+        {
+            DeckType deckType = ((DeckType)index);
+            Transform deckPrefab = Instantiate(GameAssets.Instance.deckPrefab, transform);
+            deckPrefab.SetParent(transform.GetChild(0));
+            deckPrefab.name = deckType.ToString();
+            Deck deck = deckPrefab.GetComponent<Deck>();
+            deck.Init(index, _cardDataByDeckType[index]);
+            _decks.Add(deckType, deck);
         }
     }
 
@@ -61,7 +65,7 @@ public class DeckController : MonoBehaviour
         return collection;
     }
 
-    private Deck GetDeckByDeckType(DeckType deckType)
+    public Deck GetDeckByDeckType(DeckType deckType)
     {
         return _decks[deckType];
     }
@@ -87,7 +91,6 @@ public class DeckController : MonoBehaviour
         for (int i = 0; i < emptyHoldersCount; i++)
         {
             Card card = deck.GetRandomCard();
-            //Card card = deck.GetCardByID(195, DeckType.North); //for testing!
             card.transform.SetParent(parent);
             card.transform.position = parent.position;
             card.ToggleRayCast(false);
@@ -96,21 +99,16 @@ public class DeckController : MonoBehaviour
         return cards;
     }
 
-    public Card GetCardFromDeck(DeckType deckType)
+    public Card GetCardFromDeck(DeckType deckType, int cardID = -1)
     {
-        return GetDeckByDeckType(deckType).GetRandomCard();
-    }
-
-    public void ClearTopCards()
-    {
-        DeckType deckType = _topCards.First().Data.deckType;
-        Deck deck = _decks[deckType];
-        _topCards.ForEach(card =>
+        Deck deck = GetDeckByDeckType(deckType);
+        if(cardID > -1)
         {
-            card.transform.SetParent(deck.transform);
-            card.GetComponent<RectTransform>().anchoredPosition = new(0f, 0f);
-            deck.AddCard(card);
-        });
-        _topCards.Clear();
+            return deck.GetCardByID(cardID);
+        }
+        else
+        {
+            return deck.GetRandomCard();
+        }
     }
 }

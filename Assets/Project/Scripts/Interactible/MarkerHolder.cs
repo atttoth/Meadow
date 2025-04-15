@@ -76,9 +76,12 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     public void OnScroll(PointerEventData eventData)
     {
-        InteractableHolderEventArgs args = new();
-        args.scrollDirection = (int)eventData.scrollDelta.y;
-        _interactionEventHandler?.Invoke(this, args);
+        if (IsAvailable())
+        {
+            InteractableHolderEventArgs args = new();
+            args.scrollDirection = (int)eventData.scrollDelta.y;
+            _interactionEventHandler?.Invoke(this, args);
+        }
     }
 
     public void ToggleRayCast(bool value)

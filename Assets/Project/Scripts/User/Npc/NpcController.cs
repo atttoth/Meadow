@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 public class NpcController : UserController
 {
@@ -46,6 +47,16 @@ public class NpcController : UserController
                 task.Complete();
                 break;
         }
+    }
+
+    public Card SelectInitialGroundCard(List<Card> cards)
+    {
+        return cards.First();
+    }
+
+    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card)
+    {
+        task.Complete();
     }
 
     public void RegisterScoreHandler(GameTask task)

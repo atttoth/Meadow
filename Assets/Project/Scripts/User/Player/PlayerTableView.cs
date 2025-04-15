@@ -246,16 +246,31 @@ public class PlayerTableView : TableView
         }
         else
         {
-            holder.AddToContentList(card);
+            holder.AddItemToContentList(card);
         }
         card.canMove = isActionCancelled;
         card.cardStatus = isActionCancelled ? CardStatus.IN_HAND : CardStatus.PENDING_ON_TABLE;
     }
 
-    public void PositionTableCard(Card card, int contentCount, float speed, float lastPosX)
+    public void PositionTableCard(CardHolder holder, Card card, float speed, float[] handCardPositions, Transform parentTransform)
     {
-        Vector2 position = _tableLayout.GetCardTargetPosition(card, contentCount, lastPosX);
-        card.PositionCardOnTable(position, speed);
+        bool isPlacement = card.cardStatus == CardStatus.PENDING_ON_TABLE;
+        Vector2 position;
+        if (isPlacement)
+        {
+            card.transform.SetParent(parentTransform);
+            float[] holderPositions = holder.holderSubType == HolderSubType.PRIMARY 
+                ? _tableLayout.GetPrimaryCardHolderPositions(_activePrimaryCardHolders.Count) 
+                : _tableLayout.GetSecondaryCardHolderPositions(_activeSecondaryCardHolders.Count);
+            position = _tableLayout.GetPlacedCardPosition(card.Data.cardType, holder.GetContentListSize() - 1, holderPositions[holder.transform.GetSiblingIndex()]);
+        }
+        else
+        {
+            card.transform.SetParent(parentTransform);
+            float posX = handCardPositions.Length > 0 ? handCardPositions[^1] : 0f;
+            position = _tableLayout.GetCancelledCardPosition(posX, card.hoverTargetY);
+        }
+        card.PositionCard(position, speed, isPlacement);
     }
 
     public void RemoveEmptyHolder(HolderSubType holderSubType)

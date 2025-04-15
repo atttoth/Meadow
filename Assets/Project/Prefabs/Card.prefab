@@ -93,8 +93,12 @@ MonoBehaviour:
   cardStatus: 0
   highlightFrame: {fileID: 0}
   isSelected: 0
+  selectedToDispose: 0
+  isDisposable: 0
+  isInspected: 0
   canMove: 0
   canHover: 0
+  canScale: 0
   hoverOriginY: 0
   hoverTargetY: 0
 --- !u!1 &1007749968112719204

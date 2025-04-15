@@ -6,18 +6,18 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
-using static GameTask;
 
-public class OverlayController : GameLogicEvent
+public class ScreenController : GameLogicEvent
 {
     private CardInspectionScreen _cardInspectionScreen;
     private MarkerActionScreen _markerActionScreen;
-    private DeckSelectionScreen _deckSelectionScreen;
+    private SelectionScreen _selectionScreen;
+    private RowHighlightScreen _rowHighlightScreen;
     private ScoreCollectionScreen _scoreCollectionScreen;
     private GameRoundScreen _gameRoundScreen;
     private CardsInHandScreen _cardsInHandScreen;
 
-    public void CreateOverlay()
+    public void Create()
     {
         _cardInspectionScreen = transform.GetChild(0).GetComponent<CardInspectionScreen>();
         Button approveIconRemoveButton = _cardInspectionScreen.Init();
@@ -34,21 +34,29 @@ public class OverlayController : GameLogicEvent
             StartEventHandler(GameLogicEventType.MARKER_ACTION_SELECTED, new object[] { (MarkerAction)button.GetComponent<ScreenDisplayItem>().type });
         }));
 
-        _deckSelectionScreen = transform.GetChild(2).GetComponent<DeckSelectionScreen>();
-        List<Button> deckButtons = _deckSelectionScreen.Init();
+        _selectionScreen = transform.GetChild(2).GetComponent<SelectionScreen>();
+        List<Button> deckButtons = _selectionScreen.Init();
         deckButtons.ForEach(button => button.onClick.AddListener(() =>
         {
             button.enabled = true;
             StartEventHandler(GameLogicEventType.DECK_SELECTED, new object[] { (DeckType)button.GetComponent<ScreenDisplayItem>().type });
         }));
 
-        _scoreCollectionScreen = transform.GetChild(3).GetComponent<ScoreCollectionScreen>();
+        _rowHighlightScreen = transform.GetChild(3).GetComponent<RowHighlightScreen>();
+        Button highlightFrameButton = _rowHighlightScreen.Init();
+        highlightFrameButton.onClick.AddListener(() =>
+        {
+            highlightFrameButton.enabled = true;
+            StartEventHandler(GameLogicEventType.ROW_PICKED, new object[0]);
+        });
+
+        _scoreCollectionScreen = transform.GetChild(4).GetComponent<ScoreCollectionScreen>();
         _scoreCollectionScreen.Init();
 
-        _gameRoundScreen = transform.GetChild(4).GetComponent<GameRoundScreen>();
+        _gameRoundScreen = transform.GetChild(5).GetComponent<GameRoundScreen>();
         _gameRoundScreen.Init();
 
-        _cardsInHandScreen = transform.GetChild(5).GetComponent<CardsInHandScreen>();
+        _cardsInHandScreen = transform.GetChild(6).GetComponent<CardsInHandScreen>();
         _cardsInHandScreen.Init();
     }
 
@@ -124,6 +132,11 @@ public class OverlayController : GameLogicEvent
         _cardInspectionScreen.UpdateIconRemoveButtonStatus(hasEnoughDisposableCards);
     }
 
+    public void ToggleRowHighlightFrame(float posY = 0f)
+    {
+        _rowHighlightScreen.Toggle(posY);
+    }
+
     public Delegate GetRemoveIconItemHandler()
     {
         return (Action<GameTask, CardIconItem>)_cardInspectionScreen.RemoveIconItemHandler;
@@ -131,12 +144,12 @@ public class OverlayController : GameLogicEvent
 
     public Delegate GetToggleDeckSelectionScreenHandler()
     {
-        return (Action<GameTask, DeckType, bool>)_deckSelectionScreen.ToggleDeckSelectionScreenHandler;
+        return (Action<GameTask, DeckType, bool>)_selectionScreen.ToggleDeckSelectionScreenHandler;
     }
 
     public Delegate GetCardSelectionToggleHandler(bool isShow)
     {
-        return isShow ? (Action<GameTask, List<Card>>)_deckSelectionScreen.ShowCardSelectionHandler : (Action<GameTask, List<Card>>)_deckSelectionScreen.HideCardSelectionHandler;
+        return isShow ? (Action<GameTask, List<Card>>)_selectionScreen.ShowCardSelectionHandler : (Action<GameTask, List<Card>>)_selectionScreen.HideCardSelectionHandler;
     }
 
     public Delegate GetCardInspectionScreenHandler(bool isShow)

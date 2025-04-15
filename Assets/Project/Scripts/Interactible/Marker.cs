@@ -1,7 +1,7 @@
+using DG.Tweening;
 using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using UnityEngine.Timeline;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
@@ -42,26 +42,29 @@ public class Marker : Interactable
         set { _status = value; }
     }
 
-    public Sprite GetActionIcon()
-    {
-        return actionIcon.sprite;
-    }
-
     public void CreateMarker(int index, Color32 color)
     {
         SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
         name = $"marker{index}";
         ID = index;
         _status = MarkerStatus.NONE;
-        numberOnMarkerText = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        numberOnMarker = ID + 1;
-        string value = ID < 4 ? numberOnMarker.ToString() : "?";
-        numberOnMarkerText.text = value;
         _mainImage = GetComponent<Image>();
         _mainImage.color = color;
-        action = (MarkerAction)ID;
+        numberOnMarkerText = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         actionIcon = transform.GetChild(1).GetComponent<Image>();
-        actionIcon.sprite = atlas.GetSprite("action_" + index.ToString());
+        numberOnMarker = index + 1;
+        if (index < MarkerView.BLANK_MARKER_ID)
+        {
+            _mainImage.enabled = true;
+            string value = index < 4 ? numberOnMarker.ToString() : "?";
+            numberOnMarkerText.text = value;
+            action = (MarkerAction)index;
+            actionIcon.sprite = atlas.GetSprite("action_" + index.ToString());
+        }
+        else
+        {
+            actionIcon.enabled = false;
+        }
     }
 
     public override void OnPointerClick(PointerEventData eventData)
@@ -125,5 +128,11 @@ public class Marker : Interactable
         _mainImage.raycastTarget = value;
         numberOnMarkerText.raycastTarget = value;
         actionIcon.raycastTarget = value;
+    }
+
+    public void Fade(bool value, float duration)
+    {
+        float endValue = value ? 1f : 0f;
+        DOTween.Sequence().Append(_mainImage.DOFade(endValue, duration)).SetEase(Ease.Linear);
     }
 }

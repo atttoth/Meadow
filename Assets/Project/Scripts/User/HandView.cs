@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ public abstract class HandView : MonoBehaviour
         _cards = new();
     }
 
-    public abstract void AddCardHandler(GameTask task, Card card);
+    public abstract void AddCardHandler(GameTask task, List<Card> cards);
 
     public void AddCard(Card card)
     {
