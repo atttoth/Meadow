@@ -40,7 +40,7 @@ public class CardInspectionScreen : MonoBehaviour
                 _inspectedCard = card;
                 _inspectedCard.ToggleIsInspectedFlag(true);
                 _approveIconRemoveButton.enabled = true;
-                float duration = ReferenceManager.Instance.gameLogicController.GameSettings.cardInspectionFlipDuration;
+                float duration = GameSettings.Instance.GetDuration(Duration.cardInspectionFlipDuration);
                 float quarterOfDuration = duration * 0.25f;
                 Vector2 screenPosition = _interactableScreen.GetComponent<RectTransform>().anchoredPosition;
                 _fakeCardTransform.localScale = Vector3.one;
@@ -121,7 +121,7 @@ public class CardInspectionScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float duration = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardIconItemDelete;
+                float duration = GameSettings.Instance.GetDuration(Duration.fakeCardIconItemDelete);
                 item.PlayDeleteAnimation();
                 task.StartDelayMs((int)duration * 1000);
                 break;

@@ -36,7 +36,7 @@ public class DeckController : MonoBehaviour
         for (int index = 0; index < _cardDataByDeckType.Length; index++)
         {
             DeckType deckType = ((DeckType)index);
-            Transform deckPrefab = Instantiate(GameAssets.Instance.deckPrefab, transform);
+            Transform deckPrefab = Instantiate(GameResourceManager.Instance.deckPrefab, transform);
             deckPrefab.SetParent(transform.GetChild(0));
             deckPrefab.name = deckType.ToString();
             Deck deck = deckPrefab.GetComponent<Deck>();
@@ -48,7 +48,7 @@ public class DeckController : MonoBehaviour
     private List<CardData> ParseDataFromJSON()
     {
         List<CardData> collection = new();
-        CardData cardData = JsonUtility.FromJson<CardData>(GameAssets.Instance.cardDataJson.text);
+        CardData cardData = JsonUtility.FromJson<CardData>(GameResourceManager.Instance.cardDataJson.text);
         cardData.collection.ToList().ForEach(data =>
         {
             collection.Add(new CardData(

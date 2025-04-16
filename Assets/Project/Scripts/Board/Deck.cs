@@ -21,10 +21,10 @@ public class Deck : MonoBehaviour
     {
         deckType = (DeckType)index;
         _cards = new();
-        SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
+        SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
         cardData.ForEach(data =>
         {
-            Card card = Instantiate(GameAssets.Instance.cardPrefab, transform).GetComponent<Card>();
+            Card card = Instantiate(GameResourceManager.Instance.cardPrefab, transform).GetComponent<Card>();
             card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
             AddCard(card);
         });

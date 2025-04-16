@@ -33,10 +33,10 @@ public class SelectionScreen : MonoBehaviour
     {
         switch (deckType)
         {
-            case DeckType.West: return GameAssets.Instance.West.GetSprite("back");
-            case DeckType.South: return GameAssets.Instance.South.GetSprite("back");
-            case DeckType.East: return GameAssets.Instance.East.GetSprite("back");
-            default: return GameAssets.Instance.North.GetSprite("back");
+            case DeckType.West: return GameResourceManager.Instance.West.GetSprite("back");
+            case DeckType.South: return GameResourceManager.Instance.South.GetSprite("back");
+            case DeckType.East: return GameResourceManager.Instance.East.GetSprite("back");
+            default: return GameResourceManager.Instance.North.GetSprite("back");
         }
     }
 
@@ -94,7 +94,7 @@ public class SelectionScreen : MonoBehaviour
                 task.StartDelayMs(500);
                 break;
             case 1:
-                int duration = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000);
+                int duration = (int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000);
                 cards.ForEach(card => card.FlipDeckCard(true));
                 task.StartDelayMs(duration);
                 break;
@@ -117,7 +117,7 @@ public class SelectionScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                int duration = (int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000);
+                int duration = (int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000);
                 cards.ForEach(card =>
                 {
                     card.CardIconItemsView.Toggle(false);

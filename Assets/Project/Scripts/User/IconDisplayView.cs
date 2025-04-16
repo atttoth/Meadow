@@ -62,7 +62,7 @@ public class IconDisplayView : MonoBehaviour
         DisplayIcon displayIcon;
         if (_displayIconPool.Count < 1)
         {
-            displayIcon = Instantiate(GameAssets.Instance.displayIconPrefab, _displayIconPoolTransform).GetComponent<DisplayIcon>();
+            displayIcon = Instantiate(GameResourceManager.Instance.displayIconPrefab, _displayIconPoolTransform).GetComponent<DisplayIcon>();
             displayIcon.gameObject.SetActive(false);
         }
         else
@@ -110,7 +110,7 @@ public class IconDisplayView : MonoBehaviour
                 int duration = 0;
                 if (_displayIcons.Count > 0)
                 {
-                    float speed = ReferenceManager.Instance.gameLogicController.GameSettings.displayIconHorizontalSlideSpeed;
+                    float speed = GameSettings.Instance.GetDuration(Duration.displayIconHorizontalSlideSpeed);
                     List<int> oldHolderIDs = _displayIcons.Select(icon => icon.ID).ToList();
                     List<int> preparedHolderIDs = _preparedDisplayIcons.Select(icon => icon.ID).ToList();
                     List<int> newHolderIDs = preparedHolderIDs.Except(oldHolderIDs).ToList();
@@ -209,7 +209,7 @@ public class IconDisplayView : MonoBehaviour
         switch (task.State)
         {
             case 0: // move new icons up, and old ones out
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.displayIconVerticalSlideSpeed;
+                float speed = GameSettings.Instance.GetDuration(Duration.displayIconVerticalSlideSpeed);
                 _preparedDisplayIcons.ForEach(displayIcon =>
                 {
                     DisplayIcon oldDisplayIcon = _displayIcons.Find(icon => icon.ID == displayIcon.ID);

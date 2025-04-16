@@ -7,7 +7,6 @@ using static MarkerHolder;
 
 public class GameLogicController : MonoBehaviour
 {
-    private GameSettings _gameSettings;
     private BoardController _boardController;
     private CampController _campController;
     private ScreenController _screenController;
@@ -18,11 +17,8 @@ public class GameLogicController : MonoBehaviour
     private UserController[] _userControllers;
     private UserController _activeUserController;
 
-    public GameSettings GameSettings { get { return _gameSettings; } }
-
     public void Init()
     {
-        _gameSettings = new GameSettings();
         _boardController = ReferenceManager.Instance.boardController;
         _boardController.Create();
         _campController = ReferenceManager.Instance.campController;
@@ -95,7 +91,7 @@ public class GameLogicController : MonoBehaviour
                 SetNextActiveUserController(true);
                 (_activeUserController as PlayerController).EnableTableToggleButton(false);
                 _userControllers.ToList().ForEach(controller => controller.ResetCampScoreTokens());
-                task.StartDelayMs((int)ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration * 1000);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
             case 1:
                 task.StartHandler((Action<GameTask>)_campController.StartViewSetupHandler);
@@ -117,7 +113,7 @@ public class GameLogicController : MonoBehaviour
                 _boardController.Fade(true);
                 _campController.Fade(true);
                 _userControllers.ToList().ForEach((controller) => controller.Fade(true));
-                task.StartDelayMs((int)ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration * 1000);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
             case 2:
                 task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
@@ -400,7 +396,7 @@ public class GameLogicController : MonoBehaviour
                 _activeUserController.InfoView.SetMaxCardPlacement(1);
                 _activeUserController.InfoView.SetCardPlacement(0);
                 _activeUserController.MarkerView.IsMarkerConsumed = false;
-                task.StartDelayMs((int)ReferenceManager.Instance.gameLogicController.GameSettings.turnStartWaitDuration * 1000);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.turnStartWaitDuration) * 1000));
                 break;
             case 1:
                 if(_activeUserController.userID == 0)

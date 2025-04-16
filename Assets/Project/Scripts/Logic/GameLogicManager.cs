@@ -15,6 +15,7 @@ public class GameLogicManager : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.P)) //todo: create game menu
         {
+            GameSettings.Instance.SetGameSpeed(GameSpeed.LEVEL5);
             GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 1);
             _gameLogicController.StartSession(gameMode, CreateUserControllersForSession(gameMode));
         }
@@ -28,7 +29,7 @@ public class GameLogicManager : MonoBehaviour
         {
             for (int i = 0; i < gameMode.NumOfNpcControllers; i++)
             {
-                NpcController npcController = Instantiate(GameAssets.Instance.npcControllerPrefab, userControllerContainer).GetComponent<NpcController>();
+                NpcController npcController = Instantiate(GameResourceManager.Instance.npcControllerPrefab, userControllerContainer).GetComponent<NpcController>();
                 npcController.userID = userControllers.Count;
                 npcController.transform.SetSiblingIndex(userControllers.Count);
                 userControllers.Add(npcController);

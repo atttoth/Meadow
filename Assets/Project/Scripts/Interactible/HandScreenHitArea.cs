@@ -29,7 +29,7 @@ public class HandScreenHitArea : HitArea
 
     public void SetupHitAreaImage(CardData cardData)
     {
-        SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(cardData.deckType.ToString());
+        SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(cardData.deckType.ToString());
         _fakeCardImage.sprite = atlas.GetSprite(cardData.ID.ToString());
     }
 

@@ -22,7 +22,7 @@ public class GameRoundScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float fadeInDuration = ReferenceManager.Instance.gameLogicController.GameSettings.overlayScreenFadeDuration;
+                float fadeInDuration = GameSettings.Instance.GetDuration(Duration.overlayScreenFadeDuration);
                 _blackOverlay.enabled = true;
                 _text.enabled = true;
                 Fade(true, fadeInDuration);
@@ -32,7 +32,7 @@ public class GameRoundScreen : MonoBehaviour
                 task.StartDelayMs(500);
                 break;
             case 2:
-                float fadeOutDuration = ReferenceManager.Instance.gameLogicController.GameSettings.overlayScreenFadeDuration;
+                float fadeOutDuration = GameSettings.Instance.GetDuration(Duration.overlayScreenFadeDuration);
                 Fade(false, fadeOutDuration);
                 task.StartDelayMs((int)fadeOutDuration * 1000);
                 break;
@@ -49,7 +49,7 @@ public class GameRoundScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float fadeInDuration = ReferenceManager.Instance.gameLogicController.GameSettings.overlayScreenFadeDuration;
+                float fadeInDuration = GameSettings.Instance.GetDuration(Duration.overlayScreenFadeDuration);
                 _blackOverlay.enabled = true;
                 _text.enabled = true;
                 Fade(true, fadeInDuration);

@@ -1,19 +1,19 @@
 using UnityEngine;
 using UnityEngine.U2D;
 
-public class GameAssets : MonoBehaviour
+public class GameResourceManager : MonoBehaviour
 {
-    private static GameAssets _i;
+    private static GameResourceManager _instance;
 
-    public static GameAssets Instance
+    public static GameResourceManager Instance
     {
         get
         {
-            if (_i == null)
+            if (_instance == null)
             {
-                _i = Instantiate(Resources.Load<GameAssets>("GameAssets"));
+                _instance = Instantiate(Resources.Load<GameResourceManager>("GameResourceManager"));
             }
-            return _i;
+            return _instance;
         }
     }
 
@@ -24,7 +24,7 @@ public class GameAssets : MonoBehaviour
             Debug.Log("Could not find asset");
             return default;
         }
-        return (T)typeof(GameAssets).GetField(name).GetValue(Instance);
+        return (T)typeof(GameResourceManager).GetField(name).GetValue(Instance);
     }
 
     public TextAsset cardDataJson;
@@ -44,7 +44,7 @@ public class GameAssets : MonoBehaviour
     public Transform cardScoreTextPrefab;
     public Transform screenDisplayItemPrefab;
 
-    public SpriteAtlas baseAtlas;
+    public SpriteAtlas Base;
     public SpriteAtlas West;
     public SpriteAtlas South;
     public SpriteAtlas East;

@@ -8,7 +8,7 @@ public class RowHighlightScreen : MonoBehaviour
 
     public Button Init()
     {
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         _highlightFrame = transform.GetChild(0).GetComponent<ScreenDisplayItem>();
         _highlightFrame.Init();
         _highlightFrame.mainImage.sprite = atlas.GetSprite("highlightFrame");

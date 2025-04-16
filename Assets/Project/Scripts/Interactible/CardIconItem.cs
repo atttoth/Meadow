@@ -32,7 +32,7 @@ public class CardIconItem : Interactable
     public void Create(List<CardIcon> icons, IconItemType itemType, float iconDimension, int itemID, int score = 0)
     {
         ID = itemID;
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         RectTransform iconsParentRect = transform.GetChild((int)itemType).GetComponent<RectTransform>();
         _raycastTargetImage = iconsParentRect.GetComponent<Image>();
 

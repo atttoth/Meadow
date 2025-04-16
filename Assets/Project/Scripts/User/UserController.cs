@@ -64,7 +64,7 @@ public abstract class UserController : GameLogicEvent
 
     public void Fade(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float fadeDuration = GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration);
         float targetValue = value ? 1f : 0f;
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }

@@ -11,11 +11,11 @@ public class NpcHandView : HandView
         {
             case 0:
                 int duration = 0;
-                float drawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromBoard;
+                float drawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromBoard);
                 Vector3 parentPosition = transform.parent.GetComponent<RectTransform>().position;
                 if (cards.Count > 1)
                 {
-                    float drawDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedDelayFromBoard;
+                    float drawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedDelayFromBoard);
                     duration = (int)(((cards.Count - 1) * drawDelay + drawSpeed) * 1000);
                     cards.ForEach(card => AddCard(card));
                     int i = 0;

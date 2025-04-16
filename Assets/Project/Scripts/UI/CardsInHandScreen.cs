@@ -22,7 +22,7 @@ public class CardsInHandScreen : MonoBehaviour
         List<DeckType> deckTypes = new() { DeckType.West, DeckType.South, DeckType.East, DeckType.North };
         deckTypes.ForEach(deckType =>
         {
-            SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
+            SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(deckType.ToString());
             _atlasCollection.Add(atlas);
         });
         _activeFakeCards = new();
@@ -43,7 +43,7 @@ public class CardsInHandScreen : MonoBehaviour
         }
         else
         {
-            fakeCard = Instantiate(GameAssets.Instance.cardPrefab, _activeFakeCardsTransform).GetComponent<Card>();
+            fakeCard = Instantiate(GameResourceManager.Instance.cardPrefab, _activeFakeCardsTransform).GetComponent<Card>();
         }
         return fakeCard;
     }
@@ -88,7 +88,7 @@ public class CardsInHandScreen : MonoBehaviour
                     _showSequences.Clear();
                 }
                 SetupFakeCards(dataCollection);
-                float screenFadeSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardsInHandScreenFadeSpeed;
+                float screenFadeSpeed = GameSettings.Instance.GetDuration(Duration.cardsInHandScreenFadeSpeed);
                 Color color = _blackOverlay.color;
                 color.a = 0f;
                 _blackOverlay.color = color;
@@ -97,8 +97,8 @@ public class CardsInHandScreen : MonoBehaviour
                 task.StartDelayMs((int)(screenFadeSpeed * 1000));
                 break;
             case 1:
-                float fadeDelay = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardFadeDelay;
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.fakeCardFadeSpeed;
+                float fadeDelay = GameSettings.Instance.GetDuration(Duration.fakeCardFadeDelay);
+                float speed = GameSettings.Instance.GetDuration(Duration.fakeCardFadeSpeed);
                 int i = 0;
                 while (_activeFakeCards.Count > i)
                 {

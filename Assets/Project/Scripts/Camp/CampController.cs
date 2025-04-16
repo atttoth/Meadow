@@ -16,7 +16,7 @@ public class CampController : GameLogicEvent
     public void Create()
     {
         _markerHolders = new();
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         RectTransform markerDisplayHolders = transform.GetChild(0).GetComponent<RectTransform>();
         markerDisplayHolders.GetComponent<Image>().sprite = atlas.GetSprite("campDisplay");
         for (int i = 0; i < NUM_OF_MARKER_SLOTS; i++)
@@ -98,7 +98,7 @@ public class CampController : GameLogicEvent
         switch (task.State)
         {
             case 0:
-                task.StartDelayMs((int)(ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 1000)); // wait for last icon to flip
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000)); // wait for last icon to flip
                 break;
             case 1:
                 task.StartHandler((Action<GameTask>)_view.SetIconsPositionHandler);
@@ -141,7 +141,7 @@ public class CampController : GameLogicEvent
 
     public void Fade(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float fadeDuration = GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration);
         float targetValue = value ? 1f : 0f;
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }

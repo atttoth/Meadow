@@ -67,10 +67,10 @@ public class CampView : MonoBehaviour
     public List<ScreenDisplayItem> CreateCampItems()
     {
         Transform campIconsTransform = transform.GetChild(0).transform;
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         _CAMP_ICONS.ForEach(icon =>
         {
-            ScreenDisplayItem item = Instantiate(GameAssets.Instance.screenDisplayItemPrefab, campIconsTransform).GetComponent<ScreenDisplayItem>();
+            ScreenDisplayItem item = Instantiate(GameResourceManager.Instance.screenDisplayItemPrefab, campIconsTransform).GetComponent<ScreenDisplayItem>();
             item.gameObject.SetActive(false);
             item.Init();
             item.type = icon;
@@ -84,10 +84,10 @@ public class CampView : MonoBehaviour
 
     public List<ScreenDisplayItem> CreateItemButtons()
     {
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         for (int i = 0; i < selectionsLeft; ++i)
         {
-            ScreenDisplayItem item = Instantiate(GameAssets.Instance.screenDisplayItemPrefab, _display).GetComponent<ScreenDisplayItem>();
+            ScreenDisplayItem item = Instantiate(GameResourceManager.Instance.screenDisplayItemPrefab, _display).GetComponent<ScreenDisplayItem>();
             item.Init();
             item.ID = i;
             item.button.enabled = false;
@@ -117,8 +117,8 @@ public class CampView : MonoBehaviour
     {
         selectionsLeft--;
         _selectedItems.Add(item);
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
+        float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
         Sequence iconFlip = DOTween.Sequence();
         iconFlip.Append(item.transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(item.transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => item.mainImage.sprite = atlas.GetSprite(((int)((CardIcon)item.type)).ToString())));
         iconFlip.Append(item.transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
@@ -130,13 +130,13 @@ public class CampView : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                float iconFadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.campIconFadeDuration;
+                float iconFadeDuration = GameSettings.Instance.GetDuration(Duration.campIconFadeDuration);
                 _campItemSelection.Except(_selectedItems).ToList().ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(0f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;
             case 1:
                 _selectedItems.Sort((a, b) => (a.transform.position.x).CompareTo(b.transform.position.x));
-                float iconGroupPositionSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.campIconGroupPositionSpeed;
+                float iconGroupPositionSpeed = GameSettings.Instance.GetDuration(Duration.campIconGroupPositionSpeed);
                 Rect screenRect = _display.rect;
                 Rect itemRect = _selectedItems.First().GetComponent<RectTransform>().rect;
                 float gap = 40f;
@@ -177,8 +177,8 @@ public class CampView : MonoBehaviour
                     buttonItem.type = new List<CardIcon>() { icon1, icon2 };
                 }
 
-                float iconPositionSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.campIconSinglePositionSpeed;
-                float iconPositionDelay = ReferenceManager.Instance.gameLogicController.GameSettings.campIconPositionDelay;
+                float iconPositionSpeed = GameSettings.Instance.GetDuration(Duration.campIconSinglePositionSpeed);
+                float iconPositionDelay = GameSettings.Instance.GetDuration(Duration.campIconPositionDelay);
                 int duration = (int)(((_selectedItems.Count - 1) * iconPositionDelay + iconPositionSpeed) * 1000);
                 int index = 0;
                 while (_selectedItems.Count > index) // position icons
@@ -218,7 +218,7 @@ public class CampView : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                float iconFadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.campIconFadeDuration;
+                float iconFadeDuration = GameSettings.Instance.GetDuration(Duration.campIconFadeDuration);
                 _scoreButtonItems.ForEach(item => DOTween.Sequence().Append(item.mainImage.DOFade(1f, iconFadeDuration)));
                 task.StartDelayMs((int)(iconFadeDuration * 1000));
                 break;
@@ -233,7 +233,7 @@ public class CampView : MonoBehaviour
         _scoreButtonItems.ForEach(item => item.button.enabled = false);
         buttonItem.message.text = "";
         _usedScoreButtonIDs.Add(buttonItem.ID);
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         buttonItem.mainImage.sprite = atlas.GetSprite("campButton_complete");
     }
 

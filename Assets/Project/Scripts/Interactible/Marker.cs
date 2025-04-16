@@ -44,7 +44,7 @@ public class Marker : Interactable
 
     public void CreateMarker(int index, Color32 color)
     {
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         name = $"marker{index}";
         ID = index;
         _status = MarkerStatus.NONE;

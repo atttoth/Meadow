@@ -29,8 +29,8 @@ public class CardIconItemsView : MonoBehaviour
         if(_iconItemsLayout == null)
         {
             _iconItemsLayout = new CardIconItemsLayout();
-            _topIconItemsHolder = Instantiate(GameAssets.Instance.topIconsHolderPrefab, transform).GetComponent<Holder>();
-            _requiredIconItemsHolder = Instantiate(GameAssets.Instance.requiredIconsHolderPrefab, transform).GetComponent<Holder>();
+            _topIconItemsHolder = Instantiate(GameResourceManager.Instance.topIconsHolderPrefab, transform).GetComponent<Holder>();
+            _requiredIconItemsHolder = Instantiate(GameResourceManager.Instance.requiredIconsHolderPrefab, transform).GetComponent<Holder>();
         }
         else // delete icons from prev initialization
         {
@@ -46,7 +46,7 @@ public class CardIconItemsView : MonoBehaviour
 
         data.icons.ToList().ForEach(icon =>
         {
-            CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
+            CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _topIconItemsHolder.transform).GetComponent<CardIconItem>();
             item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, TOP_ICON_DIMENSION, -1);
             item.ToggleRayCast(false);
             _topIconItemsHolder.AddToHolder(item);
@@ -101,7 +101,7 @@ public class CardIconItemsView : MonoBehaviour
                 {
                     data.requirements.ToList().ForEach(icon =>
                     {
-                        CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
+                        CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                         item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                         _requiredIconItemsHolder.AddToHolder(item);
                     });
@@ -118,7 +118,7 @@ public class CardIconItemsView : MonoBehaviour
                         CardIcon icon1 = optionalrequirements[i];
                         CardIcon icon2 = optionalrequirements[i + 1];
                         List<CardIcon> pair = new() { icon1, icon2 };
-                        CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
+                        CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                         item.Create(pair, IconItemType.OPTIONAL, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                         _requiredIconItemsHolder.AddToHolder(item);
                     }
@@ -129,7 +129,7 @@ public class CardIconItemsView : MonoBehaviour
             {
                 if(data.adjacentRequirements.Length == 1)
                 {
-                    CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
+                    CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                     item.Create(new List<CardIcon>() { data.adjacentRequirements[0] }, IconItemType.ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                     _requiredIconItemsHolder.AddToHolder(item);
                 }
@@ -143,7 +143,7 @@ public class CardIconItemsView : MonoBehaviour
                             CardIcon icon1 = optionalAndAdjacentRequirements[i];
                             CardIcon icon2 = optionalAndAdjacentRequirements[i + 1];
                             List<CardIcon> pair = new() { icon1, icon2 };
-                            CardIconItem item = Instantiate(GameAssets.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
+                            CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
                             item.Create(pair, IconItemType.OPTIONAL_AND_ADJACENT, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
                             _requiredIconItemsHolder.AddToHolder(item);
                         }
@@ -155,7 +155,7 @@ public class CardIconItemsView : MonoBehaviour
 
             if(data.score > 0)
             {
-                _scoreItem = Instantiate(GameAssets.Instance.cardIconItemPrefab, transform).GetComponent<CardIconItem>();
+                _scoreItem = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, transform).GetComponent<CardIconItem>();
                 _scoreItem.Create(null, IconItemType.SCORE, TOP_ICON_DIMENSION, -1, data.score);
                 _scoreItem.ToggleRayCast(false);
                 _scoreItem.GetComponent<RectTransform>().anchoredPosition = _iconItemsLayout.GetScoreItemPosition();

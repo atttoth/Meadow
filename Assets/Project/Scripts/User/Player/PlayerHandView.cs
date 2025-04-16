@@ -12,7 +12,7 @@ public class PlayerHandView : HandView
     public override void Init()
     {
         base.Init();
-        float cardWidth = GameAssets.Instance.cardPrefab.GetComponent<RectTransform>().rect.width;
+        float cardWidth = GameResourceManager.Instance.cardPrefab.GetComponent<RectTransform>().rect.width;
         _handLayout = new HandLayout(cardWidth);
         _isHandDefault = true;
     }
@@ -33,10 +33,10 @@ public class PlayerHandView : HandView
         {
             case 0:
                 int duration = 0;
-                float drawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromBoard;
+                float drawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromBoard);
                 if (cards.Count > 1)
                 {
-                    float drawDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedDelayFromBoard;
+                    float drawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedDelayFromBoard);
                     duration = (int)(((cards.Count - 1) * drawDelay + drawSpeed) * 1000);
                     cards.ForEach(card => AddCard(card));
                     float[] positions = GetLayoutPositions();

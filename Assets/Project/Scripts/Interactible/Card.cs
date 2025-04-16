@@ -352,7 +352,7 @@ public class Card : Interactable
 
     public void PlayDrawingAnimation(float delay, CardHolder holder, Transform cardDrawContainer)
     {
-        float cardDrawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromDeck;
+        float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
         _parent = holder.transform;
         gameObject.SetActive(true);
         canHover = false;
@@ -370,7 +370,7 @@ public class Card : Interactable
 
     private void FlipBoardCard(Transform cardDrawContainer)
     {
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
         transform.SetParent(cardDrawContainer);
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardFront));
@@ -385,7 +385,7 @@ public class Card : Interactable
 
     public void FlipDeckCard(bool value)
     {
-        float halvedCardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard * 0.5f;
+        float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
         Sprite sprite = value ? _cardFront : _cardBack;
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = sprite));

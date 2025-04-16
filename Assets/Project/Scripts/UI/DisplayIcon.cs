@@ -60,7 +60,7 @@ public class DisplayIcon : MonoBehaviour
     private Sprite SetIconImageByCardIcon(CardIcon cardIcon)
     {
         string name = ((int)cardIcon).ToString();
-        return GameAssets.Instance.baseAtlas.GetSprite(name);
+        return GameResourceManager.Instance.Base.GetSprite(name);
     }
 
     public Color32 GetColorByGroundIcon(CardIcon cardIcon)

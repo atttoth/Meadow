@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4066283405906556077}
-  - component: {fileID: 5845991476176162939}
+  - component: {fileID: 3659603421837336242}
   m_Layer: 0
-  m_Name: GameAssets
+  m_Name: GameResourceManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -32,7 +32,7 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &5845991476176162939
+--- !u!114 &3659603421837336242
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -41,7 +41,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2003246625731154049}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e7417ed5f2ec1424d91262e07f33403a, type: 3}
+  m_Script: {fileID: 11500000, guid: 0617acff3d7199c448bd6c06d9648711, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   cardDataJson: {fileID: 4900000, guid: aa5b2f5fe717cc14e8691dc879f4f2c4, type: 3}
@@ -59,7 +59,7 @@ MonoBehaviour:
   dummyDisplayIconPrefab: {fileID: 8393196153097624382, guid: ebbe0b7235d15fe4c81fdcf458c8cec8, type: 3}
   cardScoreTextPrefab: {fileID: 5342653228728725154, guid: e0e13223a1ea98e4a8438cefa1989c85, type: 3}
   screenDisplayItemPrefab: {fileID: 264662953898850249, guid: 8bd8ff9d709d3a9498bcc5310b0423c5, type: 3}
-  baseAtlas: {fileID: 4343727234628468602, guid: 26331140f766f8a4da57ef8eba0b7bba, type: 2}
+  Base: {fileID: 4343727234628468602, guid: 26331140f766f8a4da57ef8eba0b7bba, type: 2}
   West: {fileID: 4343727234628468602, guid: fafa93261b851e7489b0f4b305ff2e78, type: 2}
   South: {fileID: 4343727234628468602, guid: 7e220495f2b56bf41a0f7e0089d50b79, type: 2}
   East: {fileID: 4343727234628468602, guid: 1dbe2d9aeb5a5ed4d8d68fc2f558da8d, type: 2}

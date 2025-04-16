@@ -25,7 +25,7 @@ public class ScoreCollectionScreen : MonoBehaviour
         }
         else
         {
-            scoreTextPrefab = Object.Instantiate(GameAssets.Instance.cardScoreTextPrefab, _poolTransform);
+            scoreTextPrefab = Object.Instantiate(GameResourceManager.Instance.cardScoreTextPrefab, _poolTransform);
         }
         return scoreTextPrefab;
     }

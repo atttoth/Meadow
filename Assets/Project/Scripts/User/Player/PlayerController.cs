@@ -35,7 +35,7 @@ public class PlayerController : UserController
         _tableToggleButton = _tableView.transform.GetChild(2).GetComponent<Button>();
         _tableApproveButton = _tableView.transform.GetChild(1).GetComponent<Button>();
 
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         Transform turnEndButtonTransform = GameObject.Find("GameCanvas").transform.GetChild(2);
         turnEndButtonTransform.GetComponent<Image>().sprite = atlas.GetSprite("endTurn_base");
         _turnEndButton = turnEndButtonTransform.GetComponent<Button>();
@@ -113,7 +113,7 @@ public class PlayerController : UserController
     public void FadeTurnEndButton(bool value)
     {
         float targetValue = value ? 1f : 0f;
-        DOTween.Sequence().Append(_turnEndButton.GetComponent<CanvasGroup>().DOFade(targetValue, ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration));
+        DOTween.Sequence().Append(_turnEndButton.GetComponent<CanvasGroup>().DOFade(targetValue, GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration)));
     }
 
     public void ToggleTurnEndButton(bool value)
@@ -414,7 +414,7 @@ public class PlayerController : UserController
         switch(task.State)
         {
             case 0:
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardSnapSpeed;
+                float speed = GameSettings.Instance.GetDuration(Duration.cardSnapSpeed);
                 float[] positions = (_handView as PlayerHandView).GetLayoutPositions();
                 Transform parentTransform = card.cardStatus == CardStatus.PENDING_ON_TABLE ? _tableView.transform.GetChild(0).transform : _handView.transform;
                 (_handView as PlayerHandView).MoveCardsHorizontallyInHand(positions);

@@ -15,7 +15,7 @@ public class MarkerActionScreen : MonoBehaviour
     public List<Button> Init()
     {
         int numOfActions = 4;
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
 
         _blackOverlay = transform.GetChild(0).GetComponent<Image>();
         _selectText = transform.GetChild(5).GetComponent<TextMeshProUGUI>();

@@ -23,7 +23,7 @@ public abstract class MarkerView : MonoBehaviour
         _allMarkers = new();
         for (int index = 0; index <= BLANK_MARKER_ID; index++)
         {
-            Marker marker = Instantiate(GameAssets.Instance.markerPrefab).GetComponent<Marker>();
+            Marker marker = Instantiate(GameResourceManager.Instance.markerPrefab).GetComponent<Marker>();
             marker.gameObject.SetActive(false);
             marker.transform.SetParent(transform);
             marker.CreateMarker(index, color);
@@ -53,7 +53,7 @@ public abstract class MarkerView : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                float duration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+                float duration = GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration);
                 _blankMarker.Fade(false, duration);
                 task.StartDelayMs((int)duration * 1000);
                 break;
@@ -107,7 +107,7 @@ public abstract class MarkerView : MonoBehaviour
 
     public void Fade(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float fadeDuration = GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration);
         float targetValue = value ? 0f : 1f;
         _allMarkers
             .Where(marker => marker.Status == MarkerStatus.USED)

@@ -46,8 +46,8 @@ public class PlayerTableView : TableView
         Rect rect = transform.GetComponent<RectTransform>().rect;
         float tableClosedPosY = transform.position.y;
         float tableOpenPosY = tableClosedPosY + rect.height;
-        float primaryHolderWidth = GameAssets.Instance.tablePrimaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
-        float secondaryHolderWidth = GameAssets.Instance.tableSecondaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
+        float primaryHolderWidth = GameResourceManager.Instance.tablePrimaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
+        float secondaryHolderWidth = GameResourceManager.Instance.tableSecondaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
         _tableLayout = new TableLayout(tableClosedPosY, tableOpenPosY, rect.width, primaryHolderWidth, secondaryHolderWidth);
     }
 
@@ -107,7 +107,7 @@ public class PlayerTableView : TableView
         _primaryCardHolderPool = new();
         for (int i = 0; i < _MAX_PRIMARY_HOLDER_NUM; i++)
         {
-            CardHolder holder = Instantiate(GameAssets.Instance.tablePrimaryCardHolderPrefab, _primaryCardHolderPoolContainer).GetComponent<CardHolder>();
+            CardHolder holder = Instantiate(GameResourceManager.Instance.tablePrimaryCardHolderPrefab, _primaryCardHolderPoolContainer).GetComponent<CardHolder>();
             holder.ID = i;
             holder.holderType = HolderType.TableCard;
             holder.gameObject.SetActive(false);
@@ -117,7 +117,7 @@ public class PlayerTableView : TableView
         _secondaryCardHolderPool = new();
         for (int i = 0; i < _MAX_SECONDARY_HOLDER_NUM; i++)
         {
-            CardHolder holder = Instantiate(GameAssets.Instance.tableSecondaryCardHolderPrefab, _secondaryCardHolderPoolContainer).GetComponent<CardHolder>();
+            CardHolder holder = Instantiate(GameResourceManager.Instance.tableSecondaryCardHolderPrefab, _secondaryCardHolderPoolContainer).GetComponent<CardHolder>();
             holder.ID = _MAX_PRIMARY_HOLDER_NUM + i;
             holder.holderType = HolderType.TableCard;
             holder.gameObject.SetActive(false);
@@ -207,7 +207,7 @@ public class PlayerTableView : TableView
 
     public void TogglePanel()
     {
-        float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableViewOpenSpeed;
+        float speed = GameSettings.Instance.GetDuration(Duration.tableViewOpenSpeed);
         isTableVisible = !isTableVisible;
         float posY = _tableLayout.GetTargetTableViewPosY(isTableVisible);
         if(isTableVisible)
@@ -296,7 +296,7 @@ public class PlayerTableView : TableView
     {
         if(_activePrimaryCardHolders.Count > 0)
         {
-            float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableHolderCenteringSpeed;
+            float speed = GameSettings.Instance.GetDuration(Duration.tableHolderCenteringSpeed);
             float[] positions = _tableLayout.GetPrimaryCardHolderPositions(_activePrimaryCardHolders.Count);
             for (int i = 0; i < positions.Length; i++)
             {
@@ -309,7 +309,7 @@ public class PlayerTableView : TableView
 
     public void AlignSecondaryCardHoldersToLeft()
     {
-        float speed = ReferenceManager.Instance.gameLogicController.GameSettings.tableHolderCenteringSpeed;
+        float speed = GameSettings.Instance.GetDuration(Duration.tableHolderCenteringSpeed);
         for (int i = 0; i < _activeSecondaryCardHolders.Count; i++)
         {
             CardHolder holder = _activeSecondaryCardHolders[i];

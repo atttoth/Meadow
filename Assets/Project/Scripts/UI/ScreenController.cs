@@ -70,9 +70,9 @@ public class ScreenController : GameLogicEvent
         switch (task.State)
         {
             case 0:
-                SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
-                float cardScoreDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreDelay;
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreCollectingSpeed;
+                SpriteAtlas atlas = GameResourceManager.Instance.Base;
+                float cardScoreDelay = GameSettings.Instance.GetDuration(Duration.cardScoreDelay);
+                float speed = GameSettings.Instance.GetDuration(Duration.cardScoreCollectingSpeed);
                 int duration = (int)(((cards.Count - 1) * cardScoreDelay + speed) * 1000);
                 int i = 0;
                 while (cards.Count > 0)
@@ -104,7 +104,7 @@ public class ScreenController : GameLogicEvent
         switch (task.State)
         {
             case 0:
-                float speed = ReferenceManager.Instance.gameLogicController.GameSettings.cardScoreCollectingSpeed;
+                float speed = GameSettings.Instance.GetDuration(Duration.cardScoreCollectingSpeed);
                 int duration = (int)(speed * 1000);
                 Transform scoreTextPrefab = _scoreCollectionScreen.GetScoreTextObject();
                 scoreTextPrefab.SetPositionAndRotation(originPosition, Quaternion.identity);

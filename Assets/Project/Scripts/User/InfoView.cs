@@ -27,7 +27,7 @@ public class InfoView : MonoBehaviour
 
     public void Init()
     {
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         Transform roadTokeItem = transform.GetChild(0);
         roadTokeItem.GetChild(0).GetComponent<Image>().sprite = atlas.GetSprite("action_1");
         _roadTokensText = roadTokeItem.GetChild(1).GetComponent<TextMeshProUGUI>();

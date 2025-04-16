@@ -30,7 +30,7 @@ public class BoardController : MonoBehaviour
 
     public void Create()
     {
-        SpriteAtlas atlas = GameAssets.Instance.baseAtlas;
+        SpriteAtlas atlas = GameResourceManager.Instance.Base;
         GetComponent<Image>().sprite = atlas.GetSprite("board_frame");
         _cardHolders = new();
         for (int i = 0; i < _GRID_SIZE; i++)
@@ -39,7 +39,7 @@ public class BoardController : MonoBehaviour
             Transform col = transform.GetChild(0).GetChild(i);
             for (int j = 0; j < _GRID_SIZE; j++)
             {
-                CardHolder boardCardHolder = Instantiate(GameAssets.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
+                CardHolder boardCardHolder = Instantiate(GameResourceManager.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
                 boardCardHolder.Init(j, HolderType.BoardCard);
                 boardCardHolder.holderSubType = HolderSubType.NONE;
                 boardCardHolder.EnableOverlay(false);
@@ -128,9 +128,9 @@ public class BoardController : MonoBehaviour
                 int duration = 0;
                 if (_emptyHolders.Count > 0)
                 {
-                    float cardDrawDelay = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawDelayFromDeck;
-                    float cardDrawSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardDrawSpeedFromDeck;
-                    float cardRotationSpeed = ReferenceManager.Instance.gameLogicController.GameSettings.cardRotationSpeedOnBoard;
+                    float cardDrawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawDelayFromDeck);
+                    float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
+                    float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
                     duration = (int)(((_emptyHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
                     int i = 0;
                     while (_emptyHolders.Count > 0)
@@ -372,11 +372,11 @@ public class BoardController : MonoBehaviour
 
     public List<Card> CreateInitialGroundCards()
     {
-        SpriteAtlas atlas = GameAssets.Instance.GetAssetByName<SpriteAtlas>(DeckType.East.ToString());
+        SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(DeckType.East.ToString());
         _cardsForSelection = new();
         _deckController.InitialGroundCardData.ForEach(data =>
         {
-            Card card = Instantiate(GameAssets.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
+            Card card = Instantiate(GameResourceManager.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
             card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
             _cardsForSelection.Add(card);
         });
@@ -459,7 +459,7 @@ public class BoardController : MonoBehaviour
 
     public void Fade(bool value)
     {
-        float fadeDuration = ReferenceManager.Instance.gameLogicController.GameSettings.gameUIFadeDuration;
+        float fadeDuration = GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration);
         float targetValue = value ? 1f : 0f;
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
