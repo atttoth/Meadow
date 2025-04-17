@@ -5,10 +5,9 @@ public class GameLogicManager : MonoBehaviour
 {
     private GameLogicController _gameLogicController;
 
-    private void Start()
+    private void Awake()
     {
-        _gameLogicController = ReferenceManager.Instance.gameLogicController;
-        _gameLogicController.Init();
+        _gameLogicController = new(GameResourceManager.Instance.boardController, GameResourceManager.Instance.campController, GameResourceManager.Instance.screenController);
     }
 
     private void Update()
@@ -16,14 +15,14 @@ public class GameLogicManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) //todo: create game menu
         {
             GameSettings.Instance.SetGameSpeed(GameSpeed.LEVEL5);
-            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 1);
+            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 3);
             _gameLogicController.StartSession(gameMode, CreateUserControllersForSession(gameMode));
         }
     }
 
     private UserController[] CreateUserControllersForSession(GameMode gameMode)
     {
-        List<UserController> userControllers = new() { ReferenceManager.Instance.playerController };
+        List<UserController> userControllers = new() { GameResourceManager.Instance.playerController };
         Transform userControllerContainer = GameObject.Find("GameCanvas").transform.GetChild(1);
         if (gameMode.ModeType == GameModeType.SINGLE_PLAYER_RANDOM)
         {
@@ -37,5 +36,10 @@ public class GameLogicManager : MonoBehaviour
         }
         userControllers.ForEach(controller => controller.CreateUser(gameMode));
         return userControllers.ToArray();
+    }
+
+    public void OnLogicEvent(object eventType, object[] args)
+    {
+        _gameLogicController.Execute((int)eventType, args);
     }
 }

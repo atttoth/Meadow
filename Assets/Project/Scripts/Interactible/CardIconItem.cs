@@ -31,6 +31,7 @@ public class CardIconItem : Interactable
 
     public void Create(List<CardIcon> icons, IconItemType itemType, float iconDimension, int itemID, int score = 0)
     {
+        Init();
         ID = itemID;
         SpriteAtlas atlas = GameResourceManager.Instance.Base;
         RectTransform iconsParentRect = transform.GetChild((int)itemType).GetComponent<RectTransform>();
@@ -75,7 +76,7 @@ public class CardIconItem : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            StartEventHandler(GameLogicEventType.CARD_ICON_CLICKED, new object[] { ID });
+            _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_ICON_CLICKED, new object[] { ID });
         }
     }
 

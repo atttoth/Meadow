@@ -131,12 +131,14 @@ public class PlayerTableView : TableView
         for (int i = 0; i < 2; i++)
         {
             TableCardHitArea primaryHitArea = transform.GetChild(0).GetChild(0).GetChild(0).GetChild(2).GetChild(i).GetComponent<TableCardHitArea>(); // .../TableContents/Primary/Content/UIHitArea/Hitarea
+            primaryHitArea.Init();
             primaryHitArea.type = HolderSubType.PRIMARY;
             primaryHitArea.Toggle(false);
             _primaryHitAreas.Add(primaryHitArea);
         }
 
         _secondaryHitArea = transform.GetChild(0).GetChild(1).GetChild(0).GetChild(2).GetComponent<TableCardHitArea>(); // .../TableContents/Secondary/Content/Hitarea
+        _secondaryHitArea.Init();
         _secondaryHitArea.type = HolderSubType.SECONDARY;
         _secondaryHitArea.Toggle(false);
     }
@@ -270,7 +272,7 @@ public class PlayerTableView : TableView
             float posX = handCardPositions.Length > 0 ? handCardPositions[^1] : 0f;
             position = _tableLayout.GetCancelledCardPosition(posX, card.hoverTargetY);
         }
-        card.PositionCard(position, speed, isPlacement);
+        card.PositionCardTween(position, speed, isPlacement);
     }
 
     public void RemoveEmptyHolder(HolderSubType holderSubType)

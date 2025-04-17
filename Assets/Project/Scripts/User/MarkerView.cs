@@ -26,7 +26,7 @@ public abstract class MarkerView : MonoBehaviour
             Marker marker = Instantiate(GameResourceManager.Instance.markerPrefab).GetComponent<Marker>();
             marker.gameObject.SetActive(false);
             marker.transform.SetParent(transform);
-            marker.CreateMarker(index, color);
+            marker.Create(index, color);
             if(index < BLANK_MARKER_ID)
             {
                 _allMarkers.Add(marker);

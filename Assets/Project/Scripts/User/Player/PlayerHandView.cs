@@ -1,4 +1,3 @@
-using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -34,6 +33,7 @@ public class PlayerHandView : HandView
             case 0:
                 int duration = 0;
                 float drawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromBoard);
+                float posY = 45f;
                 if (cards.Count > 1)
                 {
                     float drawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedDelayFromBoard);
@@ -46,9 +46,9 @@ public class PlayerHandView : HandView
                         float delay = i * drawDelay;
                         Card card = cards.First();
                         cards.Remove(card);
-                        float newCardPosition = positions[i];
+                        float posX = positions[i];
                         card.transform.SetParent(transform);
-                        DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetDelay(delay).SetEase(Ease.InOutBack));
+                        card.PickToHandTween(new(posX, posY, 0f), drawSpeed, delay);
                         i++;
                     }
                 }
@@ -59,9 +59,9 @@ public class PlayerHandView : HandView
                     AddCard(card);
                     float[] positions = GetLayoutPositions();
                     MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
-                    float newCardPosition = positions[^1];
+                    float posX = positions[^1];
                     card.transform.SetParent(transform);
-                    DOTween.Sequence().Append(card.transform.DOLocalMove(new(newCardPosition, card.hoverOriginY), drawSpeed).SetEase(Ease.InOutBack));
+                    card.PickToHandTween(new(posX, posY, 0f), drawSpeed);
                 }
                 task.StartDelayMs(duration);
                 break;
@@ -109,7 +109,7 @@ public class PlayerHandView : HandView
         {
             Card card = _cards[i];
             float posX = positions[i];
-            card.MoveCardHorizontally(posX, isRapid);
+            card.MoveCardHorizontallyTween(posX, isRapid);
         }
     }
 

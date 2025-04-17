@@ -6,8 +6,9 @@ public class HandScreenHitArea : HitArea
 {
     private Image _fakeCardImage;
 
-    public void Init()
+    public override void Init()
     {
+        base.Init();
         _fakeCardImage = transform.GetChild(0).GetComponent<Image>();
         _fakeCardImage.enabled = false;
     }
@@ -24,7 +25,7 @@ public class HandScreenHitArea : HitArea
 
     private void ToggleHandScreen(bool value)
     {
-        StartEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
+        _dispatcher.InvokeEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
     }
 
     public void SetupHitAreaImage(CardData cardData)

@@ -1,4 +1,3 @@
-using DG.Tweening;
 using UnityEngine;
 
 public class NpcMarkerView : MarkerView
@@ -17,10 +16,9 @@ public class NpcMarkerView : MarkerView
                 float duration = GameSettings.Instance.GetDuration(Duration.npcMarkerPlacementDuration);
                 Vector3 targetPosition = holder.GetComponent<RectTransform>().position;
                 Vector3 startingPos = GetStartingPosition(targetPosition, holder.Direction);
-                RectTransform rect = marker.GetComponent<RectTransform>();
-                rect.position = startingPos;
+                marker.GetComponent<RectTransform>().position = startingPos;
                 marker.SetAlpha(true);
-                DOTween.Sequence().Append(rect.DOMove(targetPosition, duration)).SetEase(Ease.InOutSine);
+                marker.SnapToHolderTween(targetPosition, duration);
                 task.StartDelayMs((int)duration * 1000);
                 break;
             case 1:

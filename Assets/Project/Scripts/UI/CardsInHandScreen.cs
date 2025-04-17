@@ -67,7 +67,7 @@ public class CardsInHandScreen : MonoBehaviour
             SpriteAtlas atlas = _atlasCollection[(int)data.deckType];
             Sprite cardFront = atlas.GetSprite(data.ID.ToString());
             Card fakeCard = GetFakeCard();
-            fakeCard.Init(data, cardFront, null);
+            fakeCard.Create(data, cardFront, null);
             fakeCard.MainImage.sprite = cardFront;
             Color color = fakeCard.MainImage.color;
             color.a = 0f;

@@ -3,8 +3,9 @@ using UnityEngine.UI;
 
 public class InteractableScreen : Interactable
 {
-    public void Init()
+    public override void Init()
     {
+        base.Init();
         _mainImage = transform.GetComponent<Image>();
     }
 
@@ -12,7 +13,7 @@ public class InteractableScreen : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            StartEventHandler(GameLogicEventType.CARD_INSPECTION_ENDED, new object[0]);
+            _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_ENDED, new object[0]);
         }
     }
 }

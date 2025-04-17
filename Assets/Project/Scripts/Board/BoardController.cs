@@ -138,7 +138,7 @@ public class BoardController : MonoBehaviour
                         float delay = i * cardDrawDelay;
                         CardHolder holder = GetNextItem(_emptyHolders);
                         Card card = GetNextItem(_cardsToDraw);
-                        card.PlayDrawingAnimation(delay, holder, _cardDrawContainer);
+                        card.FillBoardTween(delay, holder, _cardDrawContainer);
                         i++;
                     }
                 }
@@ -352,10 +352,10 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public List<Card> GetUnselectedCards(int cardID)
+    public List<Card> GetUnselectedCards(Card pickedCard)
     {
         _cardsForSelection.ForEach(card => card.ToggleSelection(false));
-        List<Card> unselectedTopCards = _cardsForSelection.Where(card => card.Data.ID != cardID).ToList();
+        List<Card> unselectedTopCards = _cardsForSelection.Where(card => card != pickedCard).ToList();
         _cardsForSelection = unselectedTopCards;
         return unselectedTopCards;
     }
@@ -377,7 +377,7 @@ public class BoardController : MonoBehaviour
         _deckController.InitialGroundCardData.ForEach(data =>
         {
             Card card = Instantiate(GameResourceManager.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
-            card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
+            card.Create(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
             _cardsForSelection.Add(card);
         });
         return _cardsForSelection;

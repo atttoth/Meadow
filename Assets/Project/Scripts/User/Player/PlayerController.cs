@@ -64,7 +64,7 @@ public class PlayerController : UserController
             {
                 EnableTableApproveButton(false);
                 (_tableView as PlayerTableView).UpdateApproveButton(false);
-                StartEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), _infoView.scoreTransform.position });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), _infoView.scoreTransform.position });
             }
             else
             {
@@ -99,13 +99,13 @@ public class PlayerController : UserController
             FadeTurnEndButton(!(_tableView as PlayerTableView).isTableVisible);
             ToggleHandScreenHitarea(!(_tableView as PlayerTableView).isTableVisible);
         }
-        StartEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !(_tableView as PlayerTableView).isTableVisible });
+        _dispatcher.InvokeEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !(_tableView as PlayerTableView).isTableVisible });
     }
 
     public void ToggleCamp()
     {
         _isCampVisible = !_isCampVisible;
-        StartEventHandler(GameLogicEventType.CAMP_TOGGLED, new object[] { _isCampVisible });
+        _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_TOGGLED, new object[] { _isCampVisible });
         Transform parent = _isCampVisible ? transform.root : _infoView.transform;
         _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
     }
@@ -264,6 +264,7 @@ public class PlayerController : UserController
         switch(task.State)
         {
             case 0:
+                (_handView as PlayerHandView).EnableCardsRaycast(false);
                 ToggleTable(true);
                 task.StartDelayMs(2000);
                 break;
@@ -281,6 +282,7 @@ public class PlayerController : UserController
                 break;
             default:
                 ToggleTable(true);
+                (_handView as PlayerHandView).EnableCardsRaycast(true);
                 task.Complete();
                 break;
         }
@@ -484,7 +486,7 @@ public class PlayerController : UserController
 
     public void ShowSelectedMarker(int value, List<Marker> markers)
     {
-        if (markers[0].ID == 5)
+        if (markers[0].ID == MarkerView.BLANK_MARKER_ID)
         {
             markers[0].gameObject.SetActive(true);
         }

@@ -22,7 +22,7 @@ public class CardInspectionScreen : MonoBehaviour
         _interactableScreen = transform.GetChild(0).GetComponent<InteractableScreen>();
         _interactableScreen.Init();
         _fakeCard = transform.GetChild(1).GetComponent<Card>();
-        _fakeCard.Init(null, null, null);
+        _fakeCard.Create(null, null, null);
         _fakeCard.ToggleRayCast(false);
         _fakeCard.MainImage.enabled = false;
         _fakeCardTransform = _fakeCard.GetComponent<RectTransform>();

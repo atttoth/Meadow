@@ -6,9 +6,11 @@ public class NpcController : UserController
 {
     private MarkerHolder _selectedMarkerHolder;
     private Marker _selectedMarker;
+    private Card _selectedCard;
 
     public MarkerHolder SelectedMarkerHolder {  get { return _selectedMarkerHolder; } }
     public Marker SelectedMarker { get { return _selectedMarker; } }
+    public Card SelectedCard { get { return _selectedCard; } }
 
     public override void CreateUser(GameMode gameMode)
     {
@@ -49,12 +51,12 @@ public class NpcController : UserController
         }
     }
 
-    public Card SelectInitialGroundCard(List<Card> cards)
+    public void SelectInitialGroundCard(List<Card> cards) // add evaluation logic
     {
-        return cards.First();
+        _selectedCard = cards.First();
     }
 
-    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card)
+    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card) // todo
     {
         task.Complete();
     }

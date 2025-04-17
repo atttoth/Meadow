@@ -1,5 +1,4 @@
 using System;
-using UnityEngine;
 
 public enum GameLogicEventType
 {
@@ -23,6 +22,7 @@ public enum GameLogicEventType
     REMOVED_CARD_ICON,
     APPROVED_PENDING_CARD_PLACED,
     CANCELLED_PENDING_CARD_PLACED,
+    MARKER_HOLDER_TRIGGERED,
     MARKER_PLACED,
     MARKER_CANCELLED,
     MARKER_ACTION_SELECTED,
@@ -31,16 +31,16 @@ public enum GameLogicEventType
     HAND_SCREEN_TOGGLED
 }
 
-public class GameLogicEvent : MonoBehaviour
+public class LogicEventDispatcher
 {
     private event EventHandler<object[]> _logicEventHandler;
 
-    private void Start()
+    public LogicEventDispatcher()
     {
-        _logicEventHandler += ReferenceManager.Instance.gameLogicController.OnLogicEvent;
+        _logicEventHandler += GameResourceManager.Instance.gameLogicManager.OnLogicEvent;
     }
 
-    protected void StartEventHandler(GameLogicEventType type, object[] args)
+    public void InvokeEventHandler(GameLogicEventType type, object[] args)
     {
         _logicEventHandler.Invoke(Enum.ToObject(typeof(GameLogicEventType), type), args);
     }

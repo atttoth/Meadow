@@ -1,4 +1,4 @@
-using System;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -11,22 +11,16 @@ public enum MarkerDirection
 
 public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, IScrollHandler
 {
-    private event EventHandler<InteractableHolderEventArgs> _interactionEventHandler;
+    private LogicEventDispatcher _dispatcher;
     private Image _mainImage;
     private MarkerDirection _direction;
-
-    public class InteractableHolderEventArgs
-    {
-        public bool isHoverIn;
-        public int scrollDirection;
-    }
 
     public MarkerDirection Direction { get { return _direction; } }
 
     public override void Init(int id, HolderType type)
     {
         base.Init(id, type);
-        _interactionEventHandler += ReferenceManager.Instance.gameLogicController.OnMarkerHolderInteraction;
+        _dispatcher = new();
         _mainImage = GetComponent<Image>();
         switch (transform.parent.gameObject.tag)
         {
@@ -58,9 +52,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            InteractableHolderEventArgs args = new();
-            args.isHoverIn = true;
-            _interactionEventHandler?.Invoke(this, args);
+            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, true, 0 });
         }
     }
 
@@ -68,9 +60,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            InteractableHolderEventArgs args = new();
-            args.isHoverIn = false;
-            _interactionEventHandler?.Invoke(this, args);
+            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, 0 });
         }
     }
 
@@ -78,9 +68,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            InteractableHolderEventArgs args = new();
-            args.scrollDirection = (int)eventData.scrollDelta.y;
-            _interactionEventHandler?.Invoke(this, args);
+            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, (int)eventData.scrollDelta.y });
         }
     }
 

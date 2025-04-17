@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
-using static UnityEditor.Progress;
 
 public enum CardType
 {
@@ -81,8 +80,9 @@ public class Card : Interactable
     private int _siblingIndexInParent;
     private Vector2 _prevPosition;
 
-    public void Init(CardData data, Sprite cardFront, Sprite cardBack)
+    public void Create(CardData data, Sprite cardFront, Sprite cardBack)
     {
+        Init();
         _data = data;
         _iconItemsView = transform.GetChild(1).GetComponent<CardIconItemsView>();
         InitIconItemsView(data);
@@ -134,7 +134,7 @@ public class Card : Interactable
         _prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
-        StartEventHandler(GameLogicEventType.CARD_MOVED, new object[] { _data.cardType });
+        _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_MOVED, new object[] { _data.cardType });
     }
 
     public override void OnEndDrag(PointerEventData eventData)
@@ -146,7 +146,7 @@ public class Card : Interactable
 
         List<RaycastResult> raycastResults = new();
         EventSystem.current.RaycastAll(eventData, raycastResults);
-        StartEventHandler(GameLogicEventType.CARD_PLACED, new object[] { this, raycastResults});
+        _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_PLACED, new object[] { this, raycastResults});
     }
 
     public void SetCardReadyInHand()
@@ -169,7 +169,7 @@ public class Card : Interactable
         {
             if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
-                StartEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
             }
             else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus) && _canInspect)
             {
@@ -177,7 +177,7 @@ public class Card : Interactable
                 {
                     transform.SetParent(_parent);
                 }
-                StartEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
             }
         }
 
@@ -186,13 +186,13 @@ public class Card : Interactable
             if(isSelected)
             {
                 OnPick();
-                StartEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
             }
             else if(isDisposable && !isInspected)
             {
                 selectedToDispose = !selectedToDispose;
                 ToggleHighlight(selectedToDispose);
-                StartEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
             }
         }
     }
@@ -350,7 +350,7 @@ public class Card : Interactable
         DOTween.Sequence().Append(transform.DOLocalMoveY(posY, 0.4f));
     }
 
-    public void PlayDrawingAnimation(float delay, CardHolder holder, Transform cardDrawContainer)
+    public void FillBoardTween(float delay, CardHolder holder, Transform cardDrawContainer)
     {
         float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
         _parent = holder.transform;
@@ -364,11 +364,11 @@ public class Card : Interactable
             .OnComplete(() =>
             {
                 holder.AddToHolder(this);
-                FlipBoardCard(cardDrawContainer);
+                FlipBoardCardTween(cardDrawContainer);
             });
     }
 
-    private void FlipBoardCard(Transform cardDrawContainer)
+    private void FlipBoardCardTween(Transform cardDrawContainer)
     {
         float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
         transform.SetParent(cardDrawContainer);
@@ -383,7 +383,12 @@ public class Card : Interactable
         });
     }
 
-    public void FlipDeckCard(bool value)
+    public void PickToHandTween(Vector3 position, float drawSpeed, float delay = 0f)
+    {
+        DOTween.Sequence().Append(GetComponent<RectTransform>().DOAnchorPos(position, drawSpeed).SetDelay(delay).SetEase(Ease.InOutBack));
+    }
+
+    public void FlipDeckCardTween(bool value)
     {
         float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
         Sprite sprite = value ? _cardFront : _cardBack;
@@ -393,14 +398,14 @@ public class Card : Interactable
         cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear);
     }
 
-    public void MoveCardHorizontally(float posX, bool isRapid)
+    public void MoveCardHorizontallyTween(float posX, bool isRapid)
     {
         float duration = canMove ? 0.2f : 0.4f;
         Ease ease = isRapid ? Ease.InOutBack : canMove ? Ease.Linear : Ease.InOutQuad;
         DOTween.Sequence().Append(transform.DOLocalMoveX(posX, duration).SetEase(ease));
     }
 
-    public void PositionCard(Vector3 position, float speed, bool isPlacement)
+    public void PositionCardTween(Vector3 position, float speed, bool isPlacement)
     {
         RectTransform rect = GetComponent<RectTransform>();
         if (Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == Data.cardType))

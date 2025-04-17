@@ -6,15 +6,17 @@ using UnityEngine;
 using UnityEngine.U2D;
 using UnityEngine.UI;
 
-public class CampController : GameLogicEvent
+public class CampController : MonoBehaviour
 {
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
+    private LogicEventDispatcher _dispatcher;
     private List<MarkerHolder> _markerHolders;
     private CampView _view;
     private CanvasGroup _canvasGroup;
 
     public void Create()
     {
+        _dispatcher = new();
         _markerHolders = new();
         SpriteAtlas atlas = GameResourceManager.Instance.Base;
         RectTransform markerDisplayHolders = transform.GetChild(0).GetComponent<RectTransform>();
@@ -48,7 +50,7 @@ public class CampController : GameLogicEvent
             if (_view.selectionsLeft < 1)
             {
                 campItems.ForEach(item => item.button.enabled = false);
-                StartEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, new object[0]);
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, new object[0]);
             }
         }));
 
@@ -60,7 +62,7 @@ public class CampController : GameLogicEvent
             if (_view.isCampActionEnabled && score > 0)
             {
                 _view.OnItemButtonClick(item);
-                StartEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new object[] { score, item.GetComponent<Transform>().position });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new object[] { score, item.GetComponent<Transform>().position });
             }
             else
             {

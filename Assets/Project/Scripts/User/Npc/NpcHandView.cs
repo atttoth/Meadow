@@ -1,4 +1,3 @@
-using DG.Tweening;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -12,7 +11,6 @@ public class NpcHandView : HandView
             case 0:
                 int duration = 0;
                 float drawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromBoard);
-                Vector3 parentPosition = transform.parent.GetComponent<RectTransform>().position;
                 if (cards.Count > 1)
                 {
                     float drawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedDelayFromBoard);
@@ -25,7 +23,7 @@ public class NpcHandView : HandView
                         Card card = cards.First();
                         cards.Remove(card);
                         card.transform.SetParent(transform);
-                        DOTween.Sequence().Append(card.transform.DOLocalMove(parentPosition, drawSpeed).SetDelay(delay).SetEase(Ease.InOutBack));
+                        card.PickToHandTween(Vector3.zero, drawSpeed, delay);
                         i++;
                     }
                 }
@@ -35,7 +33,7 @@ public class NpcHandView : HandView
                     duration = (int)(drawSpeed * 1000);
                     AddCard(card);
                     card.transform.SetParent(transform);
-                    DOTween.Sequence().Append(card.transform.DOLocalMove(parentPosition, drawSpeed).SetEase(Ease.InOutBack));
+                    card.PickToHandTween(Vector3.zero, drawSpeed);
                 }
                 task.StartDelayMs(duration);
                 break;

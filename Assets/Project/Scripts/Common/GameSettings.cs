@@ -1,4 +1,3 @@
-using UnityEngine;
 
 public enum GameSpeed
 { 
@@ -34,7 +33,7 @@ public enum Duration
     npcMarkerPlacementDuration
  }
 
-public class GameSettings : MonoBehaviour
+public class GameSettings
 {
     private static GameSettings _instance;
     private float _gameSpeedMod;
@@ -45,7 +44,7 @@ public class GameSettings : MonoBehaviour
         {
             if (_instance == null)
             {
-                _instance = Object.Instantiate(Resources.Load<GameSettings>("GameSettings"));
+                _instance = new GameSettings();
             }
             return _instance;
         }
@@ -58,11 +57,10 @@ public class GameSettings : MonoBehaviour
 
     public float GetDuration(Duration duration)
     {
-        float value = GetValueBy(duration) * _gameSpeedMod;
-        return value > 0f ? value : 0f;
+        return GetValue(duration) * _gameSpeedMod;
     }
 
-    private float GetValueBy(Duration duration)
+    private float GetValue(Duration duration)
     {
         switch(duration)
         {

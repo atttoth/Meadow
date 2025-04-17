@@ -42,8 +42,9 @@ public class Marker : Interactable
         set { _status = value; }
     }
 
-    public void CreateMarker(int index, Color32 color)
+    public void Create(int index, Color32 color)
     {
+        Init();
         SpriteAtlas atlas = GameResourceManager.Instance.Base;
         name = $"marker{index}";
         ID = index;
@@ -65,6 +66,10 @@ public class Marker : Interactable
         {
             actionIcon.enabled = false;
         }
+        if(transform.parent.GetComponent<MarkerView>().GetType() == typeof(NpcMarkerView))
+        {
+            ToggleRayCast(false);
+        }
     }
 
     public override void OnPointerClick(PointerEventData eventData)
@@ -79,7 +84,7 @@ public class Marker : Interactable
                 {
                     holder = _parent.GetComponent<MarkerHolder>();
                 }
-                StartEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.holderType, this });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.holderType, this });
             }
         }
 
@@ -88,7 +93,7 @@ public class Marker : Interactable
             if (_status == MarkerStatus.NONE)
             {
                 MarkerHolder holder = transform.parent.GetComponent<MarkerHolder>();
-                StartEventHandler(GameLogicEventType.MARKER_PLACED, new object[] { holder, this });
+                _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_PLACED, new object[] { holder, this });
             }
         }
     }
@@ -134,5 +139,10 @@ public class Marker : Interactable
     {
         float endValue = value ? 1f : 0f;
         DOTween.Sequence().Append(_mainImage.DOFade(endValue, duration)).SetEase(Ease.Linear);
+    }
+
+    public void SnapToHolderTween(Vector3 targetPosition, float duration)
+    {
+        DOTween.Sequence().Append(GetComponent<RectTransform>().DOMove(targetPosition, duration)).SetEase(Ease.InOutSine);
     }
 }

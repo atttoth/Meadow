@@ -710,56 +710,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   holderType: 0
   ID: 0
---- !u!1 &172187211
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 172187213}
-  - component: {fileID: 172187214}
-  m_Layer: 0
-  m_Name: ReferenceManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &172187213
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 172187211}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &172187214
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 172187211}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f6669c17d051ae04ea40ba1aec3a3577, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameLogicManager: {fileID: 591474480}
-  gameLogicController: {fileID: 724581948}
-  boardController: {fileID: 840271220}
-  playerController: {fileID: 241775366}
-  campController: {fileID: 777678037}
-  screenController: {fileID: 936583951}
 --- !u!1001 &178029242
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3502,50 +3452,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 50, y: -30, z: 0}
---- !u!1 &724581947
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 724581949}
-  - component: {fileID: 724581948}
-  m_Layer: 0
-  m_Name: GameLogicController
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &724581948
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 724581947}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 24e9860dac6ec7e4ea706f461a4a5bfd, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!4 &724581949
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 724581947}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &724977270
 GameObject:
   m_ObjectHideFlags: 0
@@ -5978,6 +5884,75 @@ RectTransform:
   m_AnchoredPosition: {x: 0, y: 277}
   m_SizeDelta: {x: 1920, y: 1000}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!1 &1259672986
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1259672988}
+  - component: {fileID: 1259672987}
+  m_Layer: 0
+  m_Name: GameResourceManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1259672987
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259672986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0617acff3d7199c448bd6c06d9648711, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  cardDataJson: {fileID: 4900000, guid: aa5b2f5fe717cc14e8691dc879f4f2c4, type: 3}
+  npcControllerPrefab: {fileID: 2574006946091603895, guid: 3acfdfef33f9780478f2d1d93c21bee6, type: 3}
+  deckPrefab: {fileID: 507146776534277429, guid: 5c7562ab37821bd4dadba068928a28a2, type: 3}
+  cardPrefab: {fileID: 6090333228907795711, guid: 3cf8631f39959c3498134d201016f7eb, type: 3}
+  topIconsHolderPrefab: {fileID: 1344820618171853396, guid: 19a93bcf1fadf204d9fd833fa70e2e9e, type: 3}
+  requiredIconsHolderPrefab: {fileID: 7916160077716389213, guid: ecf1bec5c236a384ea73e4c53f7bd937, type: 3}
+  cardIconItemPrefab: {fileID: 5728147989031318804, guid: 6f0c5672f99fade42aa8f3ba379eac72, type: 3}
+  boardCardHolderPrefab: {fileID: 911632800280658922, guid: efafd4edac6ba354a8cf691d34f5f2e3, type: 3}
+  tablePrimaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 9694b7a706bfb354c96111d34fa4acba, type: 3}
+  tableSecondaryCardHolderPrefab: {fileID: 6220129483715313968, guid: 7bb290dc78c988045b20bbdf14a062ba, type: 3}
+  markerPrefab: {fileID: 7310574253820092359, guid: c216b656b1a24644797daed882869f50, type: 3}
+  displayIconPrefab: {fileID: 8597923760973663733, guid: bd36c87be2d7a8445bf06b449df2affc, type: 3}
+  dummyDisplayIconPrefab: {fileID: 8393196153097624382, guid: ebbe0b7235d15fe4c81fdcf458c8cec8, type: 3}
+  cardScoreTextPrefab: {fileID: 5342653228728725154, guid: e0e13223a1ea98e4a8438cefa1989c85, type: 3}
+  screenDisplayItemPrefab: {fileID: 264662953898850249, guid: 8bd8ff9d709d3a9498bcc5310b0423c5, type: 3}
+  Base: {fileID: 4343727234628468602, guid: 26331140f766f8a4da57ef8eba0b7bba, type: 2}
+  West: {fileID: 4343727234628468602, guid: fafa93261b851e7489b0f4b305ff2e78, type: 2}
+  South: {fileID: 4343727234628468602, guid: 7e220495f2b56bf41a0f7e0089d50b79, type: 2}
+  East: {fileID: 4343727234628468602, guid: 1dbe2d9aeb5a5ed4d8d68fc2f558da8d, type: 2}
+  North: {fileID: 4343727234628468602, guid: b2f86e6f9b98a5441b51a0c8040068f8, type: 2}
+  gameLogicManager: {fileID: 591474480}
+  boardController: {fileID: 840271220}
+  playerController: {fileID: 241775366}
+  campController: {fileID: 777678037}
+  screenController: {fileID: 936583951}
+--- !u!4 &1259672988
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259672986}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1272199141
 GameObject:
   m_ObjectHideFlags: 0
@@ -9487,8 +9462,7 @@ SceneRoots:
   - {fileID: 963194228}
   - {fileID: 705507995}
   - {fileID: 591474479}
-  - {fileID: 724581949}
+  - {fileID: 1259672988}
   - {fileID: 764915148}
   - {fileID: 1743066297}
-  - {fileID: 172187213}
   - {fileID: 860066743}

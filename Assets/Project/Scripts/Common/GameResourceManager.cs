@@ -3,17 +3,18 @@ using UnityEngine.U2D;
 
 public class GameResourceManager : MonoBehaviour
 {
-    private static GameResourceManager _instance;
+    public static GameResourceManager Instance;
 
-    public static GameResourceManager Instance
+    void Awake()
     {
-        get
+        if (Instance == null) // If there is no instance already
         {
-            if (_instance == null)
-            {
-                _instance = Instantiate(Resources.Load<GameResourceManager>("GameResourceManager"));
-            }
-            return _instance;
+            DontDestroyOnLoad(gameObject); // Keep the GameObject, this component is attached to, across different scenes
+            Instance = this;
+        }
+        else if (Instance != this) // If there is already an instance and it's not `this` instance
+        {
+            Destroy(gameObject); // Destroy the GameObject, this component is attached to
         }
     }
 
@@ -49,4 +50,10 @@ public class GameResourceManager : MonoBehaviour
     public SpriteAtlas South;
     public SpriteAtlas East;
     public SpriteAtlas North;
+
+    public GameLogicManager gameLogicManager;
+    public BoardController boardController;
+    public PlayerController playerController;
+    public CampController campController;
+    public ScreenController screenController;
 }

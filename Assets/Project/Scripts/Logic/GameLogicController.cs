@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.EventSystems;
-using static MarkerHolder;
 
-public class GameLogicController : MonoBehaviour
+public class GameLogicController
 {
     private BoardController _boardController;
     private CampController _campController;
@@ -17,13 +16,13 @@ public class GameLogicController : MonoBehaviour
     private UserController[] _userControllers;
     private UserController _activeUserController;
 
-    public void Init()
+    public GameLogicController(BoardController boardController, CampController campController, ScreenController screenController)
     {
-        _boardController = ReferenceManager.Instance.boardController;
+        _boardController = boardController;
         _boardController.Create();
-        _campController = ReferenceManager.Instance.campController;
+        _campController = campController;
         _campController.Create();
-        _screenController = ReferenceManager.Instance.screenController;
+        _screenController = screenController;
         _screenController.Create();
         _logicEventHandlers = new Delegate[] {
             (Action<GameTask>)TurnStartHandler,
@@ -46,6 +45,7 @@ public class GameLogicController : MonoBehaviour
             (Action<GameTask, CardIconItem>)RemovedCardIconHandler,
             (Action<GameTask, List<Card>, Vector3>)ApprovedPendingCardPlaceHandler,
             (Action<GameTask, Card>)CancelledPendingCardPlaceHandler,
+            (Action<GameTask, MarkerHolder, bool, int>)MarkerHolderInteractionHandler,
             (Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler,
             (Action<GameTask, HolderType, Marker>)MarkerCancelHandler,
             (Action<GameTask, MarkerAction>)MarkerActionSelectHandler,
@@ -55,9 +55,9 @@ public class GameLogicController : MonoBehaviour
         };
     }
 
-    public void OnLogicEvent(object eventType, object[] args)
+    public void Execute(int handlerIndex, object[] args)
     {
-        new GameTask().ExecHandler(_logicEventHandlers[(int)eventType], args);
+        new GameTask().ExecHandler(_logicEventHandlers[handlerIndex], args);
     }
 
     public void StartSession(GameMode gameMode, UserController[] userControllers)
@@ -203,11 +203,15 @@ public class GameLogicController : MonoBehaviour
                 task.StartHandler((Action<GameTask>)RowPickHandler);
                 break;
             case 3:
-                Card groundCard = (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.CreateInitialGroundCards());
-                groundCard.gameObject.SetActive(true);
-                task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, groundCard.transform.parent.GetComponent<CardHolder>(), groundCard);
+                List<Card> groundCards = _boardController.CreateInitialGroundCards();
+                (_activeUserController as NpcController).SelectInitialGroundCard(groundCards);
+                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), groundCards, false);
                 break;
             case 4:
+                Card groundCard = (_activeUserController as NpcController).SelectedCard;
+                task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, groundCard.transform.parent.GetComponent<CardHolder>(), groundCard);
+                break;
+            case 5:
                 task.StartHandler((Action<GameTask>)EndHandSetupHandler);
                 break;
             default:
@@ -348,7 +352,7 @@ public class GameLogicController : MonoBehaviour
                 task.StartHandler(_screenController.GetToggleDeckSelectionScreenHandler(), deckType, false);
                 break;
             case 1:
-                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.GetTopCardsOfDeck(deckType));
+                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.GetTopCardsOfDeck(deckType), _activeUserController.userID == 0);
                 break;
             default:
                 task.Complete();
@@ -600,7 +604,7 @@ public class GameLogicController : MonoBehaviour
             case 3:
                 if (_activeUserController.userID == 0)
                 {
-                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.CreateInitialGroundCards());
+                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.CreateInitialGroundCards(), true);
                 }
                 else
                 {
@@ -628,7 +632,7 @@ public class GameLogicController : MonoBehaviour
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (holder == null) // card picked from selection screen
                 {
-                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(false), _boardController.GetUnselectedCards(card.Data.ID));
+                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(false), _boardController.GetUnselectedCards(card), _activeUserController.userID == 0);
                 }
                 else
                 {
@@ -859,19 +863,19 @@ public class GameLogicController : MonoBehaviour
         }
     }
 
-    public void OnMarkerHolderInteraction(object sender, InteractableHolderEventArgs args)
+    private void MarkerHolderInteractionHandler(GameTask task, MarkerHolder holder, bool isHoverIn, int scrollDirection)
     {
         PlayerController playerController = (_activeUserController as PlayerController);
         List<Marker> markers = _currentGameMode.State == GameState.SETUP ? new() { playerController.MarkerView.BlankMarker } : playerController.MarkerView.GetRemainingMarkers();
-        if (args.scrollDirection == 1 || args.scrollDirection == -1)
+        if (scrollDirection == 1 || scrollDirection == -1)
         {
-            playerController.ShowSelectedMarker(args.scrollDirection, markers);
+            playerController.ShowSelectedMarker(scrollDirection, markers);
         }
-        else if (args.isHoverIn)
+        else if (isHoverIn)
         {
-            if(markers.Count > 0)
+            if (markers.Count > 0)
             {
-                _boardController.ShowMarkersAtBoard(sender as MarkerHolder, markers);
+                _boardController.ShowMarkersAtBoard(holder, markers);
                 playerController.ShowSelectedMarker(0, markers);
             }
         }
@@ -879,5 +883,6 @@ public class GameLogicController : MonoBehaviour
         {
             _boardController.HideMarkersAtBoard(markers);
         }
+        task.Complete();
     }
 }

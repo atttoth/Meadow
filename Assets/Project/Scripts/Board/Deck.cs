@@ -25,7 +25,7 @@ public class Deck : MonoBehaviour
         cardData.ForEach(data =>
         {
             Card card = Instantiate(GameResourceManager.Instance.cardPrefab, transform).GetComponent<Card>();
-            card.Init(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
+            card.Create(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
             AddCard(card);
         });
     }

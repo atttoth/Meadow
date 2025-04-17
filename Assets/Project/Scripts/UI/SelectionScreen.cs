@@ -76,12 +76,12 @@ public class SelectionScreen : MonoBehaviour
         }
     }
 
-    public void ShowCardSelectionHandler(GameTask task, List<Card> cards)
+    public void ShowCardSelectionHandler(GameTask task, List<Card> cards, bool isPlayerSelection)
     {
         switch (task.State)
         {
             case 0:
-                _blackOverlay.enabled = true;
+                _blackOverlay.enabled = isPlayerSelection;
                 List<Vector2> positions = _selectionScreenLayout.GetCenteredPositions(cards.Count);
                 cards.ForEach(card =>
                 {
@@ -95,14 +95,14 @@ public class SelectionScreen : MonoBehaviour
                 break;
             case 1:
                 int duration = (int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000);
-                cards.ForEach(card => card.FlipDeckCard(true));
+                cards.ForEach(card => card.FlipDeckCardTween(true));
                 task.StartDelayMs(duration);
                 break;
             case 2:
                 cards.ForEach(card =>
                 {
                     card.CardIconItemsView.Toggle(true);
-                    card.ToggleSelection(true);
+                    card.ToggleSelection(isPlayerSelection);
                 });
                 task.StartDelayMs(0);
                 break;
@@ -112,20 +112,23 @@ public class SelectionScreen : MonoBehaviour
         }
     }
 
-    public void HideCardSelectionHandler(GameTask task, List<Card> cards)
+    public void HideCardSelectionHandler(GameTask task, List<Card> cards, bool isPlayerSelection)
     {
         switch (task.State)
         {
             case 0:
+                task.StartDelayMs(isPlayerSelection ? 0 : 500);
+                break;
+            case 1:
                 int duration = (int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000);
                 cards.ForEach(card =>
                 {
                     card.CardIconItemsView.Toggle(false);
-                    card.FlipDeckCard(false);
+                    card.FlipDeckCardTween(false);
                 });
                 task.StartDelayMs(duration);
                 break;
-            case 1:
+            case 2:
                 cards.ForEach(card => card.gameObject.SetActive(false));
                 if(cards.Count > 1) // ignore at initial ground card pick
                 {
@@ -133,7 +136,7 @@ public class SelectionScreen : MonoBehaviour
                 }
                 task.StartDelayMs(500);
                 break;
-            case 2:
+            case 3:
                 _blackOverlay.enabled = false;
                 task.StartDelayMs(500);
                 break;
