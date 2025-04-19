@@ -62,6 +62,16 @@ public class ScreenController : MonoBehaviour
         _cardsInHandScreen.Init();
     }
 
+    public void SetupProgressDisplay(GameMode gameMode)
+    {
+        _gameRoundScreen.Setup(gameMode);
+    }
+
+    public void ToggleProgressScreen(bool value)
+    {
+        _gameRoundScreen.ToggleProgressUI(value);
+    }
+
     public void ToggleMarkerActionScreen(Marker marker)
     {
         _markerActionScreen.ToggleScreen(marker);
@@ -161,7 +171,7 @@ public class ScreenController : MonoBehaviour
 
     public Delegate GetRoundScreenHandler(bool isGameFinished = false)
     {
-        return isGameFinished ? (Action<GameTask>)_gameRoundScreen.ShowGameFinishedScreenHandler : (Action<GameTask>)_gameRoundScreen.ShowNextRoundScreenHandler;
+        return isGameFinished ? (Action<GameTask, int>)_gameRoundScreen.ShowGameFinishedScreenHandler : (Action<GameTask, int>)_gameRoundScreen.ShowNextRoundScreenHandler;
     }
 
     public Delegate GetHandScreenToggleHandler(bool isToggled)

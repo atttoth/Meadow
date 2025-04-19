@@ -29,7 +29,7 @@ public class PlayerController : UserController
         _iconDisplayView.Init();
         _infoView.Init();
         (_handView as PlayerHandView).Init();
-        _markerView.Init(gameMode.GetMarkerColorByUserID(userID));
+        _markerView.Init(gameMode.CurrentUserColors[userID]);
         _pendingPlacementActionCreator = new PendingActionCreator(true);
 
         _tableToggleButton = _tableView.transform.GetChild(2).GetComponent<Button>();

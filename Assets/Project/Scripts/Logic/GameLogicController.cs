@@ -89,6 +89,7 @@ public class GameLogicController
         {
             case 0:
                 SetNextActiveUserController(true);
+                _screenController.SetupProgressDisplay(_currentGameMode);
                 (_activeUserController as PlayerController).EnableTableToggleButton(false);
                 _userControllers.ToList().ForEach(controller => controller.ResetCampScoreTokens());
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
@@ -143,14 +144,20 @@ public class GameLogicController
                 if (_currentGameMode.ActiveUserIndex == 0)
                 {
                     Debug.Log("startTurn: " + _activeUserController.userID);
-                    _activeUserController.StartTurn();
-                    task.StartDelayMs(0);
+                    task.StartHandler(_screenController.GetRoundScreenHandler(), _currentGameMode.CurrentRoundIndex + 1);
                 }
                 else
                 {
-                    Debug.Log("handSetup: " + _activeUserController.userID);
-                    task.StartHandler((Action<GameTask>)NpcHandSetupHandler);
+                    task.NextState(4);
                 }
+                break;
+            case 3:
+                _activeUserController.StartTurn();
+                task.NextState(5);
+                break;
+            case 4:
+                Debug.Log("handSetup: " + _activeUserController.userID);
+                task.StartHandler((Action<GameTask>)NpcHandSetupHandler);
                 break;
             default:
                 task.Complete();
@@ -467,7 +474,7 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                task.StartHandler(_screenController.GetRoundScreenHandler());
+                task.StartHandler(_screenController.GetRoundScreenHandler(), _currentGameMode.CurrentRoundIndex + 2);
                 break;
             case 1: // marker reset animation?
                 _userControllers.ToList().ForEach(controller => controller.MarkerView.Reset());
@@ -502,7 +509,7 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                task.StartHandler(_screenController.GetRoundScreenHandler(true));
+                task.StartHandler(_screenController.GetRoundScreenHandler(true), _currentGameMode.CurrentRoundIndex + 2);
                 break;
             default:
                 Debug.Log("finished");
@@ -546,6 +553,7 @@ public class GameLogicController
                     _campController.EnableScoreButtonOfFulfilledIcons(controller.GetAdjacentPrimaryIconPairs());
                 }
                 _campController.ToggleCampView(value);
+                _screenController.ToggleProgressScreen(value);
                 task.StartDelayMs(0);
                 break;
             default:

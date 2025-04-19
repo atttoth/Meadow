@@ -29,7 +29,6 @@ public enum Duration
     tableViewOpenSpeed,
     tableHolderCenteringSpeed,
     cardSnapSpeed,
-    overlayScreenFadeDuration,
     npcMarkerPlacementDuration
  }
 
@@ -87,7 +86,6 @@ public class GameSettings
             case Duration.tableViewOpenSpeed: return 0.5f;
             case Duration.tableHolderCenteringSpeed: return 0.3f;
             case Duration.cardSnapSpeed: return 0.3f;
-            case Duration.overlayScreenFadeDuration: return 1f;
             case Duration.npcMarkerPlacementDuration: return 0.5f;
             default: return 0f;
         }

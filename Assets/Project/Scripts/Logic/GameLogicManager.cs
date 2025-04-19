@@ -5,7 +5,7 @@ public class GameLogicManager : MonoBehaviour
 {
     private GameLogicController _gameLogicController;
 
-    private void Awake()
+    private void Start()
     {
         _gameLogicController = new(GameResourceManager.Instance.boardController, GameResourceManager.Instance.campController, GameResourceManager.Instance.screenController);
     }
@@ -15,7 +15,7 @@ public class GameLogicManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) //todo: create game menu
         {
             GameSettings.Instance.SetGameSpeed(GameSpeed.LEVEL5);
-            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 3);
+            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, 1);
             _gameLogicController.StartSession(gameMode, CreateUserControllersForSession(gameMode));
         }
     }

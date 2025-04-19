@@ -18,15 +18,16 @@ public class GameMode
     private GameState _state;
     private int _numOfPlayerControllers;
     private int _numOfNpcControllers;
-    private Color32[] _markerColors = new Color32[] {
-        new Color32(33, 85, 229, 255),
-        new Color32(255, 18, 0, 255),
-        new Color32(255, 18, 0, 255),
-        new Color32(255, 18, 0, 255)
+    private Color32[] _markerColorOptions = new Color32[] {
+        new Color32(255, 195, 0, 255),
+        new Color32(140, 0, 255, 255),
+        new Color32(0, 141, 255, 255),
+        new Color32(26, 255, 0, 255)
     };
 
     // gameplay
     private int[][] _usersOrderMap;
+    private Color32[] _currentUserColors;
     private int _userOrderIndex;
     private int _activeUserIndex;
     private int _currentRoundIndex;
@@ -38,6 +39,7 @@ public class GameMode
         _numOfPlayerControllers = numOfPlayerControllers;
         _numOfNpcControllers = numOfNpcControllers;
         CreateOrderOfUsers();
+        CreateUserColors();
     }
 
     public GameModeType ModeType { get { return _modeType; } }
@@ -47,6 +49,7 @@ public class GameMode
     public int ActiveUserIndex { get { return _activeUserIndex; } }
     public int CurrentRoundIndex { get { return _currentRoundIndex; } }
     public int[][] UsersOrderMap {  get { return _usersOrderMap; } }
+    public Color32[] CurrentUserColors { get { return _currentUserColors; } }
 
     public bool IsGameEnded => _currentRoundIndex == _usersOrderMap.Length - 1;
 
@@ -73,6 +76,16 @@ public class GameMode
         }
     }
 
+    private void CreateUserColors() // todo: make it selectable on menu panel
+    {
+        int totalUsers = _numOfNpcControllers + 1;
+        _currentUserColors = new Color32[totalUsers];
+        for(int i = 0; i < totalUsers; i++)
+        {
+            _currentUserColors[i] = _markerColorOptions[i];
+        }
+    }
+
     private int GetNumORounds(int totalUsers)
     {
         switch(totalUsers)
@@ -83,11 +96,6 @@ public class GameMode
             default: 
                 return 8;
         }
-    }
-
-    public Color32 GetMarkerColorByUserID(int userID)
-    {
-        return _markerColors[userID];
     }
 
     public void SetNextRound()

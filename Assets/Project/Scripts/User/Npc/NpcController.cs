@@ -23,7 +23,7 @@ public class NpcController : UserController
         _iconDisplayView.Init();
         _infoView.Init();
         _handView.Init();
-        _markerView.Init(gameMode.GetMarkerColorByUserID(userID));
+        _markerView.Init(gameMode.CurrentUserColors[userID]);
         _allIconsOfPrimaryHoldersInOrder = new();
         _allIconsOfSecondaryHoldersInOrder = new();
         base.CreateUser(gameMode);

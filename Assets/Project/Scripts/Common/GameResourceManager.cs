@@ -44,6 +44,7 @@ public class GameResourceManager : MonoBehaviour
     public Transform dummyDisplayIconPrefab;
     public Transform cardScoreTextPrefab;
     public Transform screenDisplayItemPrefab;
+    public Transform userAvatarPrefab;
 
     public SpriteAtlas Base;
     public SpriteAtlas West;
