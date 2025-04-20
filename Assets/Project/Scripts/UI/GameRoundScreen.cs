@@ -88,7 +88,7 @@ public class GameRoundScreen : MonoBehaviour
                 task.StartDelayMs((int)fadeDuration * 1000);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, int, float, float>)ShowProgressUI, nextRound, waitDelay, fadeDuration);
+                task.StartHandler((Action<GameTask, int>)ShowProgressUI, nextRound);
                 break;
             case 2:
                 _text.enabled = true;
@@ -109,7 +109,6 @@ public class GameRoundScreen : MonoBehaviour
 
     public void ShowGameFinishedScreenHandler(GameTask task, int nextRound)
     {
-        float waitDelay = 1f;
         float fadeDuration = 1f;
         switch (task.State)
         {
@@ -121,11 +120,11 @@ public class GameRoundScreen : MonoBehaviour
                 task.StartDelayMs((int)fadeDuration * 1000);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, int, float, float>)ShowProgressUI, nextRound, waitDelay, fadeDuration);
+                task.StartHandler((Action<GameTask, int>)ShowProgressUI, nextRound);
                 break;
             case 2:
                 _text.enabled = true;
-                task.StartDelayMs((int)waitDelay * 1000);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
                 break;
             default: // todo: add end game summary
                 task.Complete();
@@ -139,8 +138,9 @@ public class GameRoundScreen : MonoBehaviour
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, duration));
     }
 
-    private void ShowProgressUI(GameTask task, int nextRound, float waitDelay, float fadeDuration)
+    private void ShowProgressUI(GameTask task, int nextRound)
     {
+        float waitDelay = GameSettings.Instance.GetDuration(Duration.waitDelay);
         float progressPanelSpeed = 0.3f;
         float sliderDuration = 1f;
         RectTransform rect = _progressDisplayTransforms[(int)_activeProgressDisplayIndex].GetComponent<RectTransform>();

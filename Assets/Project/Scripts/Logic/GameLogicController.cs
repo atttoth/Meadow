@@ -359,7 +359,7 @@ public class GameLogicController
                 task.StartHandler(_screenController.GetToggleDeckSelectionScreenHandler(), deckType, false);
                 break;
             case 1:
-                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.GetTopCardsOfDeck(deckType), _activeUserController.userID == 0);
+                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.GetRandomCardOfDeck(deckType, 3), _activeUserController.userID == 0);
                 break;
             default:
                 task.Complete();
@@ -592,24 +592,28 @@ public class GameLogicController
         switch (task.State)
         {
             case 0:
-                if(_activeUserController.userID == 0)
+                if (_activeUserController.userID == 0)
                 {
                     _activeUserController.SetMarkerUsed();
                     _screenController.ToggleRowHighlightFrame();
                 }
-                List<Card> cards = _boardController.GetRowCards();
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
-                _boardController.ToggleCardsSelection(false);
-                cards.ForEach(card => card.transform.parent.GetComponent<CardHolder>().RemoveItemFromContentList(card));
-                task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cards);
+                task.StartHandler((Action<GameTask>)_boardController.DrawRandomNorthCardFromDeckHandler);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
+                List<Card> cardsOfRow = _boardController.GetRowCards();
+                _boardController.ToggleCardsSelection(false);
+                cardsOfRow.ForEach(card => card.transform.parent.GetComponent<CardHolder>().RemoveItemFromContentList(card));
+                cardsOfRow.Insert(0, _boardController.GetUnselectedCards(null).First()); // include random north card
+                task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cardsOfRow);
                 break;
             case 2:
-                task.StartDelayMs(500);
+                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
                 break;
             case 3:
+                task.StartDelayMs(500);
+                break;
+            case 4:
                 if (_activeUserController.userID == 0)
                 {
                     task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.CreateInitialGroundCards(), true);

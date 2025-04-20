@@ -8,7 +8,7 @@ using static UnityEditor.Progress;
 
 public class BoardController : MonoBehaviour
 {
-    private static readonly int _GRID_SIZE = 4;
+    private static readonly int GRID_SIZE = 4;
     private Dictionary<int, List<CardHolder>> _cardHolders;
     private Dictionary<int, List<MarkerHolder>> _markerHolders;
     private DeckController _deckController;
@@ -33,11 +33,11 @@ public class BoardController : MonoBehaviour
         SpriteAtlas atlas = GameResourceManager.Instance.Base;
         GetComponent<Image>().sprite = atlas.GetSprite("board_frame");
         _cardHolders = new();
-        for (int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < GRID_SIZE; i++)
         {
             List<CardHolder> list = new();
             Transform col = transform.GetChild(0).GetChild(i);
-            for (int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < GRID_SIZE; j++)
             {
                 CardHolder boardCardHolder = Instantiate(GameResourceManager.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
                 boardCardHolder.Init(j, HolderType.BoardCard);
@@ -49,11 +49,12 @@ public class BoardController : MonoBehaviour
         }
 
         _markerHolders = new();
-        for (int i = 0; i < 3; i++)
+        int boardSides = 3;
+        for (int i = 0; i < boardSides; i++)
         {
             List<MarkerHolder> list = new();
             Transform holderGroup = transform.GetChild(1).GetChild(i);
-            for (int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < GRID_SIZE; j++)
             {
                 MarkerHolder boardMarkerHolder = holderGroup.GetChild(j).GetComponent<MarkerHolder>();
                 boardMarkerHolder.Init(j, HolderType.BoardMarker);
@@ -68,6 +69,7 @@ public class BoardController : MonoBehaviour
         _canvasGroup = GetComponent<CanvasGroup>();
         _canvasGroup.alpha = 0f;
         _boardLayout = new BoardLayout(GetComponent<RectTransform>());
+        _cardsForSelection = new();
         ToggleRayCastOfMarkerHolders(false);
     }
 
@@ -177,6 +179,33 @@ public class BoardController : MonoBehaviour
         }
     }
 
+    public void DrawRandomNorthCardFromDeckHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                Card card = GetRandomCardOfDeck(DeckType.North, 1).First();
+                Transform display = _deckController.GetDisplayDeckByIndex(-1);
+                card.transform.SetParent(display);
+                card.transform.position = display.position;
+                card.ToggleRayCast(false);
+                task.StartDelayMs(0);
+                break;
+            case 1:
+                float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
+                float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
+                _cardsForSelection.First().DrawFromDeckTween(GetSingleSelectedCard().GetComponent<RectTransform>().position.y);
+                task.StartDelayMs((int)((cardDrawSpeed + cardRotationSpeed) * 1000));
+                break;
+            case 2:
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     private List<CardHolder> GetEmptyCardHoldersByColumn(int colIndex)
     {
         List<CardHolder> list = _cardHolders[colIndex];
@@ -208,20 +237,20 @@ public class BoardController : MonoBehaviour
 
     private int[][] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey, int numberOnMarker)
     {
-        int length = numberOnMarker < MarkerView.BLANK_MARKER_ID ? 1 : _GRID_SIZE;
+        int length = numberOnMarker < MarkerView.BLANK_MARKER_ID ? 1 : GRID_SIZE;
         int[][] indices = new int[length][];
         if (length == 1) // 1-2-3-4 markers point to a single position
         {
             switch (holderListKey)
             {
                 case 2:
-                    indices[0] = new int[] { holderID, _GRID_SIZE - numberOnMarker };
+                    indices[0] = new int[] { holderID, GRID_SIZE - numberOnMarker };
                     break;
                 case 1:
                     indices[0] = new int[] { numberOnMarker - 1, holderID };
                     break;
                 default:
-                    indices[0] = new int[] { _GRID_SIZE - numberOnMarker, holderID };
+                    indices[0] = new int[] { GRID_SIZE - numberOnMarker, holderID };
                     break;
             };
             return indices;
@@ -244,9 +273,9 @@ public class BoardController : MonoBehaviour
     public List<Card> GetRowCards()
     {
         List<Card> cards = new();
-        for (int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < GRID_SIZE; i++)
         {
-            for (int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < GRID_SIZE; j++)
             {
                 Card card = GetCardFromCardHolder(i, j);
                 if (card.isSelected)
@@ -312,9 +341,9 @@ public class BoardController : MonoBehaviour
 
     public void ToggleCardsSelection(bool value)
     {
-        for (int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < GRID_SIZE; i++)
         {
-            for (int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < GRID_SIZE; j++)
             {
                 GetCardFromCardHolder(i, j).ToggleSelection(value);
             }
@@ -323,7 +352,7 @@ public class BoardController : MonoBehaviour
 
     public void ToggleBlackOverlayOfCardHolders(bool value, int[][] indices)
     {
-        for (int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < GRID_SIZE; i++)
         {
             List<CardHolder> holders = _cardHolders[i];
             holders.ForEach(holder => holder.EnableOverlay(value));
@@ -354,16 +383,22 @@ public class BoardController : MonoBehaviour
 
     public List<Card> GetUnselectedCards(Card pickedCard)
     {
-        _cardsForSelection.ForEach(card => card.ToggleSelection(false));
-        List<Card> unselectedTopCards = _cardsForSelection.Where(card => card != pickedCard).ToList();
-        _cardsForSelection = unselectedTopCards;
-        return unselectedTopCards;
+        if(!pickedCard)
+        {
+            return _cardsForSelection;
+        }
+        else
+        {
+            _cardsForSelection.ForEach(card => card.ToggleSelection(false));
+            List<Card> unselectedTopCards = _cardsForSelection.Where(card => card != pickedCard).ToList();
+            _cardsForSelection = unselectedTopCards;
+            return unselectedTopCards;
+        }
     }
 
-    public List<Card> GetTopCardsOfDeck(DeckType deckType)
+    public List<Card> GetRandomCardOfDeck(DeckType deckType, int amount)
     {
-        int num = 3;
-        for (int i = 0; i < num; i++)
+        for (int i = 0; i < amount; i++)
         {
             _cardsForSelection.Add(_deckController.GetCardFromDeck(deckType));
         }
@@ -373,7 +408,7 @@ public class BoardController : MonoBehaviour
     public List<Card> CreateInitialGroundCards()
     {
         SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(DeckType.East.ToString());
-        _cardsForSelection = new();
+        _cardsForSelection.Clear();
         _deckController.InitialGroundCardData.ForEach(data =>
         {
             Card card = Instantiate(GameResourceManager.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
@@ -385,11 +420,11 @@ public class BoardController : MonoBehaviour
 
     public void DisposeUnselectedCards(bool isHandSetup)
     {
-        if(isHandSetup)
+        if(isHandSetup) // destroy unselected ground card copy
         {
             Object.Destroy(_cardsForSelection.First().gameObject);
         }
-        else
+        else // put cards back to deck
         {
             DeckType deckType = _cardsForSelection.First().Data.deckType;
             Deck deck = _deckController.GetDeckByDeckType(deckType);
@@ -443,9 +478,9 @@ public class BoardController : MonoBehaviour
 
     public Card GetSingleSelectedCard()
     {
-        for (int i = 0; i < _GRID_SIZE; i++)
+        for (int i = 0; i < GRID_SIZE; i++)
         {
-            for (int j = 0; j < _GRID_SIZE; j++)
+            for (int j = 0; j < GRID_SIZE; j++)
             {
                 Card card = GetCardFromCardHolder(i, j);
                 if(card.isSelected)

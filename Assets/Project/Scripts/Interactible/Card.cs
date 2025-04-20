@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
+using UnityEngine.WSA;
 
 public enum CardType
 {
@@ -350,6 +351,17 @@ public class Card : Interactable
         DOTween.Sequence().Append(transform.DOLocalMoveY(posY, 0.4f));
     }
 
+    public void DrawFromDeckTween(float posY)
+    {
+        float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
+        gameObject.SetActive(true);
+        canHover = false;
+        DOTween.Sequence()
+            .Append(transform.DOMoveY(posY, cardDrawSpeed)
+            .SetEase(Ease.InOutQuart)
+            .OnComplete(() => FlipBoardCardTween()));
+    }
+
     public void FillBoardTween(float delay, CardHolder holder, Transform cardDrawContainer)
     {
         float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
@@ -364,22 +376,25 @@ public class Card : Interactable
             .OnComplete(() =>
             {
                 holder.AddToHolder(this);
-                FlipBoardCardTween(cardDrawContainer);
+                transform.SetParent(cardDrawContainer);
+                FlipBoardCardTween();
             });
     }
 
-    private void FlipBoardCardTween(Transform cardDrawContainer)
+    private void FlipBoardCardTween()
     {
         float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
-        transform.SetParent(cardDrawContainer);
         Sequence cardFlip = DOTween.Sequence();
         cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardFront));
         cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
         cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear).OnComplete(() =>
         {
-            transform.SetParent(_parent);
-            transform.SetAsFirstSibling();
-            canScale = true;
+            if(_parent)
+            {
+                transform.SetParent(_parent);
+                transform.SetAsFirstSibling();
+                canScale = true;
+            }
         });
     }
 

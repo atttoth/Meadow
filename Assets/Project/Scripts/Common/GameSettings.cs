@@ -6,6 +6,7 @@ public enum GameSpeed
 
 public enum Duration
 {
+    waitDelay,
     turnStartWaitDuration,
     gameUIFadeDuration,
     campIconFadeDuration,
@@ -63,6 +64,7 @@ public class GameSettings
     {
         switch(duration)
         {
+            case Duration.waitDelay: return 1f;
             case Duration.turnStartWaitDuration: return 1f;
             case Duration.gameUIFadeDuration: return 0.5f;
             case Duration.campIconFadeDuration: return 0.8f;

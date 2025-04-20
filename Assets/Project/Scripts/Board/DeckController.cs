@@ -11,7 +11,7 @@ public class DeckController : MonoBehaviour
     private List<CardData> _initialGroundCardData;
     private Dictionary<DeckType, Deck> _decks;
     private Dictionary<int, Transform> _displayDecks;
-    
+
     public List<CardData> InitialGroundCardData { get  { return _initialGroundCardData; } }
 
     public void Init()
@@ -22,9 +22,9 @@ public class DeckController : MonoBehaviour
         _initialGroundCardData.ForEach(data => _cardDataByDeckType[(int)DeckType.East].Remove(data));
 
         _displayDecks = new();
-        for (int i = 0; i < (int)DeckType.NUM_OF_DECKS; i++)
+        for (int i = -1; i < (int)DeckType.NUM_OF_DECKS; i++)
         {
-            Transform dummyDeck = transform.GetChild(1).GetChild(i);
+            Transform dummyDeck = transform.GetChild(1).GetChild(i + 1);
             _displayDecks.Add(i, dummyDeck);
         }
         CreateDecks();
@@ -70,29 +70,31 @@ public class DeckController : MonoBehaviour
         return _decks[deckType];
     }
 
+    public Transform GetDisplayDeckByIndex(int index)
+    {
+        return _displayDecks[index];
+    }
+
     private Transform GetDisplayDeck(DeckType deckType, int colIndex)
     {
         switch (deckType)
         {
-            case DeckType.West:
-                return _displayDecks[0];
-            case DeckType.East:
-                return _displayDecks[3];
-            default:
-                return colIndex == 1 ? _displayDecks[1] : _displayDecks[2];
+            case DeckType.West: return GetDisplayDeckByIndex(0);
+            case DeckType.East: return GetDisplayDeckByIndex(3);
+            default: return GetDisplayDeckByIndex(colIndex == 1 ? 1 : 2);
         }
     }
 
     public List<Card> GetCardsReadyToDraw(int emptyHoldersCount, DeckType deckType, int colIndex)
     {
         Deck deck = GetDeckByDeckType(deckType);
-        Transform parent = GetDisplayDeck(deckType, colIndex);
+        Transform display = GetDisplayDeck(deckType, colIndex);
         List<Card> cards = new();
         for (int i = 0; i < emptyHoldersCount; i++)
         {
             Card card = deck.GetRandomCard();
-            card.transform.SetParent(parent);
-            card.transform.position = parent.position;
+            card.transform.SetParent(display);
+            card.transform.position = display.position;
             card.ToggleRayCast(false);
             cards.Add(card);
         }
