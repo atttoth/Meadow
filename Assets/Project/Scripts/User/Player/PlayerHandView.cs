@@ -48,7 +48,7 @@ public class PlayerHandView : HandView
                         cards.Remove(card);
                         float posX = positions[i];
                         card.transform.SetParent(transform);
-                        card.PickToHandTween(new(posX, posY, 0f), drawSpeed, delay);
+                        card.MoveToPositionTween(new(posX, posY, 0f), drawSpeed, delay);
                         i++;
                     }
                 }
@@ -61,7 +61,7 @@ public class PlayerHandView : HandView
                     MoveCardsHorizontallyInHand(positions, _cards.Count <= 10);
                     float posX = positions[^1];
                     card.transform.SetParent(transform);
-                    card.PickToHandTween(new(posX, posY, 0f), drawSpeed);
+                    card.MoveToPositionTween(new(posX, posY, 0f), drawSpeed);
                 }
                 task.StartDelayMs(duration);
                 break;

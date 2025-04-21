@@ -5,7 +5,6 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using System.Linq;
-using UnityEngine.WSA;
 
 public enum CardType
 {
@@ -394,11 +393,26 @@ public class Card : Interactable
                 transform.SetParent(_parent);
                 transform.SetAsFirstSibling();
                 canScale = true;
+                _iconItemsView.Toggle(true);
             }
         });
     }
 
-    public void PickToHandTween(Vector3 position, float drawSpeed, float delay = 0f)
+    public void ClearBoardTween(Transform display, float delay)
+    {
+        float halvedCardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 0.5f;
+        float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
+        transform.SetParent(display);
+        _iconItemsView.Toggle(false);
+        Sequence cardFlip = DOTween.Sequence();
+        cardFlip.SetDelay(delay);
+        cardFlip.Append(transform.DOScale(1.1f, halvedCardRotationSpeed)).Join(transform.DORotate(new Vector3(0f, 90f, 0f), halvedCardRotationSpeed).SetEase(Ease.Linear).OnComplete(() => _mainImage.sprite = _cardBack));
+        cardFlip.Append(transform.DORotate(new Vector3(0f, 0f, 0f), halvedCardRotationSpeed)).SetEase(Ease.Linear);
+        cardFlip.Append(transform.DOScale(1f, 0.05f)).SetEase(Ease.Linear)
+            .OnComplete(() => DOTween.Sequence().Append(transform.DOMove(display.position, cardDrawSpeed).SetEase(Ease.InOutQuart)));
+    }
+
+    public void MoveToPositionTween(Vector3 position, float drawSpeed, float delay = 0f)
     {
         DOTween.Sequence().Append(GetComponent<RectTransform>().DOAnchorPos(position, drawSpeed).SetDelay(delay).SetEase(Ease.InOutBack));
     }

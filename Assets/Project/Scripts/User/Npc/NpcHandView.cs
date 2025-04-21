@@ -23,7 +23,7 @@ public class NpcHandView : HandView
                         Card card = cards.First();
                         cards.Remove(card);
                         card.transform.SetParent(transform);
-                        card.PickToHandTween(Vector3.zero, drawSpeed, delay);
+                        card.MoveToPositionTween(Vector3.zero, drawSpeed, delay);
                         i++;
                     }
                 }
@@ -33,7 +33,7 @@ public class NpcHandView : HandView
                     duration = (int)(drawSpeed * 1000);
                     AddCard(card);
                     card.transform.SetParent(transform);
-                    card.PickToHandTween(Vector3.zero, drawSpeed);
+                    card.MoveToPositionTween(Vector3.zero, drawSpeed);
                 }
                 task.StartDelayMs(duration);
                 break;

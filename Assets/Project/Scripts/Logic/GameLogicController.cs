@@ -117,7 +117,7 @@ public class GameLogicController
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
             case 2:
-                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
+                task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
                 break;
             case 3:
                 _boardController.EnableRightSideMarkerHoldersForRowPick();
@@ -485,15 +485,12 @@ public class GameLogicController
                 _currentGameMode.SetNextRound();
                 if(!_currentGameMode.IsOverHalfTime(prevRoundIndex) && _currentGameMode.IsOverHalfTime()) // check if session just reached half-time
                 {
-                    task.StartHandler((Action<GameTask>)_boardController.BoardClearHandler);
+                    task.StartHandler((Action<GameTask>)_boardController.BoardChangeHandler);
                 }
                 else
                 {
-                    task.NextState(4);
+                    task.StartDelayMs(0);
                 }
-                break;
-            case 3:
-                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
                 break;
             default:
                 Debug.Log("round: " + (_currentGameMode.CurrentRoundIndex + 1));
@@ -608,7 +605,7 @@ public class GameLogicController
                 task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cardsOfRow);
                 break;
             case 2:
-                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
+                task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
                 break;
             case 3:
                 task.StartDelayMs(500);
@@ -665,7 +662,7 @@ public class GameLogicController
                 task.StartHandler(_activeUserController.GetAddCardToHandHandler(), new List<Card>() { card });
                 break;
             case 3:
-                task.StartHandler((Action<GameTask, DeckType, List<Card>>)_boardController.BoardFillHandler, GetActiveDeckType(), new List<Card>());
+                task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
                 break;
             case 4:
                 if (_currentGameMode.State == GameState.SETUP)

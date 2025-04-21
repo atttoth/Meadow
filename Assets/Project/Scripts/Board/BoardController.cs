@@ -1,4 +1,5 @@
 using DG.Tweening;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,11 +16,8 @@ public class BoardController : MonoBehaviour
     private Transform _cardDrawContainer;
     private CanvasGroup _canvasGroup;
     private BoardLayout _boardLayout;
-    private List<Card> _cardsForSelection; // cards saved for selection screen
-
-    // used for board fill
-    private List<CardHolder> _emptyHolders; // saved empty card holders to fill
-    private List<Card> _cardsToDraw; // saved cards to fill card holders
+    private List<CardHolder> _preparedHolders; // saved empty card holders to fill
+    private List<Card> _preparedCards; // saved cards for selection screen, fill card holders, half-time board change
 
     private T GetNextItem<T>(List<T> list)
     {
@@ -69,7 +67,6 @@ public class BoardController : MonoBehaviour
         _canvasGroup = GetComponent<CanvasGroup>();
         _canvasGroup.alpha = 0f;
         _boardLayout = new BoardLayout(GetComponent<RectTransform>());
-        _cardsForSelection = new();
         ToggleRayCastOfMarkerHolders(false);
     }
 
@@ -87,68 +84,53 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    private void SaveTargetHoldersAndCards(DeckType activeDeckType)
-    {
-        List<CardHolder> holders = new() { };
-        List<Card> cards = new() { };
-        for (int colIndex = 0; colIndex < (int)DeckType.NUM_OF_DECKS; colIndex++)
-        {
-            DeckType deckType = colIndex switch
-            {
-                0 => DeckType.West,
-                1 or 2 => activeDeckType,
-                _ => DeckType.East,
-            };
-            List<CardHolder> emptyHolders = GetEmptyCardHoldersByColumn(colIndex);
-            if (emptyHolders.Count > 0)
-            {
-                emptyHolders.Reverse();
-                List<Card> selectedCards = _deckController.GetCardsReadyToDraw(emptyHolders.Count, deckType, colIndex);
-                for (int i = 0; i < emptyHolders.Count; i++)
-                {
-                    CardHolder emptyHolder = emptyHolders[i];
-                    Card card = selectedCards[i];
-                    holders.Add(emptyHolder);
-                    cards.Add(card);
-                }
-            }
-        }
-        _emptyHolders = holders;
-        _cardsToDraw = cards;
-    }
-
-    public void BoardFillHandler(GameTask task, DeckType deckType, List<Card> cards)
+    public void BoardFillHandler(GameTask task, DeckType activeDeckType)
     {
         switch (task.State)
         {
             case 0:
-                SaveTargetHoldersAndCards(deckType);
-                cards.AddRange(_cardsToDraw);
-                task.StartDelayMs(0);
+                _preparedCards = new();
+                _preparedHolders = new();
+                DeckType[] deckTypes = new DeckType[] { DeckType.West, activeDeckType, activeDeckType, DeckType.East };
+                for (int col = 0; col < _cardHolders.Count; col++)
+                {
+                    Transform display = _deckController.GetDisplayDeckTransform(col);
+                    DeckType deckType = deckTypes[col];
+                    for (int row = _cardHolders[col].Count - 1; row >= 0; row--)
+                    {
+                        CardHolder holder = _cardHolders[col][row];
+                        if (holder.IsEmpty())
+                        {
+                            Card card = _deckController.GetCardFromDeck(deckType);
+                            card.transform.SetParent(display);
+                            card.transform.position = display.position;
+                            card.ToggleRayCast(false);
+                            _preparedHolders.Add(holder);
+                            _preparedCards.Add(card);
+                        }
+                    }
+                }
+                task.StartDelayMs(200);
                 break;
             case 1:
                 int duration = 0;
-                if (_emptyHolders.Count > 0)
+                if (_preparedHolders.Count > 0)
                 {
                     float cardDrawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawDelayFromDeck);
                     float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
                     float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
-                    duration = (int)(((_emptyHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
+                    duration = (int)(((_preparedHolders.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
                     int i = 0;
-                    while (_emptyHolders.Count > 0)
+                    while (_preparedHolders.Count > 0)
                     {
                         float delay = i * cardDrawDelay;
-                        CardHolder holder = GetNextItem(_emptyHolders);
-                        Card card = GetNextItem(_cardsToDraw);
+                        CardHolder holder = GetNextItem(_preparedHolders);
+                        Card card = GetNextItem(_preparedCards);
                         card.FillBoardTween(delay, holder, _cardDrawContainer);
                         i++;
                     }
                 }
                 task.StartDelayMs(duration);
-                break;
-            case 2:
-                cards.ForEach(card => card.CardIconItemsView.Toggle(true));
-                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -156,22 +138,53 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public void BoardClearHandler(GameTask task) // todo: put back unused cards to deck with tween
+    public void BoardChangeHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
+                _preparedCards = new();
                 for (int col = 0; col < _cardHolders.Count; col++)
                 {
                     for (int row = 0; row < _cardHolders[col].Count; row++)
                     {
                         CardHolder holder = _cardHolders[col][row];
-                        Card card = (Card)holder.GetItemFromContentListByIndex(0);
+                        Card card = GetCardFromCardHolder(col, row);
                         holder.RemoveItemFromContentList(card);
-                        card.gameObject.SetActive(false);
+                        _preparedCards.Add(card);
                     }
                 }
                 task.StartDelayMs(0);
+                break;
+            case 1:
+                int duration = 0;
+                List<Card> cards = new();
+                cards.AddRange(_preparedCards);
+                float cardDrawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawDelayFromDeck);
+                float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
+                float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
+                duration = (int)(((_preparedCards.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
+                int i = 0;
+                int colIndex = 0;
+                while (cards.Count > 0)
+                {
+                    float delay = i * cardDrawDelay;
+                    Card card = GetNextItem(cards);
+                    card.ClearBoardTween(_deckController.GetDisplayDeckTransform(colIndex), delay);
+                    i++;
+                    if(i % 4 == 0)
+                    {
+                        colIndex++;
+                    }
+                }
+                task.StartDelayMs(duration);
+                break;
+            case 2:
+                DisposeUnselectedCards(false);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask, DeckType>)BoardFillHandler, DeckType.North);
                 break;
             default:
                 task.Complete();
@@ -184,17 +197,19 @@ public class BoardController : MonoBehaviour
         switch(task.State)
         {
             case 0:
-                Card card = GetRandomCardOfDeck(DeckType.North, 1).First();
-                Transform display = _deckController.GetDisplayDeckByIndex(-1);
+                _preparedCards = new();
+                Card card = _deckController.GetCardFromDeck(DeckType.North);
+                Transform display = _deckController.GetDisplayDeckTransform(-1);
                 card.transform.SetParent(display);
                 card.transform.position = display.position;
                 card.ToggleRayCast(false);
+                _preparedCards.Add(card);
                 task.StartDelayMs(0);
                 break;
             case 1:
                 float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
                 float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
-                _cardsForSelection.First().DrawFromDeckTween(GetSingleSelectedCard().GetComponent<RectTransform>().position.y);
+                _preparedCards.First().DrawFromDeckTween(GetSingleSelectedCard().GetComponent<RectTransform>().position.y);
                 task.StartDelayMs((int)((cardDrawSpeed + cardRotationSpeed) * 1000));
                 break;
             case 2:
@@ -204,20 +219,6 @@ public class BoardController : MonoBehaviour
                 task.Complete();
                 break;
         }
-    }
-
-    private List<CardHolder> GetEmptyCardHoldersByColumn(int colIndex)
-    {
-        List<CardHolder> list = _cardHolders[colIndex];
-        List<CardHolder> emptyHolders = new();
-        foreach (CardHolder holder in list)
-        {
-            if (holder.IsEmpty())
-            {
-                emptyHolders.Add(holder);
-            }
-        }
-        return emptyHolders;
     }
 
     private void SelectCardsFromBoard(int[][] indices)
@@ -385,13 +386,13 @@ public class BoardController : MonoBehaviour
     {
         if(!pickedCard)
         {
-            return _cardsForSelection;
+            return _preparedCards;
         }
         else
         {
-            _cardsForSelection.ForEach(card => card.ToggleSelection(false));
-            List<Card> unselectedTopCards = _cardsForSelection.Where(card => card != pickedCard).ToList();
-            _cardsForSelection = unselectedTopCards;
+            _preparedCards.ForEach(card => card.ToggleSelection(false));
+            List<Card> unselectedTopCards = _preparedCards.Where(card => card != pickedCard).ToList();
+            _preparedCards = unselectedTopCards;
             return unselectedTopCards;
         }
     }
@@ -400,57 +401,58 @@ public class BoardController : MonoBehaviour
     {
         for (int i = 0; i < amount; i++)
         {
-            _cardsForSelection.Add(_deckController.GetCardFromDeck(deckType));
+            _preparedCards.Add(_deckController.GetCardFromDeck(deckType));
         }
-        return _cardsForSelection;
+        return _preparedCards;
     }
 
     public List<Card> CreateInitialGroundCards()
     {
         SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(DeckType.East.ToString());
-        _cardsForSelection.Clear();
+        _preparedCards = new();
         _deckController.InitialGroundCardData.ForEach(data =>
         {
             Card card = Instantiate(GameResourceManager.Instance.cardPrefab, _cardDrawContainer).GetComponent<Card>();
             card.Create(data, atlas.GetSprite(data.ID.ToString()), atlas.GetSprite("back"));
-            _cardsForSelection.Add(card);
+            _preparedCards.Add(card);
         });
-        return _cardsForSelection;
+        return _preparedCards;
     }
 
     public void DisposeUnselectedCards(bool isHandSetup)
     {
         if(isHandSetup) // destroy unselected ground card copy
         {
-            Object.Destroy(_cardsForSelection.First().gameObject);
+            Destroy(_preparedCards.First().gameObject);
         }
         else // put cards back to deck
         {
-            DeckType deckType = _cardsForSelection.First().Data.deckType;
-            Deck deck = _deckController.GetDeckByDeckType(deckType);
-            _cardsForSelection.ForEach(card =>
+            _preparedCards.ForEach(card =>
             {
+                DeckType deckType = card.Data.deckType;
+                Deck deck = _deckController.GetDeckByDeckType(deckType);
                 card.transform.SetParent(deck.transform);
-                card.GetComponent<RectTransform>().anchoredPosition = new(0f, 0f);
+                card.transform.position = deck.transform.position;
+                card.gameObject.SetActive(false);
                 deck.AddCard(card);
             });
         }
-        _cardsForSelection.Clear();
+        _preparedCards = new();
     }
 
     public void ToggleCanInspectFlagOfCards(bool value)
     {
-        _cardHolders.Select(e => e.Value).ToList().ForEach(holders =>
+        for (int col = 0; col < _cardHolders.Count; col++)
         {
-            holders.ForEach(holder =>
+            for (int row = 0; row < _cardHolders[col].Count; row++)
             {
-                if(!holder.IsEmpty())
+                CardHolder holder = _cardHolders[col][row];
+                if (!holder.IsEmpty())
                 {
-                    Card card = (Card)holder.GetItemFromContentListByIndex(0);
-                    card.ToggleCanInspectFlag(value);
+                    GetCardFromCardHolder(col, row).ToggleCanInspectFlag(value);
                 }
-            });
-        });
+            }
+        }
     }
 
     public List<MarkerHolder> GetAvailableMarkerHolders(int holderParentID = -1)
@@ -478,12 +480,12 @@ public class BoardController : MonoBehaviour
 
     public Card GetSingleSelectedCard()
     {
-        for (int i = 0; i < GRID_SIZE; i++)
+        for (int col = 0; col < _cardHolders.Count; col++)
         {
-            for (int j = 0; j < GRID_SIZE; j++)
+            for (int row = 0; row < _cardHolders[col].Count; row++)
             {
-                Card card = GetCardFromCardHolder(i, j);
-                if(card.isSelected)
+                Card card = GetCardFromCardHolder(col, row);
+                if (card.isSelected)
                 {
                     return card;
                 }

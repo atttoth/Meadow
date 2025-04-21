@@ -147,12 +147,9 @@ public class GameRoundScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                task.StartDelayMs(0);
-                break;
-            case 1:
                 if (nextRound == 1)
                 {
-                    task.NextState(7);
+                    task.NextState(6);
                 }
                 else
                 {
@@ -160,23 +157,23 @@ public class GameRoundScreen : MonoBehaviour
                     task.StartDelayMs((int)progressPanelSpeed * 1000);
                 }
                 break;
-            case 2:
+            case 1:
                 task.StartDelayMs((int)waitDelay * 1000);
                 break;
-            case 3:
+            case 2:
                 float targetValue = PROGRESS_SECTION_WIDTH * (nextRound - 1);
                 Slider slider = _progressSliders[(int)_activeProgressDisplayIndex];
                 DOTween.To(() => slider.value, x => slider.value = x, targetValue, sliderDuration);
                 task.StartDelayMs((int)sliderDuration * 1000);
                 break;
-            case 4:
+            case 3:
                 task.StartDelayMs((int)waitDelay * 1000);
                 break;
-            case 5:
+            case 4:
                 DOTween.Sequence().Append(rect.DOScale(1f, progressPanelSpeed)).Join(rect.DOAnchorPos(_progressDisplayOriginPos, progressPanelSpeed).SetEase(Ease.Linear));
                 task.StartDelayMs((int)progressPanelSpeed * 1000);
                 break;
-            case 6:
+            case 5:
                 task.StartDelayMs((int)waitDelay * 1000);
                 break;
             default:

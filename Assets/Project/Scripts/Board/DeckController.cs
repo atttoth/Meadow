@@ -70,35 +70,9 @@ public class DeckController : MonoBehaviour
         return _decks[deckType];
     }
 
-    public Transform GetDisplayDeckByIndex(int index)
+    public Transform GetDisplayDeckTransform(int colIndex)
     {
-        return _displayDecks[index];
-    }
-
-    private Transform GetDisplayDeck(DeckType deckType, int colIndex)
-    {
-        switch (deckType)
-        {
-            case DeckType.West: return GetDisplayDeckByIndex(0);
-            case DeckType.East: return GetDisplayDeckByIndex(3);
-            default: return GetDisplayDeckByIndex(colIndex == 1 ? 1 : 2);
-        }
-    }
-
-    public List<Card> GetCardsReadyToDraw(int emptyHoldersCount, DeckType deckType, int colIndex)
-    {
-        Deck deck = GetDeckByDeckType(deckType);
-        Transform display = GetDisplayDeck(deckType, colIndex);
-        List<Card> cards = new();
-        for (int i = 0; i < emptyHoldersCount; i++)
-        {
-            Card card = deck.GetRandomCard();
-            card.transform.SetParent(display);
-            card.transform.position = display.position;
-            card.ToggleRayCast(false);
-            cards.Add(card);
-        }
-        return cards;
+        return _displayDecks[colIndex];
     }
 
     public Card GetCardFromDeck(DeckType deckType, int cardID = -1)
