@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-[System.Serializable]
 public class DeckController : MonoBehaviour
 {
     private static readonly List<int> INITIAL_GROUND_CARD_IDS = new() { 217, 218 };
@@ -47,22 +46,8 @@ public class DeckController : MonoBehaviour
 
     private List<CardData> ParseDataFromJSON()
     {
-        List<CardData> collection = new();
-        CardData cardData = JsonUtility.FromJson<CardData>(GameResourceManager.Instance.cardDataJson.text);
-        cardData.collection.ToList().ForEach(data =>
-        {
-            collection.Add(new CardData(
-                data.ID,
-                data.deckType,
-                data.cardType,
-                data.requirements,
-                data.optionalRequirements,
-                data.adjacentRequirements,
-                data.icons,
-                data.score
-                ));
-        });
-        return collection;
+        ParsedCardData parsedData = JsonUtility.FromJson<ParsedCardData>(GameResourceManager.Instance.cardDataJson.text);
+        return parsedData.collection.ToList();
     }
 
     public Deck GetDeckByDeckType(DeckType deckType)

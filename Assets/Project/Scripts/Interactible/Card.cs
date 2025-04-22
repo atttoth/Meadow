@@ -96,6 +96,7 @@ public class Card : Interactable
         highlightFrame = transform.GetChild(0).GetComponent<Image>();
         highlightFrame.color = Color.red;
         ToggleHighlight(false);
+        ToggleRayCast(false);
         gameObject.SetActive(false);
     }
 
@@ -153,7 +154,6 @@ public class Card : Interactable
     {
         cardStatus = CardStatus.IN_HAND;
         canHover = true;
-        ToggleRayCast(true);
     }
 
     public void MoveCardBackToHand(Transform handViewTransform)

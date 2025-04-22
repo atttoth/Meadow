@@ -7,6 +7,7 @@ using UnityEngine.UI;
 public class PlayerTableView : TableView
 {
     // Primary - ground and observation cards
+    private ScrollRect _primaryTableContentScroll;
     private List<CardHolder> _primaryCardHolderPool;
     private Transform _primaryCardHolderPoolContainer;
     private List<TableCardHitArea> _primaryHitAreas; // left and right sides
@@ -35,6 +36,7 @@ public class PlayerTableView : TableView
         _approveButtonText = transform.GetChild(1).GetChild(0).GetComponent<TextMeshProUGUI>();
         _approveButtonImage = transform.GetChild(1).GetComponent<Image>();
 
+        EnableTableScroll(false);
         CreateCardHolderPools();
         CreateUIHitAreas();
         CreateTableLayout();
@@ -49,6 +51,11 @@ public class PlayerTableView : TableView
         float primaryHolderWidth = GameResourceManager.Instance.tablePrimaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
         float secondaryHolderWidth = GameResourceManager.Instance.tableSecondaryCardHolderPrefab.GetComponent<RectTransform>().rect.width;
         _tableLayout = new TableLayout(tableClosedPosY, tableOpenPosY, rect.width, primaryHolderWidth, secondaryHolderWidth);
+    }
+
+    public void EnableTableScroll(bool value)
+    {
+        _primaryTableContentScroll.enabled = value;
     }
 
     public CardHolder GetActivePrimaryCardHolderByTag(string tagName)

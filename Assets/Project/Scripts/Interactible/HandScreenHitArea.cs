@@ -1,16 +1,17 @@
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.U2D;
-using UnityEngine.UI;
 
 public class HandScreenHitArea : HitArea
 {
-    private Image _fakeCardImage;
+    private Card _fakeCard;
 
     public override void Init()
     {
         base.Init();
-        _fakeCardImage = transform.GetChild(0).GetComponent<Image>();
-        _fakeCardImage.enabled = false;
+        _fakeCard = Instantiate(GameResourceManager.Instance.cardPrefab, transform).GetComponent<Card>();
+        _fakeCard.GetComponent<RectTransform>().anchoredPosition = new(0f, 105f);
+        EnableFakeCard(null);
     }
 
     public override void OnPointerEnter(PointerEventData eventData)
@@ -28,14 +29,18 @@ public class HandScreenHitArea : HitArea
         _dispatcher.InvokeEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
     }
 
-    public void SetupHitAreaImage(CardData cardData)
+    public void EnableFakeCard(CardData cardData)
     {
-        SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(cardData.deckType.ToString());
-        _fakeCardImage.sprite = atlas.GetSprite(cardData.ID.ToString());
-    }
-
-    public void ToggleHitAreaImage(bool value)
-    {
-        _fakeCardImage.enabled = value;
+        bool value = cardData is not null;
+        if(value)
+        {
+            SpriteAtlas atlas = GameResourceManager.Instance.GetAssetByName<SpriteAtlas>(cardData.deckType.ToString());
+            Sprite cardFront = atlas.GetSprite(cardData.ID.ToString());
+            _fakeCard.Create(cardData, cardFront, null);
+            _fakeCard.ToggleRayCast(false);
+            _fakeCard.MainImage.sprite = cardFront;
+            _fakeCard.CardIconItemsView.Toggle(true);
+        }
+        _fakeCard.gameObject.SetActive(value);
     }
 }

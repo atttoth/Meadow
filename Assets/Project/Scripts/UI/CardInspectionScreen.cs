@@ -23,7 +23,6 @@ public class CardInspectionScreen : MonoBehaviour
         _interactableScreen.Init();
         _fakeCard = transform.GetChild(1).GetComponent<Card>();
         _fakeCard.Create(null, null, null);
-        _fakeCard.ToggleRayCast(false);
         _fakeCard.MainImage.enabled = false;
         _fakeCardTransform = _fakeCard.GetComponent<RectTransform>();
         _approveIconRemoveButton = transform.GetChild(2).GetComponent<Button>();
@@ -77,15 +76,15 @@ public class CardInspectionScreen : MonoBehaviour
                 task.StartDelayMs((int)duration * 1000);
                 break;
             case 1:
-                _fakeCard.CardIconItemsView.Toggle(true);
-                task.StartDelayMs(0);
-                break;
-            default:
-                ToggleRayCast(true);
-                if(_fakeCard.CardIconItemsView.GetRequiredIconItemsNumber() > 1 && isTableVisible)
+                if (_fakeCard.CardIconItemsView.GetRequiredIconItemsNumber() > 1 && isTableVisible)
                 {
                     _fakeCard.CardIconItemsView.ToggleRequiredIconsRaycast(true);
                 }
+                _fakeCard.CardIconItemsView.Toggle(true);
+                ToggleRayCast(true);
+                task.StartDelayMs(0);
+                break;
+            default:
                 task.Complete();
                 break;
         }

@@ -1,4 +1,3 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,7 +8,6 @@ public abstract class TableView : MonoBehaviour
     protected static int _MAX_SECONDARY_HOLDER_NUM = 8;
 
     // Primary - ground and observation cards
-    protected ScrollRect _primaryTableContentScroll;
     protected List<CardHolder> _activePrimaryCardHolders;
     protected Transform _primaryCardHolderContainer;
 

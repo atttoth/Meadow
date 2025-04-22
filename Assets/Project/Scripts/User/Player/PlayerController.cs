@@ -72,9 +72,9 @@ public class PlayerController : UserController
             }
         });
         _turnEndButton.onClick.AddListener(() => EndTurn());
-        ToggleTurnEndButton(false);
+        EnableTurnEndButton(false);
         _campToggleButton.onClick.AddListener(() => ToggleCamp());
-
+        EnableCampButton(false);
         _handScreenHitArea = transform.GetChild(3).GetComponent<HandScreenHitArea>();
         _handScreenHitArea.Init();
         ToggleHandScreenHitarea(false);
@@ -116,13 +116,18 @@ public class PlayerController : UserController
         DOTween.Sequence().Append(_turnEndButton.GetComponent<CanvasGroup>().DOFade(targetValue, GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration)));
     }
 
-    public void ToggleTurnEndButton(bool value)
+    public void EnableTurnEndButton(bool value)
     {
         if(value && !_markerView.IsMarkerConsumed)
         {
             return;
         }
         _turnEndButton.enabled = value;
+    }
+
+    public void EnableCampButton(bool value)
+    {
+        _campToggleButton.enabled = value;
     }
 
     private List<CardIcon[]> GetTopPrimaryIcons() // sorted primary holders (left to right)
@@ -507,8 +512,7 @@ public class PlayerController : UserController
     {
         List<CardData> dataCollection = (_handView as PlayerHandView).GetDataCollection();
         _handScreenHitArea.transform.SetParent(isToggled ? transform.root : transform);
-        _handScreenHitArea.SetupHitAreaImage(dataCollection.Last());
-        _handScreenHitArea.ToggleHitAreaImage(isToggled);
+        _handScreenHitArea.EnableFakeCard(isToggled ? dataCollection.Last() : null);
         _handView.gameObject.SetActive(!isToggled);
         return isToggled ? dataCollection : null;
     }

@@ -110,7 +110,7 @@ public class BoardController : MonoBehaviour
                         }
                     }
                 }
-                task.StartDelayMs(200);
+                task.StartDelayMs(0);
                 break;
             case 1:
                 int duration = 0;

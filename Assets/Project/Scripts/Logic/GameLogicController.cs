@@ -6,10 +6,10 @@ using UnityEngine.EventSystems;
 
 public class GameLogicController
 {
-    private BoardController _boardController;
-    private CampController _campController;
-    private ScreenController _screenController;
-    private Delegate[] _logicEventHandlers;
+    private readonly BoardController _boardController;
+    private readonly CampController _campController;
+    private readonly ScreenController _screenController;
+    private readonly Delegate[] _logicEventHandlers;
 
     // resets at every session
     private GameMode _currentGameMode;
@@ -137,13 +137,12 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask>)_activeUserController.MarkerView.EndHandSetupHandler);
                 break;
             case 1:
-                task.StartDelayMs(1000);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
                 break;
             case 2:
                 SetNextActiveUserController();
                 if (_currentGameMode.ActiveUserIndex == 0)
                 {
-                    Debug.Log("startTurn: " + _activeUserController.userID);
                     task.StartHandler(_screenController.GetRoundScreenHandler(), _currentGameMode.CurrentRoundIndex + 1);
                 }
                 else
@@ -156,7 +155,6 @@ public class GameLogicController
                 task.NextState(5);
                 break;
             case 4:
-                Debug.Log("handSetup: " + _activeUserController.userID);
                 task.StartHandler((Action<GameTask>)NpcHandSetupHandler);
                 break;
             default:
@@ -241,7 +239,7 @@ public class GameLogicController
                 if (_activeUserController.userID == 0)
                 {
                     marker.SetAlpha(true);
-                    (_activeUserController as PlayerController).ToggleTurnEndButton(false);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(false);
                     (_activeUserController as PlayerController).EnableTableToggleButton(false);
                     _boardController.ToggleRayCastOfMarkerHolders(false);
                     _campController.ToggleRayCastOfMarkerHolders(false);
@@ -299,7 +297,7 @@ public class GameLogicController
                     _boardController.ToggleRayCastOfMarkerHolders(true);
                     _campController.ToggleRayCastOfMarkerHolders(true);
                     (_activeUserController as PlayerController).EnableTableToggleButton(true);
-                    (_activeUserController as PlayerController).ToggleTurnEndButton(true);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(true);
                 }
                 task.StartDelayMs(0);
                 break;
@@ -341,7 +339,7 @@ public class GameLogicController
                     Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, action => action == markerAction)) // marker action ends immediately
                 {
                     (_activeUserController as PlayerController).EnableTableToggleButton(true);
-                    (_activeUserController as PlayerController).ToggleTurnEndButton(true);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(true);
                 }
                 task.StartDelayMs(0);
                 break;
@@ -386,7 +384,7 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                task.StartHandler(_screenController.GetHandScreenToggleHandler(isToggled), (_activeUserController as PlayerController).UpdateHandScreenButton(isToggled));
+                task.StartHandler(_screenController.GetHandScreenToggleHandler(isToggled), (_userControllers[0] as PlayerController).UpdateHandScreenButton(isToggled));
                 break;
             default:
                 task.Complete();
@@ -403,6 +401,9 @@ public class GameLogicController
                 {
                     _currentGameMode.State = GameState.GAMEPLAY;
                     (_activeUserController as PlayerController).FadeTurnEndButton(true);
+                    (_activeUserController as PlayerController).EnableCampButton(true);
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
+                    (_activeUserController as PlayerController).TableView.EnableTableScroll(true);
                 }
                 _activeUserController.InfoView.SetMaxCardPlacement(1);
                 _activeUserController.InfoView.SetCardPlacement(0);
@@ -440,7 +441,7 @@ public class GameLogicController
             case 0:
                 if(_activeUserController.userID == 0)
                 {
-                    (_activeUserController as PlayerController).ToggleTurnEndButton(false);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(false);
                     (_activeUserController as PlayerController).EnableTableToggleButton(false);
                     _boardController.ToggleRayCastOfMarkerHolders(false);
                     _boardController.ToggleRayCastOfCards(false);
@@ -592,6 +593,7 @@ public class GameLogicController
                 if (_activeUserController.userID == 0)
                 {
                     _activeUserController.SetMarkerUsed();
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
                     _screenController.ToggleRowHighlightFrame();
                 }
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
@@ -634,9 +636,10 @@ public class GameLogicController
                 if (_activeUserController.userID == 0)
                 {
                     _boardController.ToggleRayCastOfCards(false);
-                    (_activeUserController as PlayerController).ToggleTurnEndButton(false);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(false);
                     (_activeUserController as PlayerController).ToggleHandScreenHitarea(false);
                     (_activeUserController as PlayerController).EnableTableToggleButton(false);
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
                 }
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 if (holder == null) // card picked from selection screen
@@ -673,9 +676,10 @@ public class GameLogicController
                 {
                     if (_activeUserController.userID == 0)
                     {
-                        (_activeUserController as PlayerController).ToggleTurnEndButton(true);
+                        (_activeUserController as PlayerController).EnableTurnEndButton(true);
                         (_activeUserController as PlayerController).ToggleHandScreenHitarea(true);
                         (_activeUserController as PlayerController).EnableTableToggleButton(true);
+                        (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
                         _boardController.ToggleCanInspectFlagOfCards(true);
                         _boardController.ToggleRayCastOfCards(true);
                     }

@@ -103,10 +103,10 @@ public class CardsInHandScreen : MonoBehaviour
                 while (_activeFakeCards.Count > i)
                 {
                     float delay = i * fadeDelay;
-                    Card fakeCard = _activeFakeCards[i];
+                    Card card = _activeFakeCards[i];
                     Sequence sequence = DOTween.Sequence();
                     _showSequences.Add(sequence);
-                    sequence.Append(fakeCard.MainImage.DOFade(1f, speed).SetEase(Ease.InOutQuart).SetDelay(delay));
+                    sequence.Append(card.MainImage.DOFade(1f, speed).SetEase(Ease.InOutQuart).SetDelay(delay).OnComplete(() => card.CardIconItemsView.Toggle(true)));
                     i++;
                 }
                 task.StartDelayMs(0);

@@ -103,6 +103,7 @@ public class SelectionScreen : MonoBehaviour
                 {
                     card.CardIconItemsView.Toggle(true);
                     card.ToggleSelection(isPlayerSelection);
+                    card.ToggleRayCast(isPlayerSelection);
                 });
                 task.StartDelayMs(0);
                 break;
@@ -120,13 +121,13 @@ public class SelectionScreen : MonoBehaviour
                 task.StartDelayMs(isPlayerSelection ? 0 : 500);
                 break;
             case 1:
-                int duration = (int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000);
                 cards.ForEach(card =>
                 {
                     card.CardIconItemsView.Toggle(false);
                     card.FlipDeckCardTween(false);
+                    card.ToggleRayCast(false);
                 });
-                task.StartDelayMs(duration);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000));
                 break;
             case 2:
                 cards.ForEach(card => card.gameObject.SetActive(false));
