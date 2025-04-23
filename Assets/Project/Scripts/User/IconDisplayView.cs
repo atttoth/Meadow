@@ -1,4 +1,3 @@
-using DG.Tweening;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +12,7 @@ public class IconDisplayView : MonoBehaviour
     protected List<DisplayIcon> _displayIconPool;
     protected List<DisplayIcon> _displayIcons;
     protected List<DisplayIcon> _preparedDisplayIcons;
+    protected List<DisplayIcon> _oldDisplayIcons;
     private IconDisplayLayout _iconDisplayLayout;
     protected Image _activeUserFrame;
 
@@ -24,6 +24,7 @@ public class IconDisplayView : MonoBehaviour
         _displayIconPool = new();
         _displayIcons = new();
         _preparedDisplayIcons = new();
+        _oldDisplayIcons = new();
         _iconDisplayLayout = new IconDisplayLayout();
         _activeUserFrame = transform.GetChild(3).GetComponent<Image>();
         ToggleActiveUserFrame(false);
@@ -110,7 +111,6 @@ public class IconDisplayView : MonoBehaviour
                 int duration = 0;
                 if (_displayIcons.Count > 0)
                 {
-                    float speed = GameSettings.Instance.GetDuration(Duration.displayIconHorizontalSlideSpeed);
                     List<int> oldHolderIDs = _displayIcons.Select(icon => icon.ID).ToList();
                     List<int> preparedHolderIDs = _preparedDisplayIcons.Select(icon => icon.ID).ToList();
                     List<int> newHolderIDs = preparedHolderIDs.Except(oldHolderIDs).ToList();
@@ -176,11 +176,12 @@ public class IconDisplayView : MonoBehaviour
                     // slide old icons
                     if (slideDirectionValue != 0)
                     {
+                        float speed = GameSettings.Instance.GetDuration(Duration.displayIconHorizontalSlideSpeed);
                         duration = (int)(speed * 1000);
                         _displayIcons.ForEach(icon =>
                         {
-                            Vector2 pos = _iconDisplayLayout.GetExistingIconPosition(icon.transform.position.x, icon.transform.position.y, slideDirectionValue);
-                            icon.transform.DOMove(pos, speed).SetEase(Ease.InOutSine);
+                            float posX = _iconDisplayLayout.GetExistingIconPosition(icon.transform.position.x, icon.transform.position.y, slideDirectionValue).x;
+                            icon.PosXTween(posX, speed);
                         });
                     }
                 }
@@ -213,6 +214,8 @@ public class IconDisplayView : MonoBehaviour
                 _preparedDisplayIcons.ForEach(displayIcon =>
                 {
                     DisplayIcon oldDisplayIcon = _displayIcons.Find(icon => icon.ID == displayIcon.ID);
+                    displayIcon.transform.SetParent(_iconsTransform);
+                    displayIcon.transform.position = new(displayIcon.transform.position.x, displayIcon.transform.position.y - 100f);
                     displayIcon.gameObject.SetActive(true);
 
                     if (displayIcon.MainIcons.Count > 1)
@@ -237,18 +240,21 @@ public class IconDisplayView : MonoBehaviour
                         displayIcon.background.color = displayIcon.GetColorByGroundIcon(displayIcon.GroundIcons.First());
                     }
 
-                    if (oldDisplayIcon != null)
+                    if (oldDisplayIcon)
                     {
                         _displayIcons.Remove(oldDisplayIcon);
-                        oldDisplayIcon.transform.DOMoveY(_displayIconPoolTransform.position.y, speed).OnComplete(() => AddDisplayIconToPool(oldDisplayIcon));
+                        _oldDisplayIcons.Add(oldDisplayIcon);
+                        oldDisplayIcon.posYTween(oldDisplayIcon.transform.position.y + 100f, speed, false);
                     }
                     _displayIcons.Add(displayIcon);
-                    displayIcon.transform.DOMoveY(_iconsTransform.position.y, speed).OnComplete(() => displayIcon.transform.SetParent(_iconsTransform));
+                    displayIcon.posYTween(displayIcon.transform.position.y + 100f, speed, true);
                 });
-                _preparedDisplayIcons = new();
                 task.StartDelayMs((int)(speed * 1000));
                 break;
             case 1: // re-order icons in hierarchy
+                _oldDisplayIcons.ForEach(icon => AddDisplayIconToPool(icon));
+                _oldDisplayIcons = new();
+                _preparedDisplayIcons = new();
                 _displayIcons.ForEach(displayIcon =>
                 {
                     int siblingIndex = holders.Find(holder => holder.ID == displayIcon.ID).transform.GetSiblingIndex();

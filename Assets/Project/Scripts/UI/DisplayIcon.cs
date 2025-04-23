@@ -10,6 +10,7 @@ public class DisplayIcon : MonoBehaviour
     public Image cardIcon;
     private List<CardIcon> _groundIcons;
     private List<CardIcon> _mainIcons;
+    private CanvasGroup _canvasGroup;
 
     public List<CardIcon> MainIcons
     {
@@ -48,13 +49,10 @@ public class DisplayIcon : MonoBehaviour
         ID = HolderID;
         background = transform.GetChild(0).GetComponent<Image>();
         cardIcon = transform.GetChild(1).GetComponent<Image>();
+        _canvasGroup = GetComponent<CanvasGroup>();
+        _canvasGroup.alpha = 0f;
         _groundIcons = new();
         _mainIcons = new();
-    }
-
-    public void MoveIconToDisplay(Vector3 target)
-    {
-        transform.DOMove(target, 0.3f);
     }
 
     private Sprite SetIconImageByCardIcon(CardIcon cardIcon)
@@ -80,7 +78,7 @@ public class DisplayIcon : MonoBehaviour
         }
     }
 
-    public void ToggleIcons()
+    private void ToggleIcons()
     {
         CardIcon icon = _mainIcons[0];
         _mainIcons.RemoveAt(0);
@@ -88,7 +86,7 @@ public class DisplayIcon : MonoBehaviour
         cardIcon.sprite = SetIconImageByCardIcon(icon);
     }
 
-    public void ToggleBackgrounds()
+    private void ToggleBackgrounds()
     {
         CardIcon icon = _groundIcons[0];
         _groundIcons.RemoveAt(0);
@@ -125,5 +123,16 @@ public class DisplayIcon : MonoBehaviour
         Color newColor = cardIcon.color;
         newColor.a = value;
         cardIcon.color = newColor;
+    }
+
+    public void PosXTween(float posX, float speed)
+    {
+        DOTween.Sequence().Append(transform.DOMoveX(posX, speed).SetEase(Ease.InOutSine));
+    }
+
+    public void posYTween(float posY, float speed, bool isNewIcon)
+    {
+        float alpha = isNewIcon ? 1f : 0f;
+        DOTween.Sequence().Append(transform.DOMoveY(posY, speed)).Join(_canvasGroup.DOFade(alpha, speed));
     }
 }

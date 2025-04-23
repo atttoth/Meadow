@@ -1,7 +1,7 @@
 
 public enum GameSpeed
 { 
-    LEVEL1, LEVEL2, LEVEL3, LEVEL4, LEVEL5
+    SPEED1, SPEED2, SPEED3, SPEED4, SPEED5
 }
 
 public enum Duration
@@ -50,9 +50,9 @@ public class GameSettings
         }
     }
 
-    public void SetGameSpeed(GameSpeed level)
+    public void SetGameSpeed(GameSpeed speed)
     {
-        _gameSpeedMod = 1f - ((int)level * 0.1f);
+        _gameSpeedMod = 1f - ((int)speed * 0.1f);
     }
 
     public float GetDuration(Duration duration)

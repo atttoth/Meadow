@@ -33,7 +33,7 @@ public class CardInspectionScreen : MonoBehaviour
 
     public void ShowCardHandler(GameTask task, Card card, bool isTableVisible)
     {
-        switch(task.State)
+        switch (task.State)
         {
             case 0:
                 _inspectedCard = card;
@@ -69,18 +69,19 @@ public class CardInspectionScreen : MonoBehaviour
 
                 if (Array.Exists(new[] { CardType.Landscape, CardType.Discovery }, cardType => cardType == card.Data.cardType))
                 {
+                    _fakeCard.CardIconItemsView.Rotate(-90f);
                     DOTween.Sequence()
                         .SetDelay(quarterOfDuration * 3)
                         .Append(_fakeCardTransform.DORotate(new Vector3(0f, 0f, 90f), quarterOfDuration));
                 }
-                task.StartDelayMs((int)duration * 1000);
+                task.StartDelayMs((int)(duration * 1000));
                 break;
             case 1:
+                _fakeCard.CardIconItemsView.Toggle(true);
                 if (_fakeCard.CardIconItemsView.GetRequiredIconItemsNumber() > 1 && isTableVisible)
                 {
                     _fakeCard.CardIconItemsView.ToggleRequiredIconsRaycast(true);
                 }
-                _fakeCard.CardIconItemsView.Toggle(true);
                 ToggleRayCast(true);
                 task.StartDelayMs(0);
                 break;
