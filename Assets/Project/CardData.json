@@ -1712,16 +1712,6 @@
       "score": 3
     },
     {
-      "ID": 172,
-      "deckType": 3,
-      "cardType": 2,
-      "requirements": [21, 23, 23, 23, 23],
-      "optionalRequirements": [],
-      "adjacentRequirements":[],
-      "icons": [22],
-      "score": 4
-    },
-    {
       "ID": 173,
       "deckType": 3,
       "cardType": 2,
@@ -1940,16 +1930,6 @@
       "adjacentRequirements":[],
       "icons": [8],
       "score": 3
-    },
-    {
-      "ID": 195,
-      "deckType": 3,
-      "cardType": 1,
-      "requirements": [24, 24, 24, 24, 24, 24, 24, 24, 24],
-      "optionalRequirements": [],
-      "adjacentRequirements":[],
-      "icons": [17],
-      "score": 4
     },
     {
       "ID": 196,

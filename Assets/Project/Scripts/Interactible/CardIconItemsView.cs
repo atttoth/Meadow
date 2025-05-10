@@ -89,23 +89,12 @@ public class CardIconItemsView : MonoBehaviour
         {
             if (data.requirements.Length > 0)
             {
-                if(data.requirements.Contains(CardIcon.AllMatching))
+                data.requirements.ToList().ForEach(icon =>
                 {
-                    // todo
-                }
-                else if(data.requirements.Contains(CardIcon.AllDifferent))
-                {
-                    // todo
-                }
-                else
-                {
-                    data.requirements.ToList().ForEach(icon =>
-                    {
-                        CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
-                        item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
-                        _requiredIconItemsHolder.AddToHolder(item);
-                    });
-                }
+                    CardIconItem item = Instantiate(GameResourceManager.Instance.cardIconItemPrefab, _requiredIconItemsHolder.transform).GetComponent<CardIconItem>();
+                    item.Create(new List<CardIcon>() { icon }, IconItemType.SINGLE, REQUIRED_ICON_DIMENSION, ITEM_INDEX++);
+                    _requiredIconItemsHolder.AddToHolder(item);
+                });
             }
             
             if(data.optionalRequirements.Length > 0)

@@ -110,13 +110,6 @@ public abstract class UserController : MonoBehaviour
                 return false;
             }
 
-            if (mainRequirements.Contains(CardIcon.AllDifferent)) // only occurs at card ID 195
-            {
-                List<CardIcon> allTableIcons = new(primaryTableIcons);
-                allTableIcons.AddRange(_tableView.GetAllRelevantIcons(HolderSubType.SECONDARY));
-                return GetDistinctTableIcons(allTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllDifferent).ToList().Count;
-            }
-
             List<CardIcon> optionalRequirements = cardData.optionalRequirements.ToList();
             List<CardIcon> adjacentRequirements = cardData.adjacentRequirements.ToList();
             bool mainGlobalCondition = PassedGlobalRequirements(primaryTableIcons, mainRequirements);
@@ -179,16 +172,9 @@ public abstract class UserController : MonoBehaviour
             primaryTableIcons.AddRange(_tableView.GetAllRelevantIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
             if (cardData.cardType == CardType.Landscape)
             {
-                if(holderData.IsEmpty())
+                if(holderData.IsEmpty() && cardData.requirements.Length == 1) // landscape card has only 1 road token requirement
                 {
-                    if (mainRequirements.Contains(CardIcon.AllMatching)) // only occurs at card ID 172
-                    {
-                        return GetMostCommonTableIconsCount(primaryTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllMatching).ToList().Count;
-                    }
-                    else if (cardData.requirements.Length == 1) // card has only road token requirement
-                    {
-                        return true;
-                    }
+                    return true;
                 }
                 else
                 {
@@ -212,23 +198,6 @@ public abstract class UserController : MonoBehaviour
                 return false;
             }
         }
-    }
-
-    private int GetMostCommonTableIconsCount(List<CardIcon> allTableIcons)
-    {
-        if (allTableIcons.Count == 0)
-        {
-            return 0;
-        }
-        else
-        {
-            return allTableIcons.GroupBy(icon => icon).Select(g => new { Icon = g.Key, Count = g.Count() }).ToList().Max(g => g.Count);
-        }
-    }
-
-    private int GetDistinctTableIcons(List<CardIcon> allTableIcons)
-    {
-        return allTableIcons.Distinct().ToList().Count;
     }
 
     private List<CardIcon[]> CreateIconPairsFromRequirements(List<CardIcon> requirements)

@@ -41,9 +41,7 @@ public enum CardIcon
     Deer, // 19
     Bag, // 20
     RoadToken, // 21
-    Landscape, // 22
-    AllMatching, // 23
-    AllDifferent // 24
+    Landscape // 22
 }
 
 public enum CardStatus

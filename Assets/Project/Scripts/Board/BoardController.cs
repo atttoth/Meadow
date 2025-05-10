@@ -19,8 +19,6 @@ public class BoardController : MonoBehaviour
     private List<CardHolder> _preparedHolders; // saved empty card holders to fill
     private List<Card> _preparedCards; // saved cards for selection screen, fill card holders, half-time board change
 
-    private List<int> ids = new List<int>() { 52, 112 };
-
     private T GetNextItem<T>(List<T> list)
     {
         T item = list[0];
@@ -103,18 +101,7 @@ public class BoardController : MonoBehaviour
                         CardHolder holder = _cardHolders[col][row];
                         if (holder.Data.IsEmpty())
                         {
-                            int id = -1;
-                            if (ids.Count > 1 && deckType == DeckType.South)
-                            {
-                                id = ids.First();
-                                ids.Remove(id);
-                            }
-                            else if (ids.Count == 1 && deckType == DeckType.East)
-                            {
-                                id = ids.First();
-                                ids.Remove(id);
-                            }
-                            Card card = _deckController.GetCardFromDeck(deckType, id);
+                            Card card = _deckController.GetCardFromDeck(deckType);
                             card.transform.SetParent(display);
                             card.transform.position = display.position;
                             card.ToggleRayCast(false);
