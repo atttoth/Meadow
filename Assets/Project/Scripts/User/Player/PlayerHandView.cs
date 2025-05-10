@@ -26,6 +26,20 @@ public class PlayerHandView : HandView
         return _cards.Select(card => card.Data).ToList();
     }
 
+    public override void PlaceCardFromHandAction(object[] args)
+    {
+        bool isActionCancelled = (bool)args[1];
+        Card card = (Card)args[3];
+        if (isActionCancelled)
+        {
+            AddCard(card);
+        }
+        else
+        {
+            RemoveCard(card);
+        }
+    }
+
     public override void AddCardHandler(GameTask task, List<Card> cards)
     {
         switch(task.State)
@@ -77,20 +91,6 @@ public class PlayerHandView : HandView
         _isHandDefault = !_isHandDefault;
         _cards.ForEach(card => card.ToggleCard());
         MoveCardsHorizontallyInHand(GetLayoutPositions());
-    }
-
-    public void PlaceCardFromHandAction(object[] args)
-    {
-        bool isActionCancelled = (bool)args[1];
-        Card card = (Card)args[3];
-        if (isActionCancelled)
-        {
-            AddCard(card);
-        }
-        else
-        {
-            RemoveCard(card);
-        }
     }
 
     public float[] GetLayoutPositions()

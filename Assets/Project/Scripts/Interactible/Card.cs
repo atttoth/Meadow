@@ -393,8 +393,8 @@ public class Card : Interactable
                 transform.SetParent(_parent);
                 transform.SetAsFirstSibling();
                 canScale = true;
-                _iconItemsView.Toggle(true);
             }
+            _iconItemsView.Toggle(true);
         });
     }
 

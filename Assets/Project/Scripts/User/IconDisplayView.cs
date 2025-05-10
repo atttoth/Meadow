@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -35,22 +36,42 @@ public class IconDisplayView : MonoBehaviour
         _activeUserFrame.enabled = value;
     }
 
-    public void UpdateIcons(GameTask task, List<Card> cards, List<CardHolder> holders)
+    public void UpdateIconsHandler(GameTask task, List<Card> cards, List<HolderData> holderDataCollection)
     {
         switch (task.State)
         {
             case 0:
-                cards
-                    .OrderBy(card => card.transform.parent.GetSiblingIndex())
-                    .ToList()
-                    .ForEach(card => PrepareDisplayIcon(card));
-                task.StartDelayMs(0);
+                if(cards.Count > 0)
+                {
+                    List<ArrayList> dataPairs = new();
+                    for (int i = 0; i < holderDataCollection.Count; i++)
+                    {
+                        HolderData holderData = holderDataCollection[i];
+                        for (int j = 0; j < cards.Count; j++)
+                        {
+                            Card card = cards[j];
+                            if(holderData.ContentList.Contains(card))
+                            {
+                                dataPairs.Add(new ArrayList { holderDataCollection.IndexOf(holderData), card.Data, holderData });
+                            }
+                        }
+                    }
+                    dataPairs
+                        .OrderBy(list => (int)list[0])
+                        .ToList()
+                        .ForEach(list => PrepareDisplayIcon((CardData)list[1], (HolderData)list[2]));
+                    task.StartDelayMs(0);
+                }
+                else
+                {
+                    task.NextState(3);
+                }
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, List<CardHolder>>)SetupDisplayIconsPositionHandler, holders);
+                task.StartHandler((Action<GameTask, List<HolderData>>)SetupDisplayIconsPositionHandler, holderDataCollection);
                 break;
             case 2:
-                task.StartHandler((Action<GameTask, List<CardHolder>>)ChangeDisplayIconsHandler, holders);
+                task.StartHandler((Action<GameTask, List<HolderData>>)ChangeDisplayIconsHandler, holderDataCollection);
                 break;
             default:
                 task.Complete();
@@ -82,18 +103,16 @@ public class IconDisplayView : MonoBehaviour
         displayIcon.transform.position = _displayIconPoolTransform.position;
     }
 
-    private void PrepareDisplayIcon(Card card)
+    private void PrepareDisplayIcon(CardData cardData, HolderData holderData)
     {
-        CardHolder holder = card.transform.parent.GetComponent<CardHolder>();
-        int holderID = holder.ID;
         DisplayIcon displayIcon = GetDisplayIconFromPool();
         displayIcon.transform.SetParent(_preparedIconsTransform);
         displayIcon.transform.position = _preparedIconsTransform.position;
-        displayIcon.SetUpDisplayIcon(holderID);
-        List<CardIcon> icons = card.Data.icons.ToList();
-        if (card.Data.cardType != CardType.Ground) // need to find a ground icon for displayIcon
+        displayIcon.SetUpDisplayIcon(holderData.ID);
+        List<CardIcon> icons = cardData.icons.ToList();
+        if (cardData.cardType != CardType.Ground) // need to find a ground icon for displayIcon
         {
-            List<CardIcon> groundIcons = holder
+            List<CardIcon> groundIcons = holderData
                 .GetAllIconsOfHolder()
                 .Where(cardIcon => (int)cardIcon < 5)
                 .ToList();
@@ -103,7 +122,7 @@ public class IconDisplayView : MonoBehaviour
         _preparedDisplayIcons.Add(displayIcon);
     }
 
-    private void SetupDisplayIconsPositionHandler(GameTask task, List<CardHolder> holders)
+    private void SetupDisplayIconsPositionHandler(GameTask task, List<HolderData> holderDataCollection)
     {
         switch (task.State)
         {
@@ -117,15 +136,16 @@ public class IconDisplayView : MonoBehaviour
                     List<DisplayIcon> leftDisplayIcons = new();
                     List<DisplayIcon> rightDisplayIcons = new();
                     List<DisplayIcon> existingDisplayIcons = new();
-                    int minSiblingIndex = holders
-                        .Where(holder => oldHolderIDs.Contains(holder.ID))
-                        .Select(holder => holder.transform.GetSiblingIndex())
+                    int minSiblingIndex = holderDataCollection
+                        .Where(data => oldHolderIDs.Contains(data.ID))
+                        .Select(data => GetSiblingIndexByHolderData(holderDataCollection, data))
                         .Min();
 
                     newHolderIDs.ForEach(holderID =>
                     {
                         DisplayIcon newDisplayIcon = _preparedDisplayIcons.Find(icon => icon.ID == holderID);
-                        int siblingIndex = holders.Find(holder => holder.ID == holderID).transform.GetSiblingIndex();
+                        HolderData holderData = holderDataCollection.Find(data => data.ID == holderID);
+                        int siblingIndex = GetSiblingIndexByHolderData(holderDataCollection, holderData);
                         if (siblingIndex < minSiblingIndex)
                         {
                             leftDisplayIcons.Add(newDisplayIcon);
@@ -205,7 +225,7 @@ public class IconDisplayView : MonoBehaviour
         }
     }
 
-    private void ChangeDisplayIconsHandler(GameTask task, List<CardHolder> holders)
+    private void ChangeDisplayIconsHandler(GameTask task, List<HolderData> holderDataCollection)
     {
         switch (task.State)
         {
@@ -257,7 +277,8 @@ public class IconDisplayView : MonoBehaviour
                 _preparedDisplayIcons = new();
                 _displayIcons.ForEach(displayIcon =>
                 {
-                    int siblingIndex = holders.Find(holder => holder.ID == displayIcon.ID).transform.GetSiblingIndex();
+                    HolderData holderData = holderDataCollection.Find(data => data.ID == displayIcon.ID);
+                    int siblingIndex = GetSiblingIndexByHolderData(holderDataCollection, holderData);
                     displayIcon.transform.SetSiblingIndex(siblingIndex);
                 });
                 task.StartDelayMs(0);
@@ -266,5 +287,10 @@ public class IconDisplayView : MonoBehaviour
                 task.Complete();
                 break;
         }
+    }
+
+    private int GetSiblingIndexByHolderData(List<HolderData> holderDataCollection, HolderData holderData)
+    {
+        return holderDataCollection.IndexOf(holderData);
     }
 }

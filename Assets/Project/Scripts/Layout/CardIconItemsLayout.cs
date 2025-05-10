@@ -19,12 +19,22 @@ public class CardIconItemsLayout
 
     public Vector2[] GetRequiredIconItemPositions(int numOfIcons, float iconDimension)
     {
+        int maxRow = 4; // 4 icons per col
+        float startingPosX = numOfIcons > maxRow ? -iconDimension * 0.5f - GAP : 0f;
         float startingPosY = 0f;
         Vector2[] positions = new Vector2[numOfIcons];
-        float posX = 0f;
+        int rowIndex = 0;
+        int colIndex = 0;
         for (int i = 0; i < numOfIcons; i++)
         {
-            float posY = startingPosY - ((iconDimension + (GAP * 0.5f)) * i);
+            float posX = startingPosX + (colIndex * (iconDimension + GAP));
+            float posY = startingPosY - ((iconDimension + (GAP * 0.5f)) * rowIndex);
+            rowIndex++;
+            if(rowIndex == maxRow)
+            {
+                rowIndex = 0;
+                colIndex++;
+            }
             positions[i] = new(posX, posY);
         }
         return positions;

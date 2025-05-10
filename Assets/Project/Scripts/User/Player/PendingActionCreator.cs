@@ -20,7 +20,7 @@ public class PendingActionCreator
         return _actionFunctionsCollection.Count;
     }
 
-    public void Create(PendingActionFunction[] actionFunctions, PendingActionFunction[] cancelledActionFunctions, params object[] args)
+    public void Create(PendingActionFunction[] actionFunctions, PendingActionFunction[] cancelledActionFunctions, object[] args)
     {
         int ID = _cancelLastActionOnly ? _actionFunctionsCollection.Count : (int)args[0];
         _actionFunctionsCollection.Add(ID, cancelledActionFunctions);

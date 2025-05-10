@@ -1,4 +1,3 @@
-using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
 
@@ -38,7 +37,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
 
     private bool IsAvailable()
     {
-        foreach (Marker marker in _contentList)
+        foreach (Marker marker in _data.ContentList)
         {
             if (marker.Status == MarkerStatus.PLACED || marker.Status == MarkerStatus.USED)
             {

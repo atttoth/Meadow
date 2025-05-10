@@ -57,14 +57,18 @@ public class GameLogicController
 
     public void Execute(int handlerIndex, object[] args)
     {
-        new GameTask().ExecHandler(_logicEventHandlers[handlerIndex], args);
+        Delegate f = handlerIndex > -1 ? _logicEventHandlers[handlerIndex] : (Action<GameTask>)StartGameSetupHandler;
+        new GameTask().ExecHandler(f, args);
     }
 
-    public void StartSession(GameMode gameMode, UserController[] userControllers)
+    public void SetupSession(GameMode gameMode, UserController[] userControllers)
     {
         _currentGameMode = gameMode;
         _userControllers = userControllers;
-        new GameTask().ExecHandler((Action<GameTask>)StartGameSetupHandler);
+        _userControllers.ToList().ForEach(controller => controller.ResetCampScoreTokens());
+        _screenController.SetupProgressDisplay(_currentGameMode);
+        SetNextActiveUserController(true);
+        (_activeUserController as PlayerController).EnableTableToggleButton(false);
     }
 
     private DeckType GetActiveDeckType()
@@ -87,11 +91,7 @@ public class GameLogicController
     {
         switch(task.State)
         {
-            case 0:
-                SetNextActiveUserController(true);
-                _screenController.SetupProgressDisplay(_currentGameMode);
-                (_activeUserController as PlayerController).EnableTableToggleButton(false);
-                _userControllers.ToList().ForEach(controller => controller.ResetCampScoreTokens());
+            case 0: // todo: game intro
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
             case 1:
@@ -197,7 +197,7 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                (_activeUserController as NpcController).SelectRandomMarkerAndMarkerHolder(_boardController.GetAvailableMarkerHolders(1));
+                (_activeUserController as NpcController).SelectRow(_boardController.GetAvailableMarkerHolders(1), _boardController.GetAllCardsByRow(), _campController.GetAdjacentIconPairs());
                 _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
                 task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).ShowMarkerPlacementHandler);
                 break;
@@ -209,7 +209,7 @@ public class GameLogicController
                 break;
             case 3:
                 List<Card> groundCards = _boardController.CreateInitialGroundCards();
-                (_activeUserController as NpcController).SelectInitialGroundCard(groundCards);
+                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCardsByRow(), groundCards, _campController.GetAdjacentIconPairs());
                 task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), groundCards, false);
                 break;
             case 4:
@@ -243,11 +243,11 @@ public class GameLogicController
                     (_activeUserController as PlayerController).EnableTableToggleButton(false);
                     _boardController.ToggleRayCastOfMarkerHolders(false);
                     _campController.ToggleRayCastOfMarkerHolders(false);
-                    if (holder.holderType == HolderType.BoardMarker)
+                    if (holder.Data.holderType == HolderType.BoardMarker)
                     {
                         _boardController.SelectCard(marker, holder);
                     }
-                    else if (holder.holderType == HolderType.CampMarker)
+                    else if (holder.Data.holderType == HolderType.CampMarker)
                     {
                         _campController.ToggleCampAction(true);
                         _screenController.ToggleMarkerActionScreen(marker);
@@ -580,7 +580,7 @@ public class GameLogicController
     {
         if (((_activeUserController as PlayerController).draggingCardType == CardType.Ground && subType == HolderSubType.PRIMARY) || ((_activeUserController as PlayerController).draggingCardType == CardType.Landscape && subType == HolderSubType.SECONDARY))
         {
-            (_activeUserController as PlayerController).UpdateActiveCardHolders(subType, hitAreaTag);
+            (_activeUserController as PlayerController).UpdateCardHolders(subType, hitAreaTag);
         }
         task.Complete();
     }
@@ -600,9 +600,9 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask>)_boardController.DrawRandomNorthCardFromDeckHandler);
                 break;
             case 1:
-                List<Card> cardsOfRow = _boardController.GetRowCards();
+                List<Card> cardsOfRow = _boardController.GetRowOfSelectedCards();
                 _boardController.ToggleCardsSelection(false);
-                cardsOfRow.ForEach(card => card.transform.parent.GetComponent<CardHolder>().RemoveItemFromContentList(card));
+                cardsOfRow.ForEach(card => card.transform.parent.GetComponent<CardHolder>().Data.RemoveItemFromContentList(card));
                 cardsOfRow.Insert(0, _boardController.GetUnselectedCards(null).First()); // include random north card
                 task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cardsOfRow);
                 break;
@@ -650,7 +650,7 @@ public class GameLogicController
                 {
                     _activeUserController.SetMarkerUsed();
                     _boardController.ToggleCardsSelection(false);
-                    holder.RemoveItemFromContentList(card);
+                    holder.Data.RemoveItemFromContentList(card);
                     task.StartDelayMs(0);
                 }
                 break;
@@ -805,10 +805,10 @@ public class GameLogicController
                     holder = result.gameObject.GetComponent<CardHolder>();
                     TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
                     holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                    if (holder && playerController.TryPlaceCard(holder, card))
+                    if (holder && playerController.PassedBasicRequirements(card) && playerController.TryPlaceCard(holder.Data, card.Data))
                     {
                         playerController.HandView.EnableCardsRaycast(false);
-                        playerController.CreatePendingCardPlacement(holder, card);
+                        playerController.ExecuteCardPlacement(new object[] { card.Data.ID, false, holder.Data, card });
                         playerController.EnableTableToggleButton(false);
                         playerController.TableView.UpdateApproveButton(true);
                         break;
@@ -847,7 +847,7 @@ public class GameLogicController
             case 0:
                 card.ToggleRayCast(false);
                 (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
-                task.StartHandler((Action<GameTask, Card>)(_activeUserController as PlayerController).CancelPendingCardPlacement, card);
+                task.StartHandler((Action<GameTask, Card>)(_activeUserController as PlayerController).CancelCardPlacement, card);
                 break;
             default:
                 card.ToggleRayCast(true);
@@ -865,7 +865,7 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask, List <Card>, Vector3>)_screenController.CollectCardScoreHandler, cards, targetPosition);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask>)(_activeUserController as PlayerController).ApplyPendingCardPlacementHandler);
+                task.StartHandler((Action<GameTask>)(_activeUserController as PlayerController).ApplyCardPlacementHandler);
                 break;
             default:
                 (_activeUserController as PlayerController).ToggleTable();

@@ -6,6 +6,14 @@ public enum GameModeType
     SINGLE_PLAYER_NORMAL // todo
 }
 
+public enum GameDifficulty
+{
+    EASY,
+    MEDIUM,
+    HARD,
+    VERY_HARD
+}
+
 public enum GameState
 {
     SETUP,
@@ -15,6 +23,7 @@ public enum GameState
 public class GameMode
 {
     private GameModeType _modeType;
+    private GameDifficulty _difficulty;
     private GameState _state;
     private int _numOfPlayerControllers;
     private int _numOfNpcControllers;
@@ -32,9 +41,10 @@ public class GameMode
     private int _activeUserIndex;
     private int _currentRoundIndex;
 
-    public GameMode(GameModeType modeType, int numOfNpcControllers, int numOfPlayerControllers = 1)
+    public GameMode(GameModeType modeType, GameDifficulty difficulty, int numOfNpcControllers, int numOfPlayerControllers = 1)
     {
         _modeType = modeType;
+        _difficulty = difficulty;
         _state = GameState.SETUP;
         _numOfPlayerControllers = numOfPlayerControllers;
         _numOfNpcControllers = numOfNpcControllers;
@@ -43,6 +53,7 @@ public class GameMode
     }
 
     public GameModeType ModeType { get { return _modeType; } }
+    public GameDifficulty Difficulty { get { return _difficulty; } }
     public GameState State { get { return _state; } set { _state = value; } }
     public int NumOfPlayerControllers { get { return _numOfPlayerControllers; } }
     public int NumOfNpcControllers {  get { return _numOfNpcControllers; } }

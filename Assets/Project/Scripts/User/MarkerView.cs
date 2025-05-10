@@ -58,7 +58,7 @@ public abstract class MarkerView : MonoBehaviour
                 task.StartDelayMs((int)duration * 1000);
                 break;
             case 1:
-                _blankMarker.transform.parent.GetComponent<MarkerHolder>().RemoveItemFromContentList(_blankMarker);
+                _blankMarker.transform.parent.GetComponent<MarkerHolder>().Data.RemoveItemFromContentList(_blankMarker);
                 Object.Destroy(_blankMarker.gameObject);
                 task.StartDelayMs(0);
                 break;
@@ -94,7 +94,7 @@ public abstract class MarkerView : MonoBehaviour
                 MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
                 if (prevHolder)
                 {
-                    prevHolder.RemoveItemFromContentList(marker);
+                    prevHolder.Data.RemoveItemFromContentList(marker);
                 }
                 marker.gameObject.SetActive(false);
                 marker.transform.SetParent(transform);

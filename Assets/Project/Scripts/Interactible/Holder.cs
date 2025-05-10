@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using UnityEngine;
 
 public enum HolderType
@@ -12,54 +11,18 @@ public enum HolderType
 
 public class Holder : MonoBehaviour
 {
-    [HideInInspector] public HolderType holderType;
-    public int ID;
-    protected List<Interactable> _contentList;
+    protected HolderData _data;
 
     public virtual void Init(int id, HolderType type)
     {
-        if (id != -1)
-        {
-            ID = id;
-        }
-        holderType = type;
-        _contentList = new();
+        _data = new(id, type);
     }
 
-    public bool IsEmpty() => _contentList.Count < 1;
-
-    public int GetContentListSize()
-    {
-        return _contentList.Count;
-    }
+    public HolderData Data { get { return _data; } }
 
     public void AddToHolder(Interactable item)
     {
         item.transform.SetParent(transform);
-        AddItemToContentList(item);
-    }
-
-    public Interactable GetItemFromContentListByIndex(int index)
-    {
-        if (_contentList.Count > 0)
-        {
-            return _contentList[index];
-        }
-        return default;
-    }
-
-    public void AddItemToContentList(Interactable item)
-    {
-        _contentList.Add(item);
-    }
-
-    public void RemoveItemFromContentList(Interactable item)
-    {
-        _contentList.Remove(item);
-    }
-
-    public List<Interactable> GetAllContent()
-    {
-        return _contentList;
+        _data.AddItemToContentList(item);
     }
 }

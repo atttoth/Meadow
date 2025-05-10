@@ -4,6 +4,12 @@ using UnityEngine;
 
 public class NpcHandView : HandView
 {
+    public override void PlaceCardFromHandAction(object[] args)
+    {
+        Card card = (Card)args[3];
+        RemoveCard(card);
+    }
+
     public override void AddCardHandler(GameTask task, List<Card> cards)
     {
         switch (task.State)

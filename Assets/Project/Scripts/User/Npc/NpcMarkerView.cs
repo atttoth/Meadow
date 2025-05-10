@@ -14,6 +14,7 @@ public class NpcMarkerView : MarkerView
         {
             case 0:
                 float duration = GameSettings.Instance.GetDuration(Duration.npcMarkerPlacementDuration);
+                GetRemainingMarkers().ForEach(m => m.gameObject.SetActive(m == marker));
                 Vector3 targetPosition = holder.GetComponent<RectTransform>().position;
                 Vector3 startingPos = GetStartingPosition(targetPosition, holder.Direction);
                 marker.GetComponent<RectTransform>().position = startingPos;

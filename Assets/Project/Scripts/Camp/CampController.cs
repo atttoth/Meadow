@@ -71,6 +71,11 @@ public class CampController : MonoBehaviour
         }));
     }
 
+    public List<List<CardIcon>> GetAdjacentIconPairs()
+    {
+        return _view.GetAvailableIconPairs();
+    }
+
     public void ToggleCampView(bool value)
     {
         _view.gameObject.SetActive(value);

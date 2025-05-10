@@ -21,7 +21,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public int GetRequiredIconItemsNumber()
     {
-        return _requiredIconItemsHolder.GetContentListSize();
+        return _requiredIconItemsHolder.Data.GetContentListSize();
     }
 
     public void Init(CardData data)
@@ -53,7 +53,7 @@ public class CardIconItemsView : MonoBehaviour
         });
 
         List<Interactable> topIconItems = new();
-        topIconItems.AddRange(_topIconItemsHolder.GetAllContent());
+        topIconItems.AddRange(_topIconItemsHolder.Data.GetAllContent());
         if (data.cardType == CardType.Ground) // ground icons are positioned to the bottom
         {
             List<CardIconItem> groundIconItems = new();
@@ -167,7 +167,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public void ToggleRequiredIconsRaycast(bool value)
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
@@ -180,7 +180,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public void UpdateDisposeStatusOfItems(int iconItemID)
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
@@ -190,7 +190,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public bool HasIconItemSelectedForDispose()
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
@@ -204,7 +204,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public CardIconItem GetIconItemByID(int iconItemID)
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
@@ -218,13 +218,13 @@ public class CardIconItemsView : MonoBehaviour
 
     public void DeleteIconItemByID(int iconItemID)
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < requiredIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)requiredIconItems[i];
             if (item.ID == iconItemID)
             {
-                _requiredIconItemsHolder.RemoveItemFromContentList(item);
+                _requiredIconItemsHolder.Data.RemoveItemFromContentList(item);
                 Destroy(item.gameObject);
                 return;
             }
@@ -233,7 +233,7 @@ public class CardIconItemsView : MonoBehaviour
 
     public void PositionRequiredIconItems()
     {
-        List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+        List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
         Vector2[] requiredIconPositions = _iconItemsLayout.GetRequiredIconItemPositions(requiredIconItems.Count, REQUIRED_ICON_DIMENSION);
         for (int i = 0; i < requiredIconPositions.Length; i++)
         {
@@ -261,16 +261,16 @@ public class CardIconItemsView : MonoBehaviour
     public void Rotate(float target = 0f)
     {
         Vector3 rotation = new(0f, 0f, target);
-        List<Interactable> topIconItems = _topIconItemsHolder.GetAllContent();
+        List<Interactable> topIconItems = _topIconItemsHolder.Data.GetAllContent();
         for (int i = 0; i < topIconItems.Count; i++)
         {
             CardIconItem item = (CardIconItem)topIconItems[i];
             item.GetComponent<RectTransform>().eulerAngles = rotation;
         }
 
-        if (!_requiredIconItemsHolder.IsEmpty())
+        if (!_requiredIconItemsHolder.Data.IsEmpty())
         {
-            List<Interactable> requiredIconItems = _requiredIconItemsHolder.GetAllContent();
+            List<Interactable> requiredIconItems = _requiredIconItemsHolder.Data.GetAllContent();
             for (int i = 0; i < requiredIconItems.Count; i++)
             {
                 CardIconItem item = (CardIconItem)requiredIconItems[i];

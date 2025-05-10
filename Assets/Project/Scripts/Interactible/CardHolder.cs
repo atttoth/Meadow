@@ -11,37 +11,15 @@ public enum HolderSubType
 
 public class CardHolder : Holder
 {
-    public HolderSubType holderSubType;
     private Image _blackOverlay;
 
     public override void Init(int id, HolderType type)
     {
         base.Init(id, type);
-        _blackOverlay = transform.GetChild(0).GetComponent<Image>();
-    }
-
-    public bool IsTopCardOfHolder(Card item)
-    {
-        return _contentList.IndexOf(item) == _contentList.Count - 1;
-    }
-
-    public List<CardIcon> GetAllIconsOfHolder()
-    {
-        List<CardIcon> allIcons = ((Card)GetItemFromContentListByIndex(_contentList.Count - 1)).Data.icons.ToList();
-        if (_contentList.Count > 1 && holderSubType == HolderSubType.PRIMARY)
+        if(_blackOverlay == null)
         {
-            CardIcon[] groundIcons = ((Card)GetItemFromContentListByIndex(0)).Data.icons;
-
-            foreach (CardIcon cardIcon in groundIcons)
-            {
-                if ((int)cardIcon < 5)
-                {
-                    allIcons.Add(cardIcon);
-                }
-            }
+            _blackOverlay = transform.GetChild(0).GetComponent<Image>();
         }
-
-        return allIcons;
     }
 
     public void EnableOverlay(bool value)

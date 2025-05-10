@@ -16,8 +16,6 @@ public abstract class UserController : MonoBehaviour
     protected IconDisplayView _iconDisplayView;
     protected List<int> _campScoreTokens;
     protected CanvasGroup _canvasGroup;
-    protected Dictionary<int, CardIcon[][]> _allIconsOfPrimaryHoldersInOrder; //as cards are stacked in order
-    protected Dictionary<int, CardIcon[][]> _allIconsOfSecondaryHoldersInOrder;
 
     public virtual void CreateUser(GameMode gameMode)
     {
@@ -34,6 +32,8 @@ public abstract class UserController : MonoBehaviour
     }
 
     public abstract void PlaceInitialGroundCardOnTable(GameTask task, Card card);
+    public abstract void UpdateCardHolders(HolderSubType subType, string hitAreaTag);
+    public abstract void ExecuteCardPlacement(object[] args);
 
     public InfoView InfoView { get { return _infoView; } }
     public MarkerView MarkerView { get { return _markerView; } }
@@ -71,21 +71,30 @@ public abstract class UserController : MonoBehaviour
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 
-    public bool TryPlaceCard(CardHolder holder, Card card)
+    public bool PassedBasicRequirements(Card card)
     {
-        if(!_infoView.HasEnoughCardPlacements())
+        if (!_infoView.HasEnoughCardPlacements())
         {
             return false;
         }
 
-        List<CardIcon> primaryTableIcons = GetAllCurrentIcons(HolderSubType.PRIMARY);
-        List<CardIcon> mainRequirements = card.Data.requirements.ToList();
-
-        if (holder.holderSubType == HolderSubType.PRIMARY)
+        if(card.Data.cardType == CardType.Landscape)
         {
-            if (card.Data.cardType == CardType.Ground)
+            return _infoView.HasEnoughRoadTokens(card.Data.requirements.Where(icon => icon == CardIcon.RoadToken).Count());
+        }
+        return true;
+    }
+
+    public bool TryPlaceCard(HolderData holderData, CardData cardData)
+    {
+        List<CardIcon> primaryTableIcons = _tableView.GetAllRelevantIcons(HolderSubType.PRIMARY);
+        List<CardIcon> mainRequirements = cardData.requirements.ToList();
+
+        if (holderData.holderSubType == HolderSubType.PRIMARY)
+        {
+            if (cardData.cardType == CardType.Ground)
             {
-                if (holder.IsEmpty())
+                if (holderData.IsEmpty())
                 {
                     return true;
                 }
@@ -95,7 +104,7 @@ public abstract class UserController : MonoBehaviour
                 }
             }
 
-            List<CardIcon> holderIcons = holder.GetAllIconsOfHolder();
+            List<CardIcon> holderIcons = holderData.GetAllIconsOfHolder();
             if (holderIcons.Contains(CardIcon.Deer))
             {
                 return false;
@@ -104,19 +113,19 @@ public abstract class UserController : MonoBehaviour
             if (mainRequirements.Contains(CardIcon.AllDifferent)) // only occurs at card ID 195
             {
                 List<CardIcon> allTableIcons = new(primaryTableIcons);
-                allTableIcons.AddRange(GetAllCurrentIcons(HolderSubType.SECONDARY));
+                allTableIcons.AddRange(_tableView.GetAllRelevantIcons(HolderSubType.SECONDARY));
                 return GetDistinctTableIcons(allTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllDifferent).ToList().Count;
             }
 
-            List<CardIcon> optionalRequirements = card.Data.optionalRequirements.ToList();
-            List<CardIcon> adjacentRequirements = card.Data.adjacentRequirements.ToList();
+            List<CardIcon> optionalRequirements = cardData.optionalRequirements.ToList();
+            List<CardIcon> adjacentRequirements = cardData.adjacentRequirements.ToList();
             bool mainGlobalCondition = PassedGlobalRequirements(primaryTableIcons, mainRequirements);
             bool optionalGlobalCondition = PassedOptionalGlobalRequirements(primaryTableIcons, optionalRequirements);
             bool adjacentGlobalCondition = PassedSingleRequirement(primaryTableIcons, adjacentRequirements);
 
             if (mainGlobalCondition && optionalGlobalCondition && adjacentGlobalCondition) // check for combined requirement types
             {
-                List<List<CardIcon>> adjacentHolderIcons = _tableView.GetAdjacentHolderIcons(holder);
+                List<List<CardIcon>> adjacentHolderIcons = _tableView.GetAdjacentPrimaryHolderIcons(holderData);
                 if (optionalRequirements.Count > 0 && adjacentRequirements.Count > 0)
                 {
                     List<CardIcon[]> pairs = CreateIconPairsFromRequirements(optionalRequirements);
@@ -162,21 +171,21 @@ public abstract class UserController : MonoBehaviour
         {
             int numOfIcons = mainRequirements.Count;
             mainRequirements = mainRequirements.Where(icon => icon != CardIcon.RoadToken).ToList();
-            if (!_infoView.HasEnoughRoadTokens(numOfIcons - mainRequirements.Count) || !Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == card.Data.cardType))
+            if (!Array.Exists(new CardType[] { CardType.Landscape, CardType.Discovery }, type => type == cardData.cardType))
             {
                 return false;
             }
 
-            primaryTableIcons.AddRange(GetAllCurrentIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
-            if (card.Data.cardType == CardType.Landscape)
+            primaryTableIcons.AddRange(_tableView.GetAllRelevantIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
+            if (cardData.cardType == CardType.Landscape)
             {
-                if(holder.IsEmpty())
+                if(holderData.IsEmpty())
                 {
                     if (mainRequirements.Contains(CardIcon.AllMatching)) // only occurs at card ID 172
                     {
                         return GetMostCommonTableIconsCount(primaryTableIcons) >= mainRequirements.Where(icon => icon == CardIcon.AllMatching).ToList().Count;
                     }
-                    else if (card.Data.requirements.Length == 1) // card has only road token requirement
+                    else if (cardData.requirements.Length == 1) // card has only road token requirement
                     {
                         return true;
                     }
@@ -189,13 +198,13 @@ public abstract class UserController : MonoBehaviour
 
             if (PassedGlobalRequirements(primaryTableIcons, mainRequirements))
             {
-                if (card.Data.cardType == CardType.Landscape)
+                if (cardData.cardType == CardType.Landscape)
                 {
                     return true;
                 }
                 else
                 {
-                    return PassedSingleRequirement(holder.GetAllIconsOfHolder(), mainRequirements);
+                    return PassedSingleRequirement(holderData.GetAllIconsOfHolder(), mainRequirements);
                 }
             }
             else
@@ -203,22 +212,6 @@ public abstract class UserController : MonoBehaviour
                 return false;
             }
         }
-    }
-
-    private List<CardIcon> GetAllCurrentIcons(HolderSubType holderSubType)
-    {
-        Dictionary<int, CardIcon[][]> collection = holderSubType == HolderSubType.PRIMARY ? _allIconsOfPrimaryHoldersInOrder : _allIconsOfSecondaryHoldersInOrder;
-        List<CardIcon> allCurrentIcons = new();
-        foreach (CardIcon[][] items in collection.Values)
-        {
-            allCurrentIcons.AddRange(items[items.Length - 1]);
-            if (items.Length > 1)
-            {
-                List<CardIcon> groundIcons = items[0].Where(icon => (int)icon < 5).ToList();
-                allCurrentIcons.AddRange(groundIcons);
-            }
-        }
-        return allCurrentIcons;
     }
 
     private int GetMostCommonTableIconsCount(List<CardIcon> allTableIcons)
@@ -254,7 +247,7 @@ public abstract class UserController : MonoBehaviour
         return pairs;
     }
 
-    private bool PassedGlobalRequirements(List<CardIcon> allTableIcons, List<CardIcon> requirements)
+    protected bool PassedGlobalRequirements(List<CardIcon> allTableIcons, List<CardIcon> requirements)
     {
         if (requirements.Count < 1)
         {
@@ -283,7 +276,7 @@ public abstract class UserController : MonoBehaviour
         return false;
     }
 
-    private bool PassedOptionalGlobalRequirements(List<CardIcon> allTableIcons, List<CardIcon> requirements)
+    protected bool PassedOptionalGlobalRequirements(List<CardIcon> allTableIcons, List<CardIcon> requirements)
     {
         if (requirements.Count < 2)
         {
@@ -329,7 +322,7 @@ public abstract class UserController : MonoBehaviour
         return false;
     }
 
-    private bool PassedSingleRequirement(List<CardIcon> holderIcons, List<CardIcon> requirements)
+    protected bool PassedSingleRequirement(List<CardIcon> holderIcons, List<CardIcon> requirements)
     {
         if (requirements.Count < 1)
         {
@@ -347,6 +340,112 @@ public abstract class UserController : MonoBehaviour
             }
         }
         return false;
+    }
+
+    protected Delegate GetUpdateDisplayIconsHandler()
+    {
+        return (Action<GameTask, List<Card>, List<HolderData>>)_iconDisplayView.UpdateIconsHandler;
+    }
+
+    protected List<List<CardIcon>> CreateAdjacentIconPairs(List<CardIcon[]> topIcons)
+    {
+        List<List<CardIcon>> pairs = new();
+        if (topIcons.Count < 2)
+        {
+            return pairs;
+        }
+
+        for (int i = 0; i < topIcons.Count - 1; i++) // create pairs for every posible adjacent icon combinations
+        {
+            CardIcon[] icons1 = topIcons[i];
+            CardIcon[] icons2 = topIcons[i + 1];
+            int length = icons1.Length * icons2.Length;
+            CardIcon[][] adjacentIcons = new CardIcon[][] { icons1, icons2 };
+            adjacentIcons.OrderBy(icons => icons.Length).Reverse();
+            int index1 = 0;
+            int index2 = 0;
+            for (int j = 0; j < length; j++)
+            {
+                CardIcon icon1 = adjacentIcons[0][index1];
+                CardIcon icon2 = adjacentIcons[1][index2];
+                if (icon1 != icon2) // ignore same icon pairs
+                {
+                    List<CardIcon> pair = new() { icon1, icon2 };
+                    pairs.Add(pair);
+                }
+                index1++;
+                if (index1 > adjacentIcons[0].Length - 1)
+                {
+                    index1 = 0;
+                    index2++;
+                }
+            }
+        }
+        return pairs;
+    }
+
+    protected void UpdateCurrentIconsEntryAction(object[] args)
+    {
+        bool isActionCancelled = (bool)args[1];
+        HolderData holderData = (HolderData)args[2];
+        Card card = (Card)args[3];
+        if (isActionCancelled)
+        {
+            if (card.Data.cardType == CardType.Ground)
+            {
+                _tableView.GetAllIcons(HolderSubType.PRIMARY).Remove(holderData.ID);
+                UpdateCardHolders(holderData.holderSubType, null);
+            }
+            else if (card.Data.cardType == CardType.Landscape)
+            {
+                _tableView.GetAllIcons(HolderSubType.SECONDARY).Remove(holderData.ID);
+                UpdateCardHolders(holderData.holderSubType, null);
+            }
+        }
+        else
+        {
+            if (card.Data.cardType == CardType.Ground)
+            {
+                _tableView.GetAllIcons(HolderSubType.PRIMARY).Add(holderData.ID, new CardIcon[][] { });
+            }
+            else if (card.Data.cardType == CardType.Landscape)
+            {
+                _tableView.GetAllIcons(HolderSubType.SECONDARY).Add(holderData.ID, new CardIcon[][] { });
+            }
+        }
+    }
+
+    protected void UpdateCurrentIconsOfHolderAction(object[] args)
+    {
+        bool isActionCancelled = (bool)args[1];
+        HolderData holderData = (HolderData)args[2];
+        Card card = (Card)args[3];
+        Dictionary<int, CardIcon[][]> collection = _tableView.GetAllIcons(holderData.holderSubType);
+        int ID = holderData.ID;
+        CardIcon[][] items = collection[ID];
+        collection.Remove(ID);
+
+        List<CardIcon[]> updatedItems = new();
+        if (isActionCancelled)
+        {
+            if (!Array.Exists(new[] { CardType.Ground, CardType.Landscape }, cardType => cardType == card.Data.cardType))
+            {
+                for (int i = 0; i < items.Length - 1; i++)
+                {
+                    updatedItems.Add(items[i]);
+                }
+                collection.Add(ID, updatedItems.ToArray());
+            }
+        }
+        else
+        {
+            foreach (CardIcon[] item in items)
+            {
+                updatedItems.Add(item);
+            }
+            updatedItems.Add(card.Data.icons);
+            collection.Add(ID, updatedItems.ToArray());
+        }
     }
 
     public void SetMarkerUsed()

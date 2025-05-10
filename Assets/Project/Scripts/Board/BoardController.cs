@@ -19,6 +19,8 @@ public class BoardController : MonoBehaviour
     private List<CardHolder> _preparedHolders; // saved empty card holders to fill
     private List<Card> _preparedCards; // saved cards for selection screen, fill card holders, half-time board change
 
+    private List<int> ids = new List<int>() { 52, 112 };
+
     private T GetNextItem<T>(List<T> list)
     {
         T item = list[0];
@@ -39,7 +41,7 @@ public class BoardController : MonoBehaviour
             {
                 CardHolder boardCardHolder = Instantiate(GameResourceManager.Instance.boardCardHolderPrefab, col).GetComponent<CardHolder>();
                 boardCardHolder.Init(j, HolderType.BoardCard);
-                boardCardHolder.holderSubType = HolderSubType.NONE;
+                boardCardHolder.Data.holderSubType = HolderSubType.NONE;
                 boardCardHolder.EnableOverlay(false);
                 list.Add(boardCardHolder);
             }
@@ -92,16 +94,27 @@ public class BoardController : MonoBehaviour
                 _preparedCards = new();
                 _preparedHolders = new();
                 DeckType[] deckTypes = new DeckType[] { DeckType.West, activeDeckType, activeDeckType, DeckType.East };
-                for (int col = 0; col < _cardHolders.Count; col++)
+                for (int col = 0; col < GRID_SIZE; col++)
                 {
                     Transform display = _deckController.GetDisplayDeckTransform(col);
                     DeckType deckType = deckTypes[col];
-                    for (int row = _cardHolders[col].Count - 1; row >= 0; row--)
+                    for (int row = GRID_SIZE - 1; row >= 0; row--)
                     {
                         CardHolder holder = _cardHolders[col][row];
-                        if (holder.IsEmpty())
+                        if (holder.Data.IsEmpty())
                         {
-                            Card card = _deckController.GetCardFromDeck(deckType);
+                            int id = -1;
+                            if (ids.Count > 1 && deckType == DeckType.South)
+                            {
+                                id = ids.First();
+                                ids.Remove(id);
+                            }
+                            else if (ids.Count == 1 && deckType == DeckType.East)
+                            {
+                                id = ids.First();
+                                ids.Remove(id);
+                            }
+                            Card card = _deckController.GetCardFromDeck(deckType, id);
                             card.transform.SetParent(display);
                             card.transform.position = display.position;
                             card.ToggleRayCast(false);
@@ -144,13 +157,13 @@ public class BoardController : MonoBehaviour
         {
             case 0:
                 _preparedCards = new();
-                for (int col = 0; col < _cardHolders.Count; col++)
+                for (int col = 0; col < GRID_SIZE; col++)
                 {
-                    for (int row = 0; row < _cardHolders[col].Count; row++)
+                    for (int row = 0; row < GRID_SIZE; row++)
                     {
                         CardHolder holder = _cardHolders[col][row];
                         Card card = GetCardFromCardHolder(col, row);
-                        holder.RemoveItemFromContentList(card);
+                        holder.Data.RemoveItemFromContentList(card);
                         _preparedCards.Add(card);
                     }
                 }
@@ -233,7 +246,7 @@ public class BoardController : MonoBehaviour
     private Card GetCardFromCardHolder(int col, int row)
     {
         CardHolder holder = _cardHolders[col][row];
-        return (Card)holder.GetItemFromContentListByIndex(0);
+        return (Card)holder.Data.GetItemFromContentListByIndex(0);
     }
 
     private int[][] GetColAndRowIndicesOfCardHolder(int holderID, int holderListKey, int numberOnMarker)
@@ -271,14 +284,14 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public List<Card> GetRowCards()
+    public List<Card> GetRowOfSelectedCards()
     {
         List<Card> cards = new();
-        for (int i = 0; i < GRID_SIZE; i++)
+        for (int col = 0; col < GRID_SIZE; col++)
         {
-            for (int j = 0; j < GRID_SIZE; j++)
+            for (int row = 0; row < GRID_SIZE; row++)
             {
-                Card card = GetCardFromCardHolder(i, j);
+                Card card = GetCardFromCardHolder(col, row);
                 if (card.isSelected)
                 {
                     cards.Add(card);
@@ -289,6 +302,21 @@ public class BoardController : MonoBehaviour
         return cards;
     }
 
+    public List<Card>[] GetAllCardsByRow()
+    {
+        List<Card>[] allCards = new List<Card>[GRID_SIZE];
+        for (int row = 0; row < GRID_SIZE; row++)
+        {
+            List<Card> cards = new();
+            for (int col = 0; col < GRID_SIZE; col++)
+            {
+                cards.Add(GetCardFromCardHolder(col, row));
+            }
+            allCards[row] = cards;
+        }
+        return allCards;
+    }
+
     public void ToggleRayCastOfCards(bool value)
     {
         for (int col = 0; col < _cardHolders.Count; col++)
@@ -296,9 +324,9 @@ public class BoardController : MonoBehaviour
             for (int row = 0; row < _cardHolders[col].Count; row++)
             {
                 CardHolder holder = _cardHolders[col][row];
-                if (holder.GetContentListSize() > 0)
+                if (holder.Data.GetContentListSize() > 0)
                 {
-                    holder.GetAllContent().ForEach(card => card.ToggleRayCast(value));
+                    holder.Data.GetAllContent().ForEach(card => card.ToggleRayCast(value));
                 }
             }
         }
@@ -309,9 +337,9 @@ public class BoardController : MonoBehaviour
         markers.ForEach(marker =>
         {
             MarkerHolder prevHolder = marker.transform.parent.GetComponent<MarkerHolder>();
-            if (prevHolder != null && !prevHolder.IsEmpty())
+            if (prevHolder != null && !prevHolder.Data.IsEmpty())
             {
-                prevHolder.RemoveItemFromContentList(marker);
+                prevHolder.Data.RemoveItemFromContentList(marker);
             }
             holder.AddToHolder(marker);
             marker.transform.position = holder.transform.position;
@@ -335,7 +363,7 @@ public class BoardController : MonoBehaviour
 
     public void SelectCard(Marker marker, MarkerHolder holder)
     {
-        int[][] indices = GetColAndRowIndicesOfCardHolder(holder.ID, (int)holder.Direction, marker.numberOnMarker);
+        int[][] indices = GetColAndRowIndicesOfCardHolder(holder.Data.ID, (int)holder.Direction, marker.numberOnMarker);
         ToggleBlackOverlayOfCardHolders(true, indices);
         SelectCardsFromBoard(indices);
     }
@@ -447,7 +475,7 @@ public class BoardController : MonoBehaviour
             for (int row = 0; row < _cardHolders[col].Count; row++)
             {
                 CardHolder holder = _cardHolders[col][row];
-                if (!holder.IsEmpty())
+                if (!holder.Data.IsEmpty())
                 {
                     GetCardFromCardHolder(col, row).ToggleCanInspectFlag(value);
                 }
@@ -468,7 +496,7 @@ public class BoardController : MonoBehaviour
             {
                 holders.ForEach(holder =>
                 {
-                    if (holder.IsEmpty())
+                    if (holder.Data.IsEmpty())
                     {
                         availableHolders.Add(holder);
                     }

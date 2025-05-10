@@ -274,6 +274,19 @@ public class CampView : MonoBehaviour
         ToggleItemButtons(enabledItemIDs.Distinct().ToList());
     }
 
+    public List<List<CardIcon>> GetAvailableIconPairs()
+    {
+        List<ScreenDisplayItem> availableItems = _scoreButtonItems.Where(item => !_usedScoreButtonIDs.Contains(item.ID)).ToList();
+        List<List<CardIcon>> items = new();
+        for (int j = 0; j < availableItems.Count; j++)
+        {
+            ScreenDisplayItem item = availableItems[j];
+            List<CardIcon> campIcons = (List<CardIcon>)item.type;
+            items.Add(campIcons);
+        }
+        return items;
+    }
+
     private void ToggleItemButtons(List<int> enabledItemIDs)
     {
         _scoreButtonItems.ForEach(item =>
