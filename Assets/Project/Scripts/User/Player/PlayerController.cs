@@ -195,7 +195,7 @@ public class PlayerController : UserController
 
     public List<List<CardIcon>> GetAdjacentPrimaryIconPairs() 
     {
-        return CreateAdjacentIconPairs((_tableView as PlayerTableView).GetTopPrimaryIcons());
+        return CreateAdjacentIconPairs(_tableView.GetTopPrimaryIcons());
     }
 
     public void CenterCardsInHandHandler(GameTask task)
@@ -246,14 +246,23 @@ public class PlayerController : UserController
         PendingActionFunction[] actionFunctions = new PendingActionFunction[] {
             _infoView.UpdateNumberOfCardPlacementsAction,
             _infoView.UpdateRoadTokensAction,
-            UpdateCurrentIconsEntryAction,
             (_handView as PlayerHandView).PlaceCardFromHandAction,
             (_tableView as PlayerTableView).RegisterCardPlacementAction,
             (_tableView as PlayerTableView).AdjustHolderVerticallyAction,
             (_tableView as PlayerTableView).UpdateHitAreaSizeAction,
-            UpdateCurrentIconsOfHolderAction
+            (_tableView as PlayerTableView).UpdateHolderIconsAction
         };
-        _pendingPlacementActionCreator.Create(actionFunctions, actionFunctions.Reverse().ToArray(), args);
+        PendingActionFunction[] cancelledActionFunctions = new PendingActionFunction[] {
+            _infoView.UpdateNumberOfCardPlacementsAction,
+            _infoView.UpdateRoadTokensAction,
+            (_tableView as PlayerTableView).UpdateHitAreaSizeAction,
+            (_tableView as PlayerTableView).AdjustHolderVerticallyAction,
+            (_tableView as PlayerTableView).RegisterCardPlacementAction,
+            (_handView as PlayerHandView).PlaceCardFromHandAction,
+            RemoveHolderAction,
+            (_tableView as PlayerTableView).UpdateHolderIconsAction
+        };
+        _pendingPlacementActionCreator.Create(actionFunctions, cancelledActionFunctions, args);
     }
 
     public void CancelCardPlacement(GameTask task, Card card)
@@ -331,6 +340,20 @@ public class PlayerController : UserController
                 }
                 task.Complete();
                 break;
+        }
+    }
+
+    private void RemoveHolderAction(object[] args)
+    {
+        HolderData holderData = (HolderData)args[2];
+        Card card = (Card)args[3];
+        if (card.Data.cardType == CardType.Ground)
+        {
+            UpdateCardHolders(holderData.holderSubType, null);
+        }
+        else if (card.Data.cardType == CardType.Landscape)
+        {
+            UpdateCardHolders(holderData.holderSubType, null);
         }
     }
 

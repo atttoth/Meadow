@@ -15,7 +15,7 @@ public class GameLogicManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.P)) //todo: create game menu
         {
             GameSettings.Instance.SetGameSpeed(GameSpeed.SPEED5);
-            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, GameDifficulty.MEDIUM, 1);
+            GameMode gameMode = new GameMode(GameModeType.SINGLE_PLAYER_RANDOM, GameDifficulty.VERY_HARD, 1);
             _gameLogicController.SetupSession(gameMode, CreateUserControllersForSession(gameMode));
             OnLogicEvent(-1, new object[0]);
         }

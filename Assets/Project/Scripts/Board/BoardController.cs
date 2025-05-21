@@ -289,6 +289,19 @@ public class BoardController : MonoBehaviour
         return cards;
     }
 
+    public List<Card> GetAllCards()
+    {
+        List<Card> allCards = new();
+        for (int row = 0; row < GRID_SIZE; row++)
+        {
+            for (int col = 0; col < GRID_SIZE; col++)
+            {
+                allCards.Add(GetCardFromCardHolder(col, row));
+            }
+        }
+        return allCards;
+    }
+
     public List<Card>[] GetAllCardsByRow()
     {
         List<Card>[] allCards = new List<Card>[GRID_SIZE];

@@ -239,22 +239,6 @@ public class PlayerTableView : TableView
         _secondaryHitArea.Toggle(value);
     }
 
-    public List<CardIcon[]> GetTopPrimaryIcons() // sorted primary holders (left to right)
-    {
-        List<CardIcon[]> topIcons = new();
-        _activeState.AllIconsOfPrimaryHoldersInOrder
-            .OrderBy(e => GetPrimaryCardHolderByID(e.Key).transform.GetSiblingIndex())
-            .Select(e => e.Value)
-            .ToList()
-            .ForEach(values =>
-            {
-                CardIcon[] icons = values[^1].Where(icon => (int)icon > 4).ToArray();
-                topIcons.Add(icons);
-            });
-
-        return topIcons;
-    }
-
     public void TogglePanel()
     {
         float speed = GameSettings.Instance.GetDuration(Duration.tableViewOpenSpeed);

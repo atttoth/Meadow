@@ -200,7 +200,7 @@ public abstract class UserController : MonoBehaviour
         }
     }
 
-    private List<CardIcon[]> CreateIconPairsFromRequirements(List<CardIcon> requirements)
+    protected List<CardIcon[]> CreateIconPairsFromRequirements(List<CardIcon> requirements)
     {
         List<CardIcon[]> pairs = new();
         for (int i = 0; i < requirements.Count; i++)
@@ -351,70 +351,6 @@ public abstract class UserController : MonoBehaviour
             }
         }
         return pairs;
-    }
-
-    protected void UpdateCurrentIconsEntryAction(object[] args)
-    {
-        bool isActionCancelled = (bool)args[1];
-        HolderData holderData = (HolderData)args[2];
-        Card card = (Card)args[3];
-        if (isActionCancelled)
-        {
-            if (card.Data.cardType == CardType.Ground)
-            {
-                _tableView.GetAllIcons(HolderSubType.PRIMARY).Remove(holderData.ID);
-                UpdateCardHolders(holderData.holderSubType, null);
-            }
-            else if (card.Data.cardType == CardType.Landscape)
-            {
-                _tableView.GetAllIcons(HolderSubType.SECONDARY).Remove(holderData.ID);
-                UpdateCardHolders(holderData.holderSubType, null);
-            }
-        }
-        else
-        {
-            if (card.Data.cardType == CardType.Ground)
-            {
-                _tableView.GetAllIcons(HolderSubType.PRIMARY).Add(holderData.ID, new CardIcon[][] { });
-            }
-            else if (card.Data.cardType == CardType.Landscape)
-            {
-                _tableView.GetAllIcons(HolderSubType.SECONDARY).Add(holderData.ID, new CardIcon[][] { });
-            }
-        }
-    }
-
-    protected void UpdateCurrentIconsOfHolderAction(object[] args)
-    {
-        bool isActionCancelled = (bool)args[1];
-        HolderData holderData = (HolderData)args[2];
-        Card card = (Card)args[3];
-        Dictionary<int, CardIcon[][]> collection = _tableView.GetAllIcons(holderData.holderSubType);
-        int ID = holderData.ID;
-        CardIcon[][] items = collection[ID];
-        collection.Remove(ID);
-
-        List<CardIcon[]> updatedItems = new();
-        if (isActionCancelled)
-        {
-            if (!Array.Exists(new[] { CardType.Ground, CardType.Landscape }, cardType => cardType == card.Data.cardType))
-            {
-                for (int i = 0; i < items.Length - 1; i++)
-                {
-                    updatedItems.Add(items[i]);
-                }
-                collection.Add(ID, updatedItems.ToArray());
-            }
-        }
-        else
-        {
-            foreach (CardIcon[] item in items)
-            {
-                updatedItems.Add(item);
-            }
-            updatedItems.Add(card.Data.icons);
-            collection.Add(ID, updatedItems.ToArray());
-        }
     }
 
     public void SetMarkerUsed()

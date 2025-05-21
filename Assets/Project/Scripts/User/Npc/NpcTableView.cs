@@ -12,7 +12,6 @@ public class NpcTableView : TableView
     public override void Init()
     {
         base.Init();
-        _states = new();
         _placedCardsContainer = transform.GetChild(0);
     }
 
@@ -41,6 +40,11 @@ public class NpcTableView : TableView
         _states = updatedStates;
         TableViewState state = new(new(_states.Last().AllIconsOfPrimaryHoldersInOrder), new(_states.Last().AllIconsOfSecondaryHoldersInOrder), new(_states.Last().PrimaryCardHolderDataCollection), new(_states.Last().SecondaryCardHolderDataCollection));
         _activeState = state;
+    }
+
+    public void DisposeStates()
+    {
+        _states = new();
     }
 
     public override void RegisterCardPlacementAction(object[] args)

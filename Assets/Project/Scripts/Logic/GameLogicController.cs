@@ -209,7 +209,7 @@ public class GameLogicController
                 break;
             case 3:
                 List<Card> groundCards = _boardController.CreateInitialGroundCards();
-                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCardsByRow(), groundCards, _campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCards(), groundCards, _campController.GetAdjacentIconPairs());
                 task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), groundCards, false);
                 break;
             case 4:
