@@ -163,12 +163,12 @@ public class GameLogicController
         }
     }
 
-    private void NpcRandomTurnActionHandler(GameTask task)
+    private void NpcTurnActionHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                (_activeUserController as NpcController).SelectRandomMarkerAndMarkerHolder(_boardController.GetAvailableMarkerHolders());
+                (_activeUserController as NpcController).SelectAction(_boardController.GetAllCardsWithAvailableMarkerHolders(), _campController.GetAdjacentIconPairs());
                 _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
                 task.StartDelayMs(0);
                 break;
@@ -179,11 +179,11 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler, (_activeUserController as NpcController).SelectedMarkerHolder, (_activeUserController as NpcController).SelectedMarker);
                 break;
             case 3:
-                Card card = _boardController.GetSingleSelectedCard();
+                Card card = (_activeUserController as NpcController).SelectedCard;
                 task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, card.transform.parent.GetComponent<CardHolder>(), card);
                 break;
             case 4:
-                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).RegisterScoreHandler);
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).RegisterScoreHandler); // TODO: replace this with card placement evaluation logic + icon display update
                 break;
             default:
                 _activeUserController.EndTurn();
@@ -223,11 +223,6 @@ public class GameLogicController
                 task.Complete();
                 break;
         }
-    }
-
-    private void NpcEvaluatedTurnActionHandler(GameTask task)
-    {
-        task.Complete(); //todo
     }
 
     public void MarkerPlaceHandler(GameTask task, MarkerHolder holder, Marker marker)
@@ -422,10 +417,7 @@ public class GameLogicController
                 }
                 else
                 {
-                    task.StartHandler(_currentGameMode.ModeType == GameModeType.SINGLE_PLAYER_RANDOM 
-                        ? (Action<GameTask>)NpcRandomTurnActionHandler 
-                        : (Action<GameTask>)NpcEvaluatedTurnActionHandler
-                        );
+                    task.StartHandler((Action<GameTask>)NpcTurnActionHandler);
                 }
                 break;
             default:

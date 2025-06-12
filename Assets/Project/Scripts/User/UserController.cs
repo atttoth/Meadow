@@ -172,9 +172,12 @@ public abstract class UserController : MonoBehaviour
             primaryTableIcons.AddRange(_tableView.GetAllRelevantIcons(HolderSubType.SECONDARY)); // expand primary icons with secondary icons
             if (cardData.cardType == CardType.Landscape)
             {
-                if(holderData.IsEmpty() && cardData.requirements.Length == 1) // landscape card has only 1 road token requirement
+                if(holderData.IsEmpty()) 
                 {
-                    return true;
+                    if (cardData.requirements.Length == 1) // landscape card has only 1 road token requirement (1 requirement is always a road token)
+                    {
+                        return true;
+                    }
                 }
                 else
                 {

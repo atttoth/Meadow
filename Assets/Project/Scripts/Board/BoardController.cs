@@ -1,5 +1,6 @@
 using DG.Tweening;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -48,17 +49,17 @@ public class BoardController : MonoBehaviour
 
         _markerHolders = new();
         int boardSides = 3;
-        for (int i = 0; i < boardSides; i++)
+        for (int groupIndex = 0; groupIndex < boardSides; groupIndex++)
         {
             List<MarkerHolder> list = new();
-            Transform holderGroup = transform.GetChild(1).GetChild(i);
+            Transform holderGroup = transform.GetChild(1).GetChild(groupIndex);
             for (int j = 0; j < GRID_SIZE; j++)
             {
                 MarkerHolder boardMarkerHolder = holderGroup.GetChild(j).GetComponent<MarkerHolder>();
                 boardMarkerHolder.Init(j, HolderType.BoardMarker);
                 list.Add(boardMarkerHolder);
             }
-            _markerHolders.Add(i, list);
+            _markerHolders.Add(groupIndex, list);
         }
 
         _deckController = transform.GetChild(2).GetComponent<DeckController>();
@@ -315,6 +316,33 @@ public class BoardController : MonoBehaviour
             allCards[row] = cards;
         }
         return allCards;
+    }
+
+    public List<object[]> GetAllCardsWithAvailableMarkerHolders()
+    {
+        List<object[]> boardContent = new();
+        for (int col = 0; col < GRID_SIZE; col++)
+        {
+            for (int row = 0; row < GRID_SIZE; row++)
+            {
+                Card card = GetCardFromCardHolder(col, row);
+                List<MarkerHolder> markerHolders = new();
+                List<int> distances = new();
+                for (int groupIndex = 0; groupIndex < _markerHolders.Count; groupIndex++)
+                {
+                    int orderIndex = groupIndex < _markerHolders.Count - 1 ? row : col;
+                    MarkerHolder holder = _markerHolders[groupIndex][orderIndex];
+                    if(holder.Data.IsEmpty())
+                    {
+                        int distance = groupIndex == 0 ? col + 1 : groupIndex == 1 ? GRID_SIZE - col : GRID_SIZE - row;
+                        markerHolders.Add(holder);
+                        distances.Add(distance);
+                    }
+                }
+                boardContent.Add(new object[] { card, markerHolders, distances });
+            }
+        }
+        return boardContent;
     }
 
     public void ToggleRayCastOfCards(bool value)

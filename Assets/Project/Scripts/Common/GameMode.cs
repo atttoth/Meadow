@@ -2,8 +2,7 @@ using UnityEngine;
 
 public enum GameModeType
 {
-    SINGLE_PLAYER_RANDOM,
-    SINGLE_PLAYER_NORMAL // todo
+    SINGLE_PLAYER // todo
 }
 
 public enum GameDifficulty
@@ -41,7 +40,7 @@ public class GameMode
     private int _activeUserIndex;
     private int _currentRoundIndex;
 
-    public GameMode(GameModeType modeType, GameDifficulty difficulty, int numOfNpcControllers, int numOfPlayerControllers = 1)
+    public GameMode(GameModeType modeType, GameDifficulty difficulty, int numOfNpcControllers = 1, int numOfPlayerControllers = 1)
     {
         _modeType = modeType;
         _difficulty = difficulty;
