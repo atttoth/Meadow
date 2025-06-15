@@ -20,18 +20,18 @@ struct EvaluationData
 
 public class NpcController : UserController
 {
+    private List<Card> _cardsToPlaceOnTable;
+    private List<HolderData> _cardHolderDatasOnTable;
     private MarkerHolder _selectedMarkerHolder;
     private Marker _selectedMarker;
     private Card _selectedCard;
     private int[] _probabilityValues;
-
-    // only used at evaluation
     private List<EvaluationData> _evaluationDatacollection;
     private List<List<CardIcon>> _campIconPairs;
 
     public MarkerHolder SelectedMarkerHolder {  get { return _selectedMarkerHolder; } }
     public Marker SelectedMarker { get { return _selectedMarker; } }
-    public Card SelectedCard { get { return _selectedCard; } }
+    public Card SelectedCard { get { return _selectedCard; } set { _selectedCard = value; } }
 
     public override void CreateUser(GameMode gameMode)
     {
@@ -66,6 +66,15 @@ public class NpcController : UserController
                 _probabilityValues = new int[] { 0, 0, 0, 10 };
                 break;
         }
+    }
+
+    public void SelectCardToPlace(List<List<CardIcon>> campIconPairs) //TODO
+    {
+        _campIconPairs = campIconPairs;
+        _cardsToPlaceOnTable = new();
+        _cardHolderDatasOnTable = new();
+
+        // add new primary/secondary holders on table if needed
     }
 
     public void SelectAction(List<object[]> boardContent, List<List<CardIcon>> campIconPairs) // this is only handling default action for now (TODO: regular/special action needs to be decided)
@@ -771,22 +780,63 @@ public class NpcController : UserController
         }
     }
 
-    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card)
+    public void PlaceCardOnTableHandler(GameTask task)
     {
         switch (task.State)
         {
             case 0:
-                string tag = "RectLeft";
-                UpdateCardHolders(HolderSubType.PRIMARY, tag);
-                HolderData holderData = (_tableView as NpcTableView).GetPrimaryHolderDataByTag(tag);
-                ExecuteCardPlacement(new object[] { card.Data.ID, false, holderData, card });
+                if (_selectedCard) // initial ground card placement
+                {
+                    string tag = "RectLeft";
+                    UpdateCardHolders(HolderSubType.PRIMARY, tag);
+                    HolderData holderData = (_tableView as NpcTableView).GetPrimaryHolderDataByTag(tag);
+                    ExecuteCardPlacement(new object[] { _selectedCard.Data.ID, false, holderData, _selectedCard });
+                }
+                else if (_cardsToPlaceOnTable.Count > 0) // evaluated card placement
+                {
+                    for(int i = 0; i < _cardsToPlaceOnTable.Count; i++)
+                    {
+                        Card currentCard = _cardsToPlaceOnTable[i];
+                        HolderData holderData = _cardHolderDatasOnTable[i];
+                        ExecuteCardPlacement(new object[] { currentCard.Data.ID, false, holderData, currentCard });
+                    }
+                }
                 task.StartDelayMs(0);
                 break;
             case 1:
-                task.StartHandler(GetUpdateDisplayIconsHandler(), new List<Card>() { card }, _tableView.ActiveState.PrimaryCardHolderDataCollection);
-                break;
-            case 2:
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void UpdateDisplayIconsHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                List<Card> cards = _selectedCard ? new() { _selectedCard } : _cardsToPlaceOnTable;
+                task.StartHandler(GetUpdateDisplayIconsHandler(), cards, _tableView.ActiveState.PrimaryCardHolderDataCollection);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void RegisterScoreHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                if (_cardsToPlaceOnTable.Count > 0)
+                {
+                    int totalScore = _cardsToPlaceOnTable.Select(card => card.Data.score).Sum();
+                    UpdateScore(totalScore);
+                }
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -816,11 +866,5 @@ public class NpcController : UserController
         (_tableView as NpcTableView).RegisterCardPlacementAction(args);
         (_tableView as NpcTableView).UpdateHolderIconsAction(args);
         card.transform.SetParent((_tableView as NpcTableView).PlacedCardsContainer);
-    }
-
-    public void RegisterScoreHandler(GameTask task)
-    {
-        UpdateScore((_handView as NpcHandView).GetLastCardInHand().Data.score);
-        task.Complete();
     }
 }

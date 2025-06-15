@@ -212,7 +212,7 @@ public class PlayerController : UserController
         }
     }
 
-    public override void PlaceInitialGroundCardOnTable(GameTask task, Card card)
+    public void PlaceInitialCardOnTableHandler(GameTask task, Card card)
     {
         switch(task.State)
         {

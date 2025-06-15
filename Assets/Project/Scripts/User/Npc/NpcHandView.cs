@@ -53,9 +53,4 @@ public class NpcHandView : HandView
                 break;
         }
     }
-
-    public Card GetLastCardInHand()
-    {
-        return _cards[^1];
-    }
 }

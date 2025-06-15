@@ -183,7 +183,15 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, card.transform.parent.GetComponent<CardHolder>(), card);
                 break;
             case 4:
-                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).RegisterScoreHandler); // TODO: replace this with card placement evaluation logic + icon display update
+                (_activeUserController as NpcController).SelectedCard = null;
+                (_activeUserController as NpcController).SelectCardToPlace(_campController.GetAdjacentIconPairs());
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).PlaceCardOnTableHandler);
+                break;
+            case 5:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).UpdateDisplayIconsHandler);
+                break;
+            case 6:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).RegisterScoreHandler);
                 break;
             default:
                 _activeUserController.EndTurn();
@@ -217,6 +225,12 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, groundCard.transform.parent.GetComponent<CardHolder>(), groundCard);
                 break;
             case 5:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).PlaceCardOnTableHandler);
+                break;
+            case 6:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).UpdateDisplayIconsHandler);
+                break;
+            case 7:
                 task.StartHandler((Action<GameTask>)EndHandSetupHandler);
                 break;
             default:
@@ -660,13 +674,13 @@ public class GameLogicController
                 task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
                 break;
             case 4:
-                if (_currentGameMode.State == GameState.SETUP)
+                if(_activeUserController.userID == 0)
                 {
-                    task.StartHandler((Action<GameTask, Card>)_activeUserController.PlaceInitialGroundCardOnTable, card);
-                }
-                else
-                {
-                    if (_activeUserController.userID == 0)
+                    if (_currentGameMode.State == GameState.SETUP)
+                    {
+                        task.StartHandler((Action<GameTask, Card>)(_activeUserController as PlayerController).PlaceInitialCardOnTableHandler, card);
+                    }
+                    else
                     {
                         (_activeUserController as PlayerController).EnableTurnEndButton(true);
                         (_activeUserController as PlayerController).ToggleHandScreenHitarea(true);
@@ -674,12 +688,16 @@ public class GameLogicController
                         (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
                         _boardController.ToggleCanInspectFlagOfCards(true);
                         _boardController.ToggleRayCastOfCards(true);
+                        task.StartDelayMs(0);
                     }
-                    task.StartDelayMs(0);
+                }
+                else
+                {
+                    task.NextState(6);
                 }
                 break;
             case 5:
-                if(_activeUserController.userID == 0 && _currentGameMode.State == GameState.SETUP)
+                if(_currentGameMode.State == GameState.SETUP)
                 {
                     task.StartHandler((Action<GameTask>)EndHandSetupHandler);
                 }
@@ -797,7 +815,7 @@ public class GameLogicController
                     holder = result.gameObject.GetComponent<CardHolder>();
                     TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
                     holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                    if (holder && playerController.PassedBasicRequirements(card) && playerController.TryPlaceCard(holder.Data, card.Data))
+                    if (holder && playerController.PassedBasicRequirements(card.Data) && playerController.TryPlaceCard(holder.Data, card.Data))
                     {
                         playerController.HandView.EnableCardsRaycast(false);
                         playerController.ExecuteCardPlacement(new object[] { card.Data.ID, false, holder.Data, card });

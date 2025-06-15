@@ -31,7 +31,6 @@ public abstract class UserController : MonoBehaviour
         _canvasGroup.alpha = 0f;
     }
 
-    public abstract void PlaceInitialGroundCardOnTable(GameTask task, Card card);
     public abstract void UpdateCardHolders(HolderSubType subType, string hitAreaTag);
     public abstract void ExecuteCardPlacement(object[] args);
 
@@ -71,16 +70,16 @@ public abstract class UserController : MonoBehaviour
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 
-    public bool PassedBasicRequirements(Card card)
+    public bool PassedBasicRequirements(CardData cardData)
     {
         if (!_infoView.HasEnoughCardPlacements())
         {
             return false;
         }
 
-        if(card.Data.cardType == CardType.Landscape)
+        if(cardData.cardType == CardType.Landscape)
         {
-            return _infoView.HasEnoughRoadTokens(card.Data.requirements.Where(icon => icon == CardIcon.RoadToken).Count());
+            return _infoView.HasEnoughRoadTokens(cardData.requirements.Where(icon => icon == CardIcon.RoadToken).Count());
         }
         return true;
     }
