@@ -47,10 +47,8 @@ public class NpcTableView : TableView
         _states = new();
     }
 
-    public override void RegisterCardPlacementAction(object[] args)
+    public override void RegisterCardPlacementAction(HolderData holderData, Card card, bool isActionCancelled = false)
     {
-        HolderData holderData = (HolderData)args[2];
-        Card card = (Card)args[3];
         holderData.AddItemToContentList(card);
         card.cardStatus = CardStatus.PENDING_ON_TABLE;
     }

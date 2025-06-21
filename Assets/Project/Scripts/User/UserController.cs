@@ -31,8 +31,8 @@ public abstract class UserController : MonoBehaviour
         _canvasGroup.alpha = 0f;
     }
 
-    public abstract void UpdateCardHolders(HolderSubType subType, string hitAreaTag);
-    public abstract void ExecuteCardPlacement(object[] args);
+    protected abstract void UpdateCardHolders(HolderSubType subType, string hitAreaTag);
+    protected abstract void ExecuteCardPlacement(HolderData holderData, Card card);
 
     public InfoView InfoView { get { return _infoView; } }
     public MarkerView MarkerView { get { return _markerView; } }
@@ -70,7 +70,7 @@ public abstract class UserController : MonoBehaviour
         DOTween.Sequence().Append(_canvasGroup.DOFade(targetValue, fadeDuration));
     }
 
-    public bool PassedBasicRequirements(CardData cardData)
+    protected bool PassedBasicRequirements(CardData cardData)
     {
         if (!_infoView.HasEnoughCardPlacements())
         {
@@ -84,7 +84,7 @@ public abstract class UserController : MonoBehaviour
         return true;
     }
 
-    public bool TryPlaceCard(HolderData holderData, CardData cardData)
+    protected bool TryPlaceCard(HolderData holderData, CardData cardData)
     {
         List<CardIcon> primaryTableIcons = _tableView.GetAllRelevantIcons(HolderSubType.PRIMARY);
         List<CardIcon> mainRequirements = cardData.requirements.ToList();

@@ -16,7 +16,7 @@ public class PlayerController : UserController
     private Button _campToggleButton;
     private HandScreenHitArea _handScreenHitArea;
     private bool _isCampVisible;
-    public CardType draggingCardType;
+    private CardType _draggingCardType;
 
     public override void CreateUser(GameMode gameMode)
     {
@@ -78,7 +78,7 @@ public class PlayerController : UserController
         _handScreenHitArea = transform.GetChild(3).GetComponent<HandScreenHitArea>();
         _handScreenHitArea.Init();
         ToggleHandScreenHitarea(false);
-        draggingCardType = CardType.None;
+        _draggingCardType = CardType.None;
         base.CreateUser(gameMode);
     }
 
@@ -129,7 +129,7 @@ public class PlayerController : UserController
 
     public void ToggleHitArea(CardType cardType)
     {
-        draggingCardType = cardType;
+        _draggingCardType = cardType;
         if(_infoView.HasEnoughCardPlacements())
         {
             if (cardType == CardType.Ground)
@@ -155,7 +155,15 @@ public class PlayerController : UserController
         }
     }
 
-    public override void UpdateCardHolders(HolderSubType subType, string hitAreaTag)
+    public void OnTableHitAreaHover(HolderSubType subType, string hitAreaTag)
+    {
+        if ((_draggingCardType == CardType.Ground && subType == HolderSubType.PRIMARY) || (_draggingCardType == CardType.Landscape && subType == HolderSubType.SECONDARY))
+        {
+            UpdateCardHolders(subType, hitAreaTag);
+        }
+    }
+
+    protected override void UpdateCardHolders(HolderSubType subType, string hitAreaTag)
     {
         if(subType == HolderSubType.PRIMARY)
         {
@@ -224,7 +232,7 @@ public class PlayerController : UserController
             case 1:
                 UpdateCardHolders(HolderSubType.PRIMARY, "RectLeft");
                 CardHolder holder = (_tableView as PlayerTableView).GetPrimaryCardHolderByID(0);
-                ExecuteCardPlacement(new object[] { card.Data.ID, false, holder.Data, card });
+                ExecuteCardPlacement(holder.Data, card);
                 task.StartHandler((Action<GameTask, CardHolder, Card>)SnapCardHandler, holder, card);
                 break;
             case 2:
@@ -241,28 +249,73 @@ public class PlayerController : UserController
         }
     }
 
-    public override void ExecuteCardPlacement(object[] args)
+    public bool TryPlaceCardOnTable(CardHolder holder, Card card)
     {
-        PendingActionFunction[] actionFunctions = new PendingActionFunction[] {
-            _infoView.UpdateNumberOfCardPlacementsAction,
-            _infoView.UpdateRoadTokensAction,
-            (_handView as PlayerHandView).PlaceCardFromHandAction,
-            (_tableView as PlayerTableView).RegisterCardPlacementAction,
-            (_tableView as PlayerTableView).AdjustHolderVerticallyAction,
-            (_tableView as PlayerTableView).UpdateHitAreaSizeAction,
-            (_tableView as PlayerTableView).UpdateHolderIconsAction
+        _draggingCardType = CardType.None;
+        if (holder && PassedBasicRequirements(card.Data) && TryPlaceCard(holder.Data, card.Data))
+        {
+            ExecuteCardPlacement(holder.Data, card);
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    protected override void ExecuteCardPlacement(HolderData holderData, Card card)
+    {
+        object[] functionsData = new object[] 
+        { 
+            new Delegate[]
+            {
+                (Action<bool>)_infoView.UpdateNumberOfCardPlacementsAction,
+                (Action<Card, bool>)_infoView.UpdateRoadTokensAction,
+                (Action<Card, bool>)(_handView as PlayerHandView).PlaceCardFromHandAction,
+                (Action<HolderData, Card, bool>)(_tableView as PlayerTableView).RegisterCardPlacementAction,
+                (Action<HolderData, bool>)(_tableView as PlayerTableView).AdjustHolderVerticallyAction,
+                (Action<Card, bool>)(_tableView as PlayerTableView).UpdateHitAreaSizeAction,
+                (Action<HolderData>)(_tableView as PlayerTableView).UpdateHolderIconsAction
+            },
+            new object[][]
+            {
+                new object[] { false },
+                new object[] { card, false },
+                new object[] { card, false },
+                new object[] { holderData, card, false },
+                new object[] { holderData, false },
+                new object[] { card, false },
+                new object[] { holderData }
+            }
         };
-        PendingActionFunction[] cancelledActionFunctions = new PendingActionFunction[] {
-            _infoView.UpdateNumberOfCardPlacementsAction,
-            _infoView.UpdateRoadTokensAction,
-            (_tableView as PlayerTableView).UpdateHitAreaSizeAction,
-            (_tableView as PlayerTableView).AdjustHolderVerticallyAction,
-            (_tableView as PlayerTableView).RegisterCardPlacementAction,
-            (_handView as PlayerHandView).PlaceCardFromHandAction,
-            RemoveHolderAction,
-            (_tableView as PlayerTableView).UpdateHolderIconsAction
+
+        object[] cancelledFunctionsData = new object[] 
+        { 
+            new Delegate[]
+            {
+                (Action<bool>)_infoView.UpdateNumberOfCardPlacementsAction,
+                (Action<Card, bool>)_infoView.UpdateRoadTokensAction,
+                (Action<Card, bool>)(_tableView as PlayerTableView).UpdateHitAreaSizeAction,
+                (Action<HolderData, bool>)(_tableView as PlayerTableView).AdjustHolderVerticallyAction,
+                (Action<HolderData, Card, bool>)(_tableView as PlayerTableView).RegisterCardPlacementAction,
+                (Action<Card, bool>)(_handView as PlayerHandView).PlaceCardFromHandAction,
+                (Action<HolderData, Card>)RemoveHolderAction,
+                (Action<HolderData>)(_tableView as PlayerTableView).UpdateHolderIconsAction
+            },
+            new object[][]
+            {
+                new object[] { true },
+                new object[] { card, true },
+                new object[] { card, true },
+                new object[] { holderData, true },
+                new object[] { holderData, card, true },
+                new object[] { card, true },
+                new object[] { holderData, card },
+                new object[] { holderData }
+            }
         };
-        _pendingPlacementActionCreator.Create(actionFunctions, cancelledActionFunctions, args);
+        int actionID = _pendingPlacementActionCreator.Create(card.Data.ID, functionsData, cancelledFunctionsData, new object[] { holderData, card });
+        _pendingPlacementActionCreator.Start(actionID);
     }
 
     public void CancelCardPlacement(GameTask task, Card card)
@@ -294,12 +347,12 @@ public class PlayerController : UserController
         switch (task.State)
         {
             case 0:
-                List<object[]> dataCollection = _pendingPlacementActionCreator.GetDataCollection();
+                List<object[]> dataCollection = _pendingPlacementActionCreator.GetPendingDataCollection();
                 List<Card> primaryTableCards = new();
                 for (int i = 0; i < dataCollection.Count; i++)
                 {
-                    HolderData holderData = (HolderData)dataCollection[i][2];
-                    Card card = (Card)dataCollection[i][3];
+                    HolderData holderData = (HolderData)dataCollection[i][0];
+                    Card card = (Card)dataCollection[i][1];
                     if (holderData.holderSubType == HolderSubType.PRIMARY && holderData.IsTopCardOfHolder(card)) // filter top cards of primary table holders
                     {
                         primaryTableCards.Add(card);
@@ -343,10 +396,8 @@ public class PlayerController : UserController
         }
     }
 
-    private void RemoveHolderAction(object[] args)
+    private void RemoveHolderAction(HolderData holderData, Card card)
     {
-        HolderData holderData = (HolderData)args[2];
-        Card card = (Card)args[3];
         if (card.Data.cardType == CardType.Ground)
         {
             UpdateCardHolders(holderData.holderSubType, null);
@@ -359,15 +410,15 @@ public class PlayerController : UserController
 
     private List<Card> GetPlacedCardsWithScore()
     {
-        List<object[]> dataCollection = _pendingPlacementActionCreator.GetDataCollection();
+        List<object[]> dataCollection = _pendingPlacementActionCreator.GetPendingDataCollection();
         List<Card> primaryTableCards = dataCollection
-            .Select(data => (Card)data[3])
+            .Select(data => (Card)data[1])
             .Where(card => card.transform.parent.GetComponent<CardHolder>().Data.holderSubType == HolderSubType.PRIMARY && card.Data.cardType != CardType.Ground)
             .OrderBy(card => card.transform.parent.GetSiblingIndex())
             .ToList();
 
         List<Card> secondaryTableCards = dataCollection
-            .Select(data => (Card)data[3])
+            .Select(data => (Card)data[1])
             .Where(card => card.transform.parent.GetComponent<CardHolder>().Data.holderSubType == HolderSubType.SECONDARY)
             .OrderBy(card => card.transform.parent.GetSiblingIndex())
             .ToList();

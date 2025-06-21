@@ -12,16 +12,15 @@ public abstract class TableView : MonoBehaviour
     public abstract void AddNewPrimaryHolder(string tag);
     public abstract void AddNewSecondaryHolder();
     public abstract List<List<CardIcon>> GetAdjacentPrimaryHolderIcons(HolderData holderData);
-    public abstract void RegisterCardPlacementAction(object[] args);
+    public abstract void RegisterCardPlacementAction(HolderData holderData, Card card, bool isActionCancelled);
 
     public virtual void Init()
     {
         _activeState = new TableViewState(new(), new(), new(), new());
     }
 
-    public void UpdateHolderIconsAction(object[] args)
+    public void UpdateHolderIconsAction(HolderData holderData)
     {
-        HolderData holderData = (HolderData)args[2];
         if (holderData.holderSubType == HolderSubType.PRIMARY)
         {
             _activeState.AllIconsOfPrimaryHoldersInOrder = new();

@@ -168,7 +168,8 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                (_activeUserController as NpcController).SelectAction(_boardController.GetAllCardsWithAvailableMarkerHolders(), _campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).UpdateCampIconPairs(_campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectAction(_boardController.GetAllCardsWithAvailableMarkerHolders());
                 _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
                 task.StartDelayMs(0);
                 break;
@@ -184,7 +185,7 @@ public class GameLogicController
                 break;
             case 4:
                 (_activeUserController as NpcController).SelectedCard = null;
-                (_activeUserController as NpcController).SelectCardToPlace(_campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectCardToPlace(_boardController.GetAllCardsWithAvailableMarkerHolders());
                 task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).PlaceCardOnTableHandler);
                 break;
             case 5:
@@ -205,7 +206,8 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                (_activeUserController as NpcController).SelectRow(_boardController.GetAvailableMarkerHolders(1), _boardController.GetAllCardsByRow(), _campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).UpdateCampIconPairs(_campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectRow(_boardController.GetAllCardsWithAvailableMarkerHolders());
                 _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
                 task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).ShowMarkerPlacementHandler);
                 break;
@@ -217,7 +219,7 @@ public class GameLogicController
                 break;
             case 3:
                 List<Card> groundCards = _boardController.CreateInitialGroundCards();
-                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCards(), groundCards, _campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCardsWithAvailableMarkerHolders(), groundCards);
                 task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), groundCards, false);
                 break;
             case 4:
@@ -584,10 +586,7 @@ public class GameLogicController
 
     private void TableHitAreaHoverOverHandler(GameTask task, HolderSubType subType, string hitAreaTag)
     {
-        if (((_activeUserController as PlayerController).draggingCardType == CardType.Ground && subType == HolderSubType.PRIMARY) || ((_activeUserController as PlayerController).draggingCardType == CardType.Landscape && subType == HolderSubType.SECONDARY))
-        {
-            (_activeUserController as PlayerController).UpdateCardHolders(subType, hitAreaTag);
-        }
+        (_activeUserController as PlayerController).OnTableHitAreaHover(subType, hitAreaTag);
         task.Complete();
     }
 
@@ -815,16 +814,14 @@ public class GameLogicController
                     holder = result.gameObject.GetComponent<CardHolder>();
                     TableCardHitArea hitArea = result.gameObject.GetComponent<TableCardHitArea>();
                     holder = hitArea ? playerController.GetTableCardHolderOfHitArea(hitArea) : holder;
-                    if (holder && playerController.PassedBasicRequirements(card.Data) && playerController.TryPlaceCard(holder.Data, card.Data))
+                    if (playerController.TryPlaceCardOnTable(holder, card))
                     {
                         playerController.HandView.EnableCardsRaycast(false);
-                        playerController.ExecuteCardPlacement(new object[] { card.Data.ID, false, holder.Data, card });
                         playerController.EnableTableToggleButton(false);
                         playerController.TableView.UpdateApproveButton(true);
                         break;
                     }
                 }
-                playerController.draggingCardType = CardType.None;
                 playerController.TableView.TogglePrimaryHitAreas(false);
                 playerController.TableView.ToggleSecondaryHitArea(false);
 

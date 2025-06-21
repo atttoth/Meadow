@@ -13,7 +13,6 @@ public abstract class HandView : MonoBehaviour
     }
 
     public abstract void AddCardHandler(GameTask task, List<Card> cards);
-    public abstract void PlaceCardFromHandAction(object[] args);
 
     public void AddCard(Card card)
     {

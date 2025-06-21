@@ -8,7 +8,7 @@ struct EvaluationData
     private readonly int _points;
     private readonly object _content; // stores any type of data associated with an evaluated action (MarkerHolder, Card)
 
-    public int Points {  get { return _points; } }
+    public int Points { get { return _points; } }
     public object Content { get { return _content; } }
 
     public EvaluationData(int points, object content)
@@ -68,26 +68,36 @@ public class NpcController : UserController
         }
     }
 
-    public void SelectCardToPlace(List<List<CardIcon>> campIconPairs) //TODO
+    public void UpdateCampIconPairs(List<List<CardIcon>> campIconPairs)
     {
         _campIconPairs = campIconPairs;
+    }
+
+    public void SelectCardToPlace(List<object[]> boardContent) //TODO
+    {
         _cardsToPlaceOnTable = new();
         _cardHolderDatasOnTable = new();
+        // 1. get all hand cards
+        // 2. separate ground/landscape cards from others because those need new holders
+        // 3. try to place hand cards on table cards
+        // 3.a if card can be placed, check available board cards for possible match and prioritize if there's synergy (more combo, more point)
+        // 3.b check for camp icon match
+        // 3.c consider keeping top cards with 2 icons
+        // 3.d consider having max 2 of the same ground icon/top icon - otherwise deduct evaluation point
 
         // add new primary/secondary holders on table if needed
     }
 
-    public void SelectAction(List<object[]> boardContent, List<List<CardIcon>> campIconPairs) // this is only handling default action for now (TODO: regular/special action needs to be decided)
+    public void SelectAction(List<object[]> boardContent) // this is only handling default action for now (TODO: regular/special action needs to be decided)
     {
         // regular action
         // boardContent: index0: Card (card), index1: List<MarkerHolder> (markerHolders), index2: List<int> (markerDistances)
-        _campIconPairs = campIconPairs;
         _evaluationDatacollection = new();
         List<Marker> remainingMarkers = _markerView.GetRemainingMarkers();
-        List<Card> availableCards = GetAvailableBoardContent(boardContent, remainingMarkers);
+        List<Card> availableCards = GetAvailableBoardCards(boardContent, remainingMarkers);
         List<Card>[] sortedCards = SortCardsByDeckType(availableCards);
-        EvaluateCardSelection(sortedCards[0], new());
-        EvaluateCardSelection(sortedCards[1], new());
+        EvaluateCardSelection(sortedCards[0], _handView.Cards, new());
+        EvaluateCardSelection(sortedCards[1], _handView.Cards, new());
         Dictionary<Card, int> evaluationResult = GetResultOfEvaluationPoints(availableCards);
         _selectedCard = GetSelectedEvaluatedItem(evaluationResult);
         object[] selectedBoardContent = boardContent.Find(content => (Card)content[0] == _selectedCard);
@@ -120,10 +130,12 @@ public class NpcController : UserController
         Debug.Log("distance " + currentMarkerDistance);
     }
 
-    public void SelectRow(List<MarkerHolder> holders, List<Card>[] boardCards, List<List<CardIcon>> campIconPairs)
+    public void SelectRow(List<object[]> boardContent)
     {
-        _campIconPairs = campIconPairs;
         _evaluationDatacollection = new();
+        object[] items = PrepareBoardContentForRowSelection(boardContent, MarkerDirection.RIGHT);
+        List<Card>[] boardCards = (List<Card>[])items[0];
+        List<MarkerHolder> holders = (List<MarkerHolder>)items[1];
         EvaluateRowPick(holders, boardCards);
         Dictionary<MarkerHolder, int> evaluationResult = GetResultOfEvaluationPoints(holders);
         _selectedMarkerHolder = GetSelectedEvaluatedItem(evaluationResult);
@@ -134,11 +146,10 @@ public class NpcController : UserController
         });
     }
 
-    public void SelectInitialGroundCard(List<Card> boardCards, List<Card> groundCards, List<List<CardIcon>> campIconPairs)
+    public void SelectInitialGroundCard(List<object[]> boardContent, List<Card> groundCards)
     {
-        _campIconPairs = campIconPairs;
         _evaluationDatacollection = new();
-        EvaluateCardSelection(groundCards, boardCards);
+        EvaluateCardSelection(groundCards, _handView.Cards, GetAvailableBoardCards(boardContent, null));
         Dictionary<Card, int> evaluationResult = GetResultOfEvaluationPoints(groundCards);
         _selectedCard = GetSelectedEvaluatedItem(evaluationResult);
         evaluationResult.ToList().ForEach(p =>
@@ -220,7 +231,7 @@ public class NpcController : UserController
         tableView.LoadState(startingStateIndex);
     }
 
-    private void EvaluateCardSelection(List<Card> selectableCards, List<Card> otherCards)
+    private void EvaluateCardSelection(List<Card> selectableCards, List<Card> otherCards1, List<Card> otherCards2)
     {
         if(selectableCards.Count == 0)
         {
@@ -228,13 +239,12 @@ public class NpcController : UserController
             return;
         }
 
-        List<Card> cardsInHand = (_handView as NpcHandView).Cards;
         NpcTableView tableView = _tableView as NpcTableView;
         tableView.DisposeStates();
         tableView.SaveState();
         int startingStateIndex = tableView.GetLastTableStateIndex();
-        List<Card>[] unfulfilledCardsInHand = GetUnfulfilledCardsByHolderSubType(startingStateIndex, cardsInHand); // cards in hand that can't be placed immediately
-        List<Card>[] unfulfilledOtherCards = GetUnfulfilledCardsByHolderSubType(startingStateIndex, otherCards); // other cards that can't be placed immediately
+        List<Card>[] unfulfilledOtherCards1 = GetUnfulfilledCardsByHolderSubType(startingStateIndex, otherCards1); // card collection that can't be placed immediately
+        List<Card>[] unfulfilledOtherCards2 = GetUnfulfilledCardsByHolderSubType(startingStateIndex, otherCards2); // card collection that can't be placed immediately
         if (selectableCards.First().Data.deckType == DeckType.East) // ground cards
         {
             string[] tags = new string[] { "RectLeft", "RectRight" };
@@ -251,8 +261,8 @@ public class NpcController : UserController
                     ExecuteEvaluationCardPlacement(primaryHolderData, selectableCard);
                     int groundCardStateIndex = tableView.GetLastTableStateIndex();
                     CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), selectableCard);
-                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledCardsInHand);
-                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledOtherCards);
+                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledOtherCards1);
+                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledOtherCards2);
                 }
             }
         }
@@ -276,14 +286,14 @@ public class NpcController : UserController
                                 ExecuteEvaluationCardPlacement(holderData, selectableCard, selectableCard);
                                 int observationCardStateIndex = tableView.GetLastTableStateIndex();
                                 CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), selectableCard);
-                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledCardsInHand[0] , new() });
-                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledOtherCards[0], new() });
+                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledOtherCards1[0] , new() });
+                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledOtherCards2[0], new() });
                             }
 
-                            for(int k = 0; k < unfulfilledCardsInHand[0].Count; k++) // place selectableCard on hand cards
+                            for(int k = 0; k < unfulfilledOtherCards1[0].Count; k++) // place selectableCard on otherCards1
                             {
                                 tableView.LoadState(startingStateIndex);
-                                Card card = unfulfilledCardsInHand[0][k];
+                                Card card = unfulfilledOtherCards1[0][k];
                                 if (TryPlaceCard(holderData, card.Data))
                                 {
                                     ExecuteEvaluationCardPlacement(holderData, card);
@@ -317,20 +327,20 @@ public class NpcController : UserController
                             {
                                 ExecuteEvaluationCardPlacement(holderData, selectableCard, selectableCard);
                                 int landscapeCardStateIndex = tableView.GetLastTableStateIndex();
-                                for(int j = 0; j < unfulfilledCardsInHand[1].Count; j++) // place hand cards on selectable (landscape) card
+                                for(int j = 0; j < unfulfilledOtherCards1[1].Count; j++) // place otherCards1 on selectable (landscape) card
                                 {
                                     tableView.LoadState(landscapeCardStateIndex);
-                                    Card card = unfulfilledCardsInHand[1][j];
+                                    Card card = unfulfilledOtherCards1[1][j];
                                     if (TryPlaceCard(holderData, card.Data))
                                     {
                                         _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), selectableCard));
                                     }
                                 }
 
-                                for(int j = 0; j < unfulfilledOtherCards[1].Count; j++) // place other cards on selectable (landscape) card
+                                for(int j = 0; j < unfulfilledOtherCards2[1].Count; j++) // place otherCards2 on selectable (landscape) card
                                 {
                                     tableView.LoadState(landscapeCardStateIndex);
-                                    Card card = unfulfilledOtherCards[1][j];
+                                    Card card = unfulfilledOtherCards2[1][j];
                                     if (TryPlaceCard(holderData, card.Data))
                                     {
                                         _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), selectableCard));
@@ -356,15 +366,19 @@ public class NpcController : UserController
         tableView.LoadState(startingStateIndex);
     }
 
-    private List<Card> GetAvailableBoardContent(List<object[]> boardContent, List<Marker> remainingMarkers)
+    private List<Card> GetAvailableBoardCards(List<object[]> boardContent, List<Marker> remainingMarkers)
     {
-        int[] markerDistances = remainingMarkers.Select(marker => marker.numberOnMarker).ToArray();
+        int[] markerDistances = remainingMarkers?.Select(marker => marker.numberOnMarker).ToArray();
         List<Card> availableCards = new();
         for (int i = 0; i < boardContent.Count; i++) // filter cards with no available holders to reach/available marker to reach
         {
             object[] content = boardContent[i];
             List<int> holderDistances = (List<int>)content[2];
-            if (holderDistances.Count > 0)
+            if(remainingMarkers == null)
+            {
+                availableCards.Add((Card)content[0]);
+            }
+            else if (holderDistances.Count > 0)
             {
                 for (int j = 0; j < holderDistances.Count; j++)
                 {
@@ -378,6 +392,27 @@ public class NpcController : UserController
             }
         }
         return availableCards;
+    }
+
+    private object[] PrepareBoardContentForRowSelection(List<object[]> boardContent, MarkerDirection direction)
+    {
+        List<Card>[] cardsByRow = new List<Card>[] { new(), new(), new(), new() };
+        List<MarkerHolder> holders = new();
+        int numOfRows = cardsByRow.Length;
+        int rowIndex = 0;
+        for(int i = 0; i < boardContent.Count; i++)
+        {
+            object[] item = boardContent[i];
+            Card card = (Card)item[0];
+            cardsByRow[rowIndex].Add(card);
+            if (holders.Count < numOfRows)
+            {
+                MarkerHolder holder = ((List<MarkerHolder>)item[1]).Find(holder => holder.Direction == direction);
+                holders.Add(holder);
+            }
+            rowIndex = rowIndex == numOfRows - 1 ? 0 : rowIndex + 1;
+        }
+        return new object[] { cardsByRow, holders };
     }
 
     private List<Card>[] SortCardsByDeckType(List<Card> cards) // index0: deck-East cards, index1: deck West/South/North cards
@@ -755,7 +790,7 @@ public class NpcController : UserController
         return orderedEvaluationResult.FirstOrDefault(x => x.Value == randomlySelectedEvaluationPoint).Key;
     }
 
-    public override void UpdateCardHolders(HolderSubType subType, string hitAreaTag)
+    protected override void UpdateCardHolders(HolderSubType subType, string hitAreaTag)
     {
         if (subType == HolderSubType.PRIMARY)
         {
@@ -790,7 +825,7 @@ public class NpcController : UserController
                     string tag = "RectLeft";
                     UpdateCardHolders(HolderSubType.PRIMARY, tag);
                     HolderData holderData = (_tableView as NpcTableView).GetPrimaryHolderDataByTag(tag);
-                    ExecuteCardPlacement(new object[] { _selectedCard.Data.ID, false, holderData, _selectedCard });
+                    ExecuteCardPlacement(holderData, _selectedCard);
                 }
                 else if (_cardsToPlaceOnTable.Count > 0) // evaluated card placement
                 {
@@ -798,7 +833,7 @@ public class NpcController : UserController
                     {
                         Card currentCard = _cardsToPlaceOnTable[i];
                         HolderData holderData = _cardHolderDatasOnTable[i];
-                        ExecuteCardPlacement(new object[] { currentCard.Data.ID, false, holderData, currentCard });
+                        ExecuteCardPlacement(holderData, currentCard);
                     }
                 }
                 task.StartDelayMs(0);
@@ -851,20 +886,18 @@ public class NpcController : UserController
             Card card = cardToEvaluate ? cardToEvaluate : cardToPlace;
             _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(card), evaluationContent));
         }
-        object[] args = new object[] { -1, false, holderData, cardToPlace };
-        (_tableView as NpcTableView).RegisterCardPlacementAction(args);
-        (_tableView as NpcTableView).UpdateHolderIconsAction(args);
+        (_tableView as NpcTableView).RegisterCardPlacementAction(holderData, cardToPlace);
+        (_tableView as NpcTableView).UpdateHolderIconsAction(holderData);
         (_tableView as NpcTableView).SaveState();
     }
 
-    public override void ExecuteCardPlacement(object[] args)
+    protected override void ExecuteCardPlacement(HolderData holderData, Card card)
     {
-        Card card = (Card)args[3];
-        _infoView.UpdateNumberOfCardPlacementsAction(args);
-        _infoView.UpdateRoadTokensAction(args);
-        (_handView as NpcHandView).PlaceCardFromHandAction(args);
-        (_tableView as NpcTableView).RegisterCardPlacementAction(args);
-        (_tableView as NpcTableView).UpdateHolderIconsAction(args);
+        _infoView.UpdateNumberOfCardPlacementsAction();
+        _infoView.UpdateRoadTokensAction(card);
+        (_handView as NpcHandView).RemoveCard(card);
+        (_tableView as NpcTableView).RegisterCardPlacementAction(holderData, card);
+        (_tableView as NpcTableView).UpdateHolderIconsAction(holderData);
         card.transform.SetParent((_tableView as NpcTableView).PlacedCardsContainer);
     }
 }

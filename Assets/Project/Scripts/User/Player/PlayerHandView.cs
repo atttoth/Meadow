@@ -26,10 +26,8 @@ public class PlayerHandView : HandView
         return _cards.Select(card => card.Data).ToList();
     }
 
-    public override void PlaceCardFromHandAction(object[] args)
+    public void PlaceCardFromHandAction(Card card, bool isActionCancelled = false)
     {
-        bool isActionCancelled = (bool)args[1];
-        Card card = (Card)args[3];
         if (isActionCancelled)
         {
             AddCard(card);

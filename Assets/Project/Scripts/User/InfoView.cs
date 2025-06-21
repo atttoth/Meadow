@@ -71,9 +71,8 @@ public class InfoView : MonoBehaviour
         UpdateCardPlacementsText();
     }
 
-    public void UpdateNumberOfCardPlacementsAction(object[] args)
+    public void UpdateNumberOfCardPlacementsAction(bool isActionCancelled = false)
     {
-        bool isActionCancelled = (bool)args[1];
         if(isActionCancelled)
         {
             DecrementNumberOfCardPlacements();
@@ -119,10 +118,8 @@ public class InfoView : MonoBehaviour
         UpdateRoadTokensText();
     }
 
-    public void UpdateRoadTokensAction(object[] args)
+    public void UpdateRoadTokensAction(Card card, bool isActionCancelled = false)
     {
-        bool isActionCancelled = (bool)args[1];
-        Card card = (Card)args[3];
         if (card.Data.cardType == CardType.Landscape)
         {
             int numOfRoadIcons = card.Data.requirements.ToList().Where(icon => CardIcon.RoadToken == icon).Count();

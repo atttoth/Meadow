@@ -107,11 +107,8 @@ public class PlayerTableView : TableView
         return adjacentHolderIcons;
     }
 
-    public override void RegisterCardPlacementAction(object[] args)
+    public override void RegisterCardPlacementAction(HolderData holderData, Card card, bool isActionCancelled = false)
     {
-        bool isActionCancelled = (bool)args[1];
-        HolderData holderData = (HolderData)args[2];
-        Card card = (Card)args[3];
         if (isActionCancelled)
         {
             holderData.RemoveItemFromContentList(card);
@@ -175,10 +172,8 @@ public class PlayerTableView : TableView
         _secondaryHitArea.Toggle(false);
     }
 
-    public void UpdateHitAreaSizeAction(object[] args)
+    public void UpdateHitAreaSizeAction(Card card, bool isActionCancelled = false)
     {
-        bool isActionCancelled = (bool)args[1];
-        Card card = (Card)args[3];
         CardType cardType = card.Data.cardType;
         if(isActionCancelled)
         {
@@ -257,12 +252,10 @@ public class PlayerTableView : TableView
         _approveButtonImage.color = isPendingAction ? Color.green : Color.black;
     }
 
-    public void AdjustHolderVerticallyAction(object[] args)
+    public void AdjustHolderVerticallyAction(HolderData holderData, bool isActionCancelled = false)
     {
-        HolderData holderData = (HolderData)args[2];
         if (holderData.holderSubType == HolderSubType.PRIMARY)
         {
-            bool isActionCancelled = (bool)args[1];
             CardHolder holder = _primaryCardHolders[_activeState.PrimaryCardHolderDataCollection.IndexOf(holderData)];
             RectTransform rect = holder.GetComponent<RectTransform>();
             holder.transform.position += _tableLayout.GetUpdatedPrimaryHolderPosition(isActionCancelled ? -1 : 1);

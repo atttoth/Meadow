@@ -1,6 +1,5 @@
 using DG.Tweening;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -290,34 +289,6 @@ public class BoardController : MonoBehaviour
         return cards;
     }
 
-    public List<Card> GetAllCards()
-    {
-        List<Card> allCards = new();
-        for (int row = 0; row < GRID_SIZE; row++)
-        {
-            for (int col = 0; col < GRID_SIZE; col++)
-            {
-                allCards.Add(GetCardFromCardHolder(col, row));
-            }
-        }
-        return allCards;
-    }
-
-    public List<Card>[] GetAllCardsByRow()
-    {
-        List<Card>[] allCards = new List<Card>[GRID_SIZE];
-        for (int row = 0; row < GRID_SIZE; row++)
-        {
-            List<Card> cards = new();
-            for (int col = 0; col < GRID_SIZE; col++)
-            {
-                cards.Add(GetCardFromCardHolder(col, row));
-            }
-            allCards[row] = cards;
-        }
-        return allCards;
-    }
-
     public List<object[]> GetAllCardsWithAvailableMarkerHolders()
     {
         List<object[]> boardContent = new();
@@ -508,29 +479,6 @@ public class BoardController : MonoBehaviour
                     GetCardFromCardHolder(col, row).ToggleCanInspectFlag(value);
                 }
             }
-        }
-    }
-
-    public List<MarkerHolder> GetAvailableMarkerHolders(int holderParentID = -1)
-    {
-        if(holderParentID > -1)
-        {
-            return _markerHolders[holderParentID];
-        }
-        else
-        {
-            List<MarkerHolder> availableHolders = new();
-            foreach (List<MarkerHolder> holders in _markerHolders.Values)
-            {
-                holders.ForEach(holder =>
-                {
-                    if (holder.Data.IsEmpty())
-                    {
-                        availableHolders.Add(holder);
-                    }
-                });
-            }
-            return availableHolders;
         }
     }
 

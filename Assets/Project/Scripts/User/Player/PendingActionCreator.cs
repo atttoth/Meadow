@@ -1,58 +1,80 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
+enum DataCollectionType
+{ 
+    ITEM_ID,
+    ACTION_FUNCTIONS,
+    CANCELLED_ACTION_FUNCTIONS,
+    PENDING_DATA
+}
+
 public class PendingActionCreator
 {
-    public delegate void PendingActionFunction(object[] args);
-    private readonly Dictionary<int, PendingActionFunction[]> _actionFunctionsCollection;
-    private readonly Dictionary<int, object[]> _dataCollection; // stores arguments, index 0 represents pendingActionID, index 1 represents isActionCancelled flag
+    private readonly Dictionary<int, object[]> _functionDataCollection;
     private readonly bool _cancelLastActionOnly;
 
     public PendingActionCreator(bool cancelLastActionOnly)
     {
-        _actionFunctionsCollection = new();
-        _dataCollection = new();
+        _functionDataCollection = new();
         _cancelLastActionOnly = cancelLastActionOnly;
     }
 
     public int GetNumOfActions()
     {
-        return _actionFunctionsCollection.Count;
+        return _functionDataCollection.Count;
     }
 
-    public void Create(PendingActionFunction[] actionFunctions, PendingActionFunction[] cancelledActionFunctions, object[] args)
+    public int Create(int itemID, object[] actionFunctionsData, object[] cancelledActionFunctionsData, object[] pendingDataCollection)
     {
-        int ID = _cancelLastActionOnly ? _actionFunctionsCollection.Count : (int)args[0];
-        _actionFunctionsCollection.Add(ID, cancelledActionFunctions);
-        _dataCollection.Add(ID, args);
-        actionFunctions.ToList().ForEach(item => item(args));
+        int actionID = _cancelLastActionOnly ? GetNumOfActions() : itemID;
+        object[] item = new object[] { itemID, actionFunctionsData, cancelledActionFunctionsData, pendingDataCollection };
+        _functionDataCollection.Add(actionID, item);
+        return actionID;
     }
 
-    public bool TryCancel(int pendingActionID)
+    public void Start(int actionID)
     {
-        if (_cancelLastActionOnly && (int)_dataCollection.ToList().Last().Value[0] != pendingActionID) // check if cancelled action was the last action
+        int dataIndex = (int)DataCollectionType.ACTION_FUNCTIONS;
+        Execute((object[])_functionDataCollection[actionID][dataIndex]);
+    }
+
+    public bool TryCancel(int itemID)
+    {
+        int dataIndex = (int)DataCollectionType.ITEM_ID;
+        if (_cancelLastActionOnly && (int)_functionDataCollection.Last().Value[dataIndex] != itemID) // check if cancelled action was the last action
         {
             return false;
         }
 
-        int ID = _cancelLastActionOnly ? _actionFunctionsCollection.Count - 1 : pendingActionID;
-        PendingActionFunction[] prevActionItems = _actionFunctionsCollection[ID];
-        object[] args = _dataCollection[ID];
-        args[1] = true; // setting isActionCancelled to true
-        _actionFunctionsCollection.Remove(ID);
-        _dataCollection.Remove(ID);
-        prevActionItems.ToList().ForEach(item => item(args));
+        int actionID = _cancelLastActionOnly ? GetNumOfActions() - 1 : itemID;
+        dataIndex = (int)DataCollectionType.CANCELLED_ACTION_FUNCTIONS;
+        Execute((object[])_functionDataCollection[actionID][dataIndex]);
+        _functionDataCollection.Remove(actionID);
         return true;
     }
 
-    public List<object[]> GetDataCollection()
+    private void Execute(object[] functionsData)
     {
-        return _dataCollection.Values.ToList();
+        Delegate[] functionCollection = (Delegate[])functionsData[0];
+        object[][] argsCollection = (object[][])functionsData[1];
+        for (int i = 0; i < functionCollection.Length; i++)
+        {
+            Delegate f = functionCollection[i];
+            object[] args = argsCollection[i];
+            f.DynamicInvoke(args);
+        }
+    }
+
+    public List<object[]> GetPendingDataCollection()
+    {
+        int dataIndex = (int)DataCollectionType.PENDING_DATA;
+        return _functionDataCollection.Select(collection => (object[])collection.Value[dataIndex]).ToList();
     }
 
     public void Dispose()
     {
-        _actionFunctionsCollection.Clear();
-        _dataCollection.Clear();
+        _functionDataCollection.Clear();
     }
 }
