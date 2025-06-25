@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem.LowLevel;
 
 public class NpcTableView : TableView
 {
@@ -15,6 +17,19 @@ public class NpcTableView : TableView
         _placedCardsContainer = transform.GetChild(0);
     }
 
+    private List<HolderData> CreateCopyOfHolderDataCollection(List<HolderData> oldCollection)
+    {
+        List<HolderData> newCollection = new();
+        oldCollection.ForEach(data =>
+        {
+            HolderData holderData = new(data.ID, data.holderType);
+            holderData.holderSubType = data.holderSubType;
+            holderData.ContentList = new(data.ContentList);
+            newCollection.Add(holderData);
+        });
+        return newCollection;
+    }
+
     public int GetLastTableStateIndex()
     {
         return _states.Count - 1;
@@ -22,9 +37,20 @@ public class NpcTableView : TableView
 
     public void SaveState()
     {
-        _states.Add(_activeState);
-        TableViewState state = new(new(_activeState.AllIconsOfPrimaryHoldersInOrder), new(_activeState.AllIconsOfSecondaryHoldersInOrder), new(_activeState.PrimaryCardHolderDataCollection), new(_activeState.SecondaryCardHolderDataCollection));
-        _activeState = state;
+        TableViewState prevState = new(
+            new(_activeState.AllIconsOfPrimaryHoldersInOrder),
+            new(_activeState.AllIconsOfSecondaryHoldersInOrder),
+            CreateCopyOfHolderDataCollection(_activeState.PrimaryCardHolderDataCollection),
+            CreateCopyOfHolderDataCollection(_activeState.SecondaryCardHolderDataCollection)
+            );
+        TableViewState currentState = new(
+            new(prevState.AllIconsOfPrimaryHoldersInOrder),
+            new(prevState.AllIconsOfSecondaryHoldersInOrder),
+            CreateCopyOfHolderDataCollection(prevState.PrimaryCardHolderDataCollection),
+            CreateCopyOfHolderDataCollection(prevState.SecondaryCardHolderDataCollection)
+            );
+        _states.Add(prevState);
+        _activeState = currentState;
     }
 
     public void LoadState(int stateIndex)
@@ -37,9 +63,14 @@ public class NpcTableView : TableView
                 updatedStates.Add(_states[i]);
             }
         }
+        TableViewState loadedState = updatedStates.Last();
         _states = updatedStates;
-        TableViewState state = new(new(_states.Last().AllIconsOfPrimaryHoldersInOrder), new(_states.Last().AllIconsOfSecondaryHoldersInOrder), new(_states.Last().PrimaryCardHolderDataCollection), new(_states.Last().SecondaryCardHolderDataCollection));
-        _activeState = state;
+        _activeState = new(
+            new(loadedState.AllIconsOfPrimaryHoldersInOrder),
+            new(loadedState.AllIconsOfSecondaryHoldersInOrder),
+            CreateCopyOfHolderDataCollection(loadedState.PrimaryCardHolderDataCollection),
+            CreateCopyOfHolderDataCollection(loadedState.SecondaryCardHolderDataCollection)
+            );
     }
 
     public void DisposeStates()
@@ -55,19 +86,17 @@ public class NpcTableView : TableView
 
     public override void AddNewPrimaryHolder(string tag)
     {
-        List<HolderData> primaryCardHolderDataCollection = _activeState.PrimaryCardHolderDataCollection;
-        int index = tag == "RectLeft" ? 0 : primaryCardHolderDataCollection.Count;
-        HolderData holderData = new(primaryCardHolderDataCollection.Count, HolderType.TableCard);
+        int index = tag == "RectLeft" ? 0 : _activeState.PrimaryCardHolderDataCollection.Count;
+        HolderData holderData = new(_activeState.PrimaryCardHolderDataCollection.Count, HolderType.TableCard);
         holderData.holderSubType = HolderSubType.PRIMARY;
-        primaryCardHolderDataCollection.Insert(index, holderData);
+        _activeState.PrimaryCardHolderDataCollection.Insert(index, holderData);
     }
 
     public override void AddNewSecondaryHolder()
     {
-        List<HolderData> secondaryCardHolderDataCollection = _activeState.SecondaryCardHolderDataCollection;
-        HolderData holderData = new(secondaryCardHolderDataCollection.Count, HolderType.TableCard);
+        HolderData holderData = new(_activeState.SecondaryCardHolderDataCollection.Count, HolderType.TableCard);
         holderData.holderSubType = HolderSubType.SECONDARY;
-        secondaryCardHolderDataCollection.Add(holderData);
+        _activeState.SecondaryCardHolderDataCollection.Add(holderData);
     }
 
     public override List<List<CardIcon>> GetAdjacentPrimaryHolderIcons(HolderData holderData)

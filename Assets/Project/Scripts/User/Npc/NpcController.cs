@@ -2,16 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using static UnityEditor.Progress;
+
+enum NewCardHolderID // to indicate a non-existing card holder
+{
+    LEFT = -999,
+    RIGHT = 999,
+}
 
 struct EvaluationData
 {
     private readonly int _points;
-    private readonly object _content; // stores any type of data associated with an evaluated action (MarkerHolder, Card)
+    private readonly object[] _content; // stores any type/number of data associated with an evaluated action (MarkerHolder, Card, holderID)
 
     public int Points { get { return _points; } }
-    public object Content { get { return _content; } }
+    public object[] Content { get { return _content; } }
 
-    public EvaluationData(int points, object content)
+    public EvaluationData(int points, object[] content)
     {
         _points = points;
         _content = content;
@@ -73,32 +80,15 @@ public class NpcController : UserController
         _campIconPairs = campIconPairs;
     }
 
-    public void SelectCardToPlace(List<object[]> boardContent) //TODO
-    {
-        _cardsToPlaceOnTable = new();
-        _cardHolderDatasOnTable = new();
-        // 1. get all hand cards
-        // 2. separate ground/landscape cards from others because those need new holders
-        // 3. try to place hand cards on table cards
-        // 3.a if card can be placed, check available board cards for possible match and prioritize if there's synergy (more combo, more point)
-        // 3.b check for camp icon match
-        // 3.c consider keeping top cards with 2 icons
-        // 3.d consider having max 2 of the same ground icon/top icon - otherwise deduct evaluation point
-
-        // add new primary/secondary holders on table if needed
-    }
-
     public void SelectAction(List<object[]> boardContent) // this is only handling default action for now (TODO: regular/special action needs to be decided)
     {
         // regular action
         // boardContent: index0: Card (card), index1: List<MarkerHolder> (markerHolders), index2: List<int> (markerDistances)
         _evaluationDatacollection = new();
         List<Marker> remainingMarkers = _markerView.GetRemainingMarkers();
-        List<Card> availableCards = GetAvailableBoardCards(boardContent, remainingMarkers);
-        List<Card>[] sortedCards = SortCardsByDeckType(availableCards);
-        EvaluateCardSelection(sortedCards[0], _handView.Cards, new());
-        EvaluateCardSelection(sortedCards[1], _handView.Cards, new());
-        Dictionary<Card, int> evaluationResult = GetResultOfEvaluationPoints(availableCards);
+        List<Card> boardCards = GetAvailableBoardCards(boardContent, remainingMarkers);
+        EvaluateCardSelection(boardCards, _handView.Cards, new());
+        Dictionary<Card, int> evaluationResult = GetResultOfEvaluationPoints(boardCards);
         _selectedCard = GetSelectedEvaluatedItem(evaluationResult);
         object[] selectedBoardContent = boardContent.Find(content => (Card)content[0] == _selectedCard);
         List<MarkerHolder> holders = (List<MarkerHolder>)selectedBoardContent[1];
@@ -128,6 +118,27 @@ public class NpcController : UserController
 
         remainingMarkers.ForEach(marker => marker.gameObject.SetActive(marker == _selectedMarker));
         Debug.Log("distance " + currentMarkerDistance);
+    }
+
+    public void SelectCardToPlace(List<object[]> boardContent)
+    {
+        _evaluationDatacollection = new();
+        List<Marker> remainingMarkers = _markerView.GetRemainingMarkers();
+        List<Card> boardCards = GetAvailableBoardCards(boardContent, remainingMarkers);
+        EvaluateCardSelection(_handView.Cards, boardCards, new(), true);
+        Dictionary<Card, int> evaluationResult = GetResultOfEvaluationPoints(_handView.Cards);
+        Card selectedCard = GetSelectedEvaluatedItem(evaluationResult);
+        _cardsToPlaceOnTable = selectedCard == null ? new() : new List<Card>() { selectedCard }; // handle only 1 card for now (revise this later with complex evaluation)
+        Dictionary<Card, int> cardHolderIDs = GetHolderIDsByEvaluationPoints(); // num of entries depending on _cardsToPlaceOnTable count
+        _cardHolderDatasOnTable = GetSelectedHolderDatas(cardHolderIDs);
+
+        // 1. get all hand cards
+        // 2. separate ground/landscape cards from others because those need new holders
+        // 3. try to place hand cards on table cards
+        // 3.a if card can be placed, check available board cards for possible match and prioritize if there's synergy (more combo, more point)
+        // 3.b check for camp icon match
+        // 3.c consider keeping top cards with 2 icons
+        // 3.d consider having max 2 of the same ground icon/top icon - otherwise deduct evaluation point
     }
 
     public void SelectRow(List<object[]> boardContent)
@@ -168,7 +179,7 @@ public class NpcController : UserController
         for (int row = 0; row < boardCards.Length; row++)
         {
             tableView.LoadState(startingStateIndex);
-            MarkerHolder holder = holders[row];
+            object[] evaluationContent = new object[] { holders[row] };
             List<CardIcon[]> rowTopIcons = new();
             List<Card> rowCards = boardCards[row];
             Card landscapeCard = rowCards[0].Data.cardType == CardType.Landscape ? rowCards[0] : null;
@@ -177,7 +188,7 @@ public class NpcController : UserController
             rowTopIcons.Add(groundCard.Data.icons);
             tableView.AddNewPrimaryHolder(tag);
             HolderData primaryHolderData = tableView.GetPrimaryHolderDataByTag(tag);
-            ExecuteEvaluationCardPlacement(primaryHolderData, groundCard);
+            ExecuteEvaluationCardPlacement(primaryHolderData, groundCard, new object[0]);
             int groundCardStateIndex = tableView.GetLastTableStateIndex();
             for (int col = 0; col < scoringCards.Count; col++) // stack every combination of cards on ground card
             {
@@ -185,7 +196,7 @@ public class NpcController : UserController
                 Card firstCard = scoringCards[col];
                 if (TryPlaceCard(primaryHolderData, firstCard.Data))
                 {
-                    ExecuteEvaluationCardPlacement(primaryHolderData, firstCard, holder);
+                    ExecuteEvaluationCardPlacement(primaryHolderData, firstCard, evaluationContent);
                     int firstCardStateIndex = tableView.GetLastTableStateIndex();
                     List<Card> remainingCards = scoringCards.Where(card => card != firstCard).ToList();
                     List<List<Card>> cardCombinations = new() { new List<Card>() { remainingCards[0], remainingCards[1] }, new List<Card>() { remainingCards[1], remainingCards[0] } };
@@ -195,10 +206,10 @@ public class NpcController : UserController
                         List<Card> combination = cardCombinations[j];
                         if (TryPlaceCard(primaryHolderData, combination[0].Data))
                         {
-                            ExecuteEvaluationCardPlacement(primaryHolderData, combination[0], holder);
+                            ExecuteEvaluationCardPlacement(primaryHolderData, combination[0], evaluationContent);
                             if(TryPlaceCard(primaryHolderData, combination[1].Data))
                             {
-                                ExecuteEvaluationCardPlacement(primaryHolderData, combination[1], holder);
+                                ExecuteEvaluationCardPlacement(primaryHolderData, combination[1], evaluationContent);
                             }
                         }
                     }
@@ -209,7 +220,7 @@ public class NpcController : UserController
                     tableView.AddNewSecondaryHolder();
                     if (TryPlaceCard(tableView.GetLastSecondaryHolderData(), landscapeCard.Data))
                     {
-                        _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(landscapeCard), holder));
+                        _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(landscapeCard), evaluationContent));
                     }
                 }
 
@@ -223,15 +234,15 @@ public class NpcController : UserController
             {
                 CardIcon[] icons = rowTopIcons[i];
                 int houseIconPoints = Array.Exists(icons, icon => icon == CardIcon.House) ? 2 : 0;
-                _evaluationDatacollection.Add(new EvaluationData(houseIconPoints + icons.Length, holder));
+                _evaluationDatacollection.Add(new EvaluationData(houseIconPoints + icons.Length, evaluationContent));
             }
 
-            CompareTopIconsWithCampIcons(rowTopIcons, holder);
+            CompareTopIconsWithCampIcons(rowTopIcons, evaluationContent);
         }
         tableView.LoadState(startingStateIndex);
     }
 
-    private void EvaluateCardSelection(List<Card> selectableCards, List<Card> otherCards1, List<Card> otherCards2)
+    private void EvaluateCardSelection(List<Card> selectableCards, List<Card> otherCards1, List<Card> otherCards2, bool isCardPlacement = false)
     {
         if(selectableCards.Count == 0)
         {
@@ -245,67 +256,73 @@ public class NpcController : UserController
         int startingStateIndex = tableView.GetLastTableStateIndex();
         List<Card>[] unfulfilledOtherCards1 = GetUnfulfilledCardsByHolderSubType(startingStateIndex, otherCards1); // card collection that can't be placed immediately
         List<Card>[] unfulfilledOtherCards2 = GetUnfulfilledCardsByHolderSubType(startingStateIndex, otherCards2); // card collection that can't be placed immediately
-        if (selectableCards.First().Data.deckType == DeckType.East) // ground cards
+        List<Card>[] separatedSelectableCards = SeparateCardsByHolderSubType(selectableCards);
+        Card selectableCard;
+        object[] evaluationContent; // index1 data is only used at card placement evaluation
+        for (int groupIndex = 0; groupIndex < separatedSelectableCards.Length; groupIndex++)
         {
-            string[] tags = new string[] { "RectLeft", "RectRight" };
-            for(int tagIndex = 0; tagIndex < tags.Length; tagIndex++) // run evaluation with ground card placed on left/right side
+            List<Card> selectableCardsGroup = separatedSelectableCards[groupIndex];
+            if (groupIndex == 0) // all primary cards
             {
-                tableView.LoadState(startingStateIndex);
-                string tag = tags[tagIndex];
-                for (int selectableCardIndex = 0; selectableCardIndex < selectableCards.Count; selectableCardIndex++)
+                for (int i = 0; i < selectableCardsGroup.Count; i++)
                 {
-                    tableView.LoadState(startingStateIndex);
-                    Card selectableCard = selectableCards[selectableCardIndex];
-                    tableView.AddNewPrimaryHolder(tag);
-                    HolderData primaryHolderData = tableView.GetPrimaryHolderDataByTag(tag);
-                    ExecuteEvaluationCardPlacement(primaryHolderData, selectableCard);
-                    int groundCardStateIndex = tableView.GetLastTableStateIndex();
-                    CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), selectableCard);
-                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledOtherCards1);
-                    PlaceUnfulfilledCards(groundCardStateIndex, selectableCard, unfulfilledOtherCards2);
-                }
-            }
-        }
-        else
-        {
-            List<Card>[] separatedSelectableCards = SeparateCardsByHolderSubType(selectableCards);
-            for(int groupIndex = 0; groupIndex < separatedSelectableCards.Length; groupIndex++)
-            {
-                List<Card> selectableCardsGroup = separatedSelectableCards[groupIndex];
-                if(groupIndex == 0)
-                {
-                    for (int i = 0; i < selectableCardsGroup.Count; i++) // primary cards
+                    selectableCard = selectableCardsGroup[i];
+                    if (selectableCard.Data.cardType == CardType.Ground) // ground card
                     {
-                        Card selectableCard = selectableCardsGroup[i];
+                        string[] tags = new string[] { "RectLeft", "RectRight" };
+                        for (int tagIndex = 0; tagIndex < tags.Length; tagIndex++)
+                        {
+                            tableView.LoadState(startingStateIndex);
+                            string tag = tags[tagIndex];
+                            tableView.AddNewPrimaryHolder(tag);
+                            HolderData primaryHolderData = tableView.GetPrimaryHolderDataByTag(tag);
+                            evaluationContent = new object[] { selectableCard, tagIndex == 0 ? NewCardHolderID.LEFT : NewCardHolderID.RIGHT };
+                            ExecuteEvaluationCardPlacement(primaryHolderData, selectableCard, isCardPlacement ? evaluationContent : new object[0]);
+                            int groundCardStateIndex = tableView.GetLastTableStateIndex();
+                            CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), evaluationContent);
+                            PlaceUnfulfilledCards(groundCardStateIndex, evaluationContent, unfulfilledOtherCards1);
+                            PlaceUnfulfilledCards(groundCardStateIndex, evaluationContent, unfulfilledOtherCards2);
+                        }
+                    }
+                    else // observation card
+                    {
                         for (int j = 0; j < tableView.ActiveState.PrimaryCardHolderDataCollection.Count; j++)
                         {
                             tableView.LoadState(startingStateIndex);
                             HolderData holderData = tableView.ActiveState.PrimaryCardHolderDataCollection[j];
-                            if(TryPlaceCard(holderData, selectableCard.Data))
+                            bool canBePlaced = false;
+                            if (TryPlaceCard(holderData, selectableCard.Data))
                             {
-                                ExecuteEvaluationCardPlacement(holderData, selectableCard, selectableCard);
+                                canBePlaced = true;
+                                evaluationContent = new object[] { selectableCard, holderData.ID };
+                                ExecuteEvaluationCardPlacement(holderData, selectableCard, evaluationContent);
                                 int observationCardStateIndex = tableView.GetLastTableStateIndex();
-                                CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), selectableCard);
-                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledOtherCards1[0] , new() });
-                                PlaceUnfulfilledCards(observationCardStateIndex, selectableCard, new List<Card>[] { unfulfilledOtherCards2[0], new() });
+                                CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), evaluationContent);
+                                PlaceUnfulfilledCards(observationCardStateIndex, evaluationContent, new List<Card>[] { unfulfilledOtherCards1[0], new() });
+                                PlaceUnfulfilledCards(observationCardStateIndex, evaluationContent, new List<Card>[] { unfulfilledOtherCards2[0], new() });
                             }
 
-                            for(int k = 0; k < unfulfilledOtherCards1[0].Count; k++) // place selectableCard on otherCards1
+                            if(!isCardPlacement || (isCardPlacement && canBePlaced))
                             {
-                                tableView.LoadState(startingStateIndex);
-                                Card card = unfulfilledOtherCards1[0][k];
-                                if (TryPlaceCard(holderData, card.Data))
+                                for (int k = 0; k < unfulfilledOtherCards1[0].Count; k++)
                                 {
-                                    ExecuteEvaluationCardPlacement(holderData, card);
-                                    int observationCardStateIndex = tableView.GetLastTableStateIndex();
-                                    for(int l = 0; l < tableView.ActiveState.PrimaryCardHolderDataCollection.Count; l++)
+                                    tableView.LoadState(startingStateIndex);
+                                    Card card = unfulfilledOtherCards1[0][k];
+                                    if (TryPlaceCard(holderData, card.Data))
                                     {
-                                        tableView.LoadState(observationCardStateIndex);
-                                        HolderData data = tableView.ActiveState.PrimaryCardHolderDataCollection[l];
-                                        if (TryPlaceCard(data, selectableCard.Data))
+                                        evaluationContent = new object[0];
+                                        ExecuteEvaluationCardPlacement(holderData, card, evaluationContent);
+                                        int observationCardStateIndex = tableView.GetLastTableStateIndex();
+                                        for (int l = 0; l < tableView.ActiveState.PrimaryCardHolderDataCollection.Count; l++)
                                         {
-                                            ExecuteEvaluationCardPlacement(data, selectableCard, selectableCard);
-                                            CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), selectableCard);
+                                            tableView.LoadState(observationCardStateIndex);
+                                            HolderData data = tableView.ActiveState.PrimaryCardHolderDataCollection[l];
+                                            if (TryPlaceCard(data, selectableCard.Data))
+                                            {
+                                                evaluationContent = new object[] { selectableCard, holderData.ID };
+                                                ExecuteEvaluationCardPlacement(data, selectableCard, evaluationContent);
+                                                CompareTopIconsWithCampIcons(tableView.GetTopPrimaryIcons(), evaluationContent);
+                                            }
                                         }
                                     }
                                 }
@@ -313,50 +330,52 @@ public class NpcController : UserController
                         }
                     }
                 }
-                else
+            }
+            else // all secondary cards
+            {
+                for (int i = 0; i < selectableCardsGroup.Count; i++)
                 {
-                    for (int i = 0; i < selectableCardsGroup.Count; i++) // secondary cards
+                    tableView.LoadState(startingStateIndex);
+                    selectableCard = selectableCardsGroup[i];
+                    if (selectableCard.Data.cardType == CardType.Landscape)
                     {
-                        tableView.LoadState(startingStateIndex);
-                        Card selectableCard = selectableCardsGroup[i];
-                        if(selectableCard.Data.cardType == CardType.Landscape)
+                        tableView.AddNewSecondaryHolder();
+                        HolderData holderData = tableView.GetLastSecondaryHolderData();
+                        if (TryPlaceCard(holderData, selectableCard.Data))
                         {
-                            tableView.AddNewSecondaryHolder();
-                            HolderData holderData = tableView.GetLastSecondaryHolderData();
-                            if (TryPlaceCard(holderData, selectableCard.Data))
+                            evaluationContent = new object[] { selectableCard, NewCardHolderID.RIGHT };
+                            ExecuteEvaluationCardPlacement(holderData, selectableCard, evaluationContent);
+                            int landscapeCardStateIndex = tableView.GetLastTableStateIndex();
+                            for (int j = 0; j < unfulfilledOtherCards1[1].Count; j++) // place otherCards1 on selectable (landscape) card
                             {
-                                ExecuteEvaluationCardPlacement(holderData, selectableCard, selectableCard);
-                                int landscapeCardStateIndex = tableView.GetLastTableStateIndex();
-                                for(int j = 0; j < unfulfilledOtherCards1[1].Count; j++) // place otherCards1 on selectable (landscape) card
+                                tableView.LoadState(landscapeCardStateIndex);
+                                Card card = unfulfilledOtherCards1[1][j];
+                                if (TryPlaceCard(holderData, card.Data))
                                 {
-                                    tableView.LoadState(landscapeCardStateIndex);
-                                    Card card = unfulfilledOtherCards1[1][j];
-                                    if (TryPlaceCard(holderData, card.Data))
-                                    {
-                                        _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), selectableCard));
-                                    }
+                                    _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), evaluationContent));
                                 }
+                            }
 
-                                for(int j = 0; j < unfulfilledOtherCards2[1].Count; j++) // place otherCards2 on selectable (landscape) card
+                            for (int j = 0; j < unfulfilledOtherCards2[1].Count; j++) // place otherCards2 on selectable (landscape) card
+                            {
+                                tableView.LoadState(landscapeCardStateIndex);
+                                Card card = unfulfilledOtherCards2[1][j];
+                                if (TryPlaceCard(holderData, card.Data))
                                 {
-                                    tableView.LoadState(landscapeCardStateIndex);
-                                    Card card = unfulfilledOtherCards2[1][j];
-                                    if (TryPlaceCard(holderData, card.Data))
-                                    {
-                                        _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), selectableCard));
-                                    }
+                                    _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), evaluationContent));
                                 }
                             }
                         }
-                        else
+                    }
+                    else
+                    {
+                        for (int j = 0; j < tableView.ActiveState.SecondaryCardHolderDataCollection.Count; j++) // place selectable (discovery) card
                         {
-                            for (int j = 0; j < tableView.ActiveState.SecondaryCardHolderDataCollection.Count; j++) // place selectable (discovery) card
+                            HolderData holderData = tableView.ActiveState.SecondaryCardHolderDataCollection[j];
+                            if (TryPlaceCard(holderData, selectableCard.Data))
                             {
-                                HolderData holderData = tableView.ActiveState.SecondaryCardHolderDataCollection[j];
-                                if(TryPlaceCard(holderData, selectableCard.Data))
-                                {
-                                    _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), selectableCard));
-                                }
+                                evaluationContent = new object[] { selectableCard, holderData.ID };
+                                _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(selectableCard), evaluationContent));
                             }
                         }
                     }
@@ -413,24 +432,6 @@ public class NpcController : UserController
             rowIndex = rowIndex == numOfRows - 1 ? 0 : rowIndex + 1;
         }
         return new object[] { cardsByRow, holders };
-    }
-
-    private List<Card>[] SortCardsByDeckType(List<Card> cards) // index0: deck-East cards, index1: deck West/South/North cards
-    {
-        List<Card> groundCards = new();
-        List<Card> otherCards = new();
-        cards.ForEach(card =>
-        {
-            if(card.Data.deckType == DeckType.East)
-            {
-                groundCards.Add(card);
-            }
-            else
-            {
-                otherCards.Add(card);
-            }
-        });
-        return new List<Card>[] { groundCards, otherCards };
     }
 
     private List<Card>[] GetUnfulfilledCardsByHolderSubType(int stateIndex, List<Card> cards)
@@ -501,7 +502,7 @@ public class NpcController : UserController
         return new List<Card>[] { unfulfilledPrimaryCards, unfulfilledSecondaryCards };
     }
 
-    private void PlaceUnfulfilledCards(int stateIndex, object evaluationContent, List<Card>[] unfulfilledCards)
+    private void PlaceUnfulfilledCards(int stateIndex, object[] evaluationContent, List<Card>[] unfulfilledCards)
     {
         NpcTableView tableView = _tableView as NpcTableView;
         for (int i = 0; i < unfulfilledCards[0].Count; i++) // primary cards
@@ -522,7 +523,7 @@ public class NpcController : UserController
 
             if (!canBePlacedAnywhere)
             {
-                Card evaluatedCard = (Card)evaluationContent;
+                Card evaluatedCard = (Card)evaluationContent[0];
                 CheckNumberOfRequirementsFulfilledBySelectableCard(tableView.GetAllRelevantIcons(HolderSubType.PRIMARY).Except(evaluatedCard.Data.icons).ToList(), new List<CardIcon>(evaluatedCard.Data.icons), card.Data, evaluationContent);
             }
         }
@@ -557,13 +558,13 @@ public class NpcController : UserController
 
             if (!canBePlacedAnywhere)
             {
-                Card evaluatedCard = (Card)evaluationContent;
+                Card evaluatedCard = (Card)evaluationContent[0];
                 CheckNumberOfRequirementsFulfilledBySelectableCard(tableView.GetAllRelevantIcons(HolderSubType.PRIMARY).Except(evaluatedCard.Data.icons).ToList(), new List<CardIcon>(evaluatedCard.Data.icons), card.Data, evaluationContent);
             }
         }
     }
 
-    private void CompareTopIconsWithCampIcons(List<CardIcon[]> topIcons, object evaluationContent)
+    private void CompareTopIconsWithCampIcons(List<CardIcon[]> topIcons, object[] evaluationContent)
     {
         int points = GetNextCampScoreToken();
         if(points == 0)
@@ -585,7 +586,7 @@ public class NpcController : UserController
         }
     }
 
-    private void CheckNumberOfRequirementsFulfilledBySelectableCard(List<CardIcon> allRelevantIcons, List<CardIcon> selectableCardIcons, CardData cardData, object content) // global icon check only!
+    private void CheckNumberOfRequirementsFulfilledBySelectableCard(List<CardIcon> allRelevantIcons, List<CardIcon> selectableCardIcons, CardData cardData, object[] evaluationContent) // global icon check only!
     {
         List<CardIcon> cardRequirements = new(cardData.requirements);
         List<CardIcon> cardOptionalRequirements = new(cardData.optionalRequirements);
@@ -697,7 +698,7 @@ public class NpcController : UserController
             }
         }
         int points = (remainingRequirementIcons - cardRequirements.Count) + (remainingOptionalRequirementPairs - optionalRequirementIconPairs.Count) + (remainingAdjacentRequirementIcons - cardAdjacentRequirements.Count);
-        _evaluationDatacollection.Add(new EvaluationData(points, content));
+        _evaluationDatacollection.Add(new EvaluationData(points, evaluationContent));
     }
 
     private List<Card>[] SeparateCardsByHolderSubType(List<Card> cards)
@@ -741,7 +742,7 @@ public class NpcController : UserController
         for (int i = 0; i < _evaluationDatacollection.Count; i++)
         {
             EvaluationData data = _evaluationDatacollection[i];
-            T item = (T)data.Content;
+            T item = (T)data.Content[0];
             evaluationResults[item] += data.Points;
         }
         return evaluationResults;
@@ -790,6 +791,76 @@ public class NpcController : UserController
         return orderedEvaluationResult.FirstOrDefault(x => x.Value == randomlySelectedEvaluationPoint).Key;
     }
 
+    private Dictionary<Card, int> GetHolderIDsByEvaluationPoints()
+    {
+        object[] collectionOfholderIDs = new object[_cardsToPlaceOnTable.Count];
+        for (int i = 0; i < _cardsToPlaceOnTable.Count; i++) // collect points by holderIDs
+        {
+            Card card = _cardsToPlaceOnTable[i];
+            Dictionary<int, int> pointsByHolderIDs = new();
+            for (int j = 0; j < _evaluationDatacollection.Count; j++)
+            {
+                EvaluationData data = _evaluationDatacollection[j];
+                if ((Card)data.Content[0] == card)
+                {
+                    int points = data.Points;
+                    int holderID = (int)data.Content[1];
+                    if (pointsByHolderIDs.ContainsKey(holderID))
+                    {
+                        pointsByHolderIDs[holderID] += points;
+                    }
+                    else
+                    {
+                        pointsByHolderIDs[holderID] = points;
+                    }
+                    
+                }
+            }
+            collectionOfholderIDs[i] = pointsByHolderIDs;
+        }
+
+        Dictionary<Card, int> result = new();
+        for (int i = 0; i < collectionOfholderIDs.Length; i++) // select holderID by highest points
+        {
+            Card card = _cardsToPlaceOnTable[i];
+            Dictionary<int, int> pointsByHolderIDs = (Dictionary<int, int>)collectionOfholderIDs[i];
+            int holderID = pointsByHolderIDs.Aggregate((x, y) => x.Value > y.Value ? x : y).Key;
+            result[card] = holderID;
+        }
+        return result;
+    }
+
+    private List<HolderData> GetSelectedHolderDatas(Dictionary<Card, int> cardHolderIDs)
+    {
+        NpcTableView tableView = _tableView as NpcTableView;
+        List<HolderData> result = new();
+        cardHolderIDs.ToList().ForEach(e =>
+        {
+            Card card = e.Key;
+            int holderID = cardHolderIDs[card];
+            if (card.Data.cardType == CardType.Ground)
+            {
+                string tag = holderID == (int)NewCardHolderID.LEFT ? "RectLeft" : "RectRight";
+                tableView.AddNewPrimaryHolder(tag);
+                result.Add(tableView.GetPrimaryHolderDataByTag(tag));
+            }
+            else if (card.Data.cardType == CardType.Landscape)
+            {
+                tableView.AddNewSecondaryHolder();
+                result.Add(tableView.GetLastSecondaryHolderData());
+            }
+            else if (card.Data.cardType == CardType.Observation)
+            {
+                result.Add(tableView.ActiveState.PrimaryCardHolderDataCollection.Find(data => data.ID == holderID));
+            }
+            else if (card.Data.cardType == CardType.Discovery)
+            {
+                result.Add(tableView.ActiveState.SecondaryCardHolderDataCollection.Find(data => data.ID == holderID));
+            }
+        });
+        return result;
+    }
+
     protected override void UpdateCardHolders(HolderSubType subType, string hitAreaTag)
     {
         if (subType == HolderSubType.PRIMARY)
@@ -829,11 +900,15 @@ public class NpcController : UserController
                 }
                 else if (_cardsToPlaceOnTable.Count > 0) // evaluated card placement
                 {
-                    for(int i = 0; i < _cardsToPlaceOnTable.Count; i++)
+                    Debug.Log("num of cards: " + _cardsToPlaceOnTable.Count);
+                    (_tableView as NpcTableView).ActiveState.PrimaryCardHolderDataCollection.ForEach(data => Debug.Log("holderID: " + data.ID));
+                    for (int i = 0; i < _cardsToPlaceOnTable.Count; i++)
                     {
                         Card currentCard = _cardsToPlaceOnTable[i];
                         HolderData holderData = _cardHolderDatasOnTable[i];
                         ExecuteCardPlacement(holderData, currentCard);
+                        Debug.Log("card's first icon: " + currentCard.Data.icons?[0]);
+                        Debug.Log("selected holderID: " + holderData.ID);
                     }
                 }
                 task.StartDelayMs(0);
@@ -879,9 +954,9 @@ public class NpcController : UserController
         }
     }
 
-    private void ExecuteEvaluationCardPlacement(HolderData holderData, Card cardToPlace, object evaluationContent = null, Card cardToEvaluate = null)
+    private void ExecuteEvaluationCardPlacement(HolderData holderData, Card cardToPlace, object[] evaluationContent, Card cardToEvaluate = null)
     {
-        if(evaluationContent != null)
+        if(evaluationContent.Length > 0)
         {
             Card card = cardToEvaluate ? cardToEvaluate : cardToPlace;
             _evaluationDatacollection.Add(new EvaluationData(GetCardPlacementEvaluationPoints(card), evaluationContent));

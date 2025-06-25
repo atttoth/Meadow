@@ -27,7 +27,7 @@ public abstract class TableView : MonoBehaviour
             for (int i = 0; i < _activeState.PrimaryCardHolderDataCollection.Count; i++)
             {
                 HolderData data = _activeState.PrimaryCardHolderDataCollection[i];
-                CardIcon[][] items = new CardIcon[data.GetContentListSize()][];
+                CardIcon[][] items = new CardIcon[data.ContentList.Count][];
                 for (int j = 0; j < items.Length; j++)
                 {
                     Card card = (Card)data.GetItemFromContentListByIndex(j);
@@ -42,7 +42,7 @@ public abstract class TableView : MonoBehaviour
             for (int i = 0; i < _activeState.SecondaryCardHolderDataCollection.Count; i++)
             {
                 HolderData data = _activeState.SecondaryCardHolderDataCollection[i];
-                CardIcon[][] items = new CardIcon[data.GetContentListSize()][];
+                CardIcon[][] items = new CardIcon[data.ContentList.Count][];
                 for (int j = 0; j < items.Length; j++)
                 {
                     Card card = (Card)data.GetItemFromContentListByIndex(j);

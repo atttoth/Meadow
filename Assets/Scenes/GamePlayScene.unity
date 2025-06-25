@@ -371,8 +371,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &108835489
 GameObject:
   m_ObjectHideFlags: 0
@@ -818,8 +816,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1001 &178029242
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1209,7 +1205,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   userID: 0
-  draggingCardType: 0
 --- !u!225 &241775367
 CanvasGroup:
   m_ObjectHideFlags: 0
@@ -2769,8 +2764,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &481274274
 GameObject:
   m_ObjectHideFlags: 0
@@ -3777,8 +3770,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1001 &727736134
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -4278,8 +4269,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &779618804
 GameObject:
   m_ObjectHideFlags: 0
@@ -5010,8 +4999,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!224 &924840849 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 264662953898850249, guid: 8bd8ff9d709d3a9498bcc5310b0423c5, type: 3}
@@ -6042,8 +6029,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1151285912
 GameObject:
   m_ObjectHideFlags: 0
@@ -6132,8 +6117,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1180918330
 GameObject:
   m_ObjectHideFlags: 0
@@ -6147,8 +6130,8 @@ GameObject:
   - component: {fileID: 1180918333}
   - component: {fileID: 1180918332}
   m_Layer: 0
-  m_Name: HitArea
-  m_TagString: Untagged
+  m_Name: HitAreaRight
+  m_TagString: RectRight
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -6444,8 +6427,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1251478612
 GameObject:
   m_ObjectHideFlags: 0
@@ -7664,8 +7645,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1498826172
 GameObject:
   m_ObjectHideFlags: 0
@@ -7942,8 +7921,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1549653820
 GameObject:
   m_ObjectHideFlags: 0
@@ -8241,8 +8218,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1561677924
 GameObject:
   m_ObjectHideFlags: 0
@@ -9699,8 +9674,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &1951203974
 GameObject:
   m_ObjectHideFlags: 0
@@ -9892,8 +9865,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1 &2013850032
 GameObject:
   m_ObjectHideFlags: 0
@@ -10365,8 +10336,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cbe2a4cc65df9464b986969d04ecc373, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  holderType: 0
-  ID: 0
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

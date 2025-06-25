@@ -273,7 +273,7 @@ public class PlayerTableView : TableView
             float[] holderPositions = holder.Data.holderSubType == HolderSubType.PRIMARY 
                 ? _tableLayout.GetPrimaryCardHolderPositions(_primaryCardHolders.Count) 
                 : _tableLayout.GetSecondaryCardHolderPositions(_secondaryCardHolders.Count);
-            position = _tableLayout.GetPlacedCardPosition(card.Data.cardType, holder.Data.GetContentListSize() - 1, holderPositions[holder.transform.GetSiblingIndex()]);
+            position = _tableLayout.GetPlacedCardPosition(card.Data.cardType, holder.Data.ContentList.Count - 1, holderPositions[holder.transform.GetSiblingIndex()]);
         }
         else
         {

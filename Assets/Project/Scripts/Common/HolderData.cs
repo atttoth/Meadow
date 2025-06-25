@@ -16,14 +16,9 @@ public class HolderData
         holderType = type;
     }
 
-    public List<Interactable> ContentList { get { return _contentList; } }
+    public List<Interactable> ContentList { get { return _contentList; } set { _contentList = value; } }
 
     public bool IsEmpty() => _contentList.Count < 1;
-
-    public int GetContentListSize()
-    {
-        return _contentList.Count;
-    }
 
     public Interactable GetItemFromContentListByIndex(int index)
     {
@@ -42,11 +37,6 @@ public class HolderData
     public void RemoveItemFromContentList(Interactable item)
     {
         _contentList.Remove(item);
-    }
-
-    public List<Interactable> GetAllContent()
-    {
-        return _contentList;
     }
 
     public bool IsTopCardOfHolder(Card item)

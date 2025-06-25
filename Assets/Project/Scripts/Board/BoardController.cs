@@ -323,9 +323,9 @@ public class BoardController : MonoBehaviour
             for (int row = 0; row < _cardHolders[col].Count; row++)
             {
                 CardHolder holder = _cardHolders[col][row];
-                if (holder.Data.GetContentListSize() > 0)
+                if (holder.Data.ContentList.Count > 0)
                 {
-                    holder.Data.GetAllContent().ForEach(card => card.ToggleRayCast(value));
+                    holder.Data.ContentList.ForEach(card => card.ToggleRayCast(value));
                 }
             }
         }
