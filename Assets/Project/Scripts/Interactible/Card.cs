@@ -133,7 +133,7 @@ public class Card : Interactable
         _prevPosition = GetComponent<RectTransform>().anchoredPosition;
         transform.SetParent(transform.root);
         ToggleRayCast(false);
-        _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_MOVED, new object[] { _data.cardType });
+        _eventController.InvokeEventHandler(GameLogicEventType.CARD_MOVED, new object[] { _data.cardType });
     }
 
     public override void OnEndDrag(PointerEventData eventData)
@@ -145,7 +145,7 @@ public class Card : Interactable
 
         List<RaycastResult> raycastResults = new();
         EventSystem.current.RaycastAll(eventData, raycastResults);
-        _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_PLACED, new object[] { this, raycastResults});
+        _eventController.InvokeEventHandler(GameLogicEventType.CARD_PLACED, new object[] { this, raycastResults});
     }
 
     public void SetCardReadyInHand()
@@ -167,7 +167,7 @@ public class Card : Interactable
         {
             if (cardStatus == CardStatus.PENDING_ON_TABLE)
             {
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
+                _eventController.InvokeEventHandler(GameLogicEventType.CANCELLED_PENDING_CARD_PLACED, new object[] { this });
             }
             else if (Array.Exists(new[] { CardStatus.NONE, CardStatus.IN_HAND }, status => status == cardStatus) && _canInspect)
             {
@@ -175,7 +175,7 @@ public class Card : Interactable
                 {
                     transform.SetParent(_parent);
                 }
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
+                _eventController.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_STARTED, new object[] { this });
             }
         }
 
@@ -184,13 +184,13 @@ public class Card : Interactable
             if(isSelected)
             {
                 OnPick();
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
+                _eventController.InvokeEventHandler(GameLogicEventType.CARD_PICKED, new object[] { _parent.GetComponent<CardHolder>(), this });
             }
             else if(isDisposable && !isInspected)
             {
                 selectedToDispose = !selectedToDispose;
                 ToggleHighlight(selectedToDispose);
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
+                _eventController.InvokeEventHandler(GameLogicEventType.CARD_SELECTED_FOR_DISPOSE, new object[0]);
             }
         }
     }

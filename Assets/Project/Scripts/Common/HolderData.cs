@@ -62,9 +62,4 @@ public class HolderData
 
         return allIcons;
     }
-
-    public void Empty()
-    {
-        _contentList = new();
-    }
 }

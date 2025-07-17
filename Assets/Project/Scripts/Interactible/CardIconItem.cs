@@ -76,7 +76,7 @@ public class CardIconItem : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Left)
         {
-            _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_ICON_CLICKED, new object[] { ID });
+            _eventController.InvokeEventHandler(GameLogicEventType.CARD_ICON_CLICKED, new object[] { ID });
         }
     }
 

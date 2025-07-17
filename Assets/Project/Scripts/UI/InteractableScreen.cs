@@ -13,7 +13,7 @@ public class InteractableScreen : Interactable
     {
         if (eventData.button == PointerEventData.InputButton.Right)
         {
-            _dispatcher.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_ENDED, new object[0]);
+            _eventController.InvokeEventHandler(GameLogicEventType.CARD_INSPECTION_ENDED, new object[0]);
         }
     }
 }

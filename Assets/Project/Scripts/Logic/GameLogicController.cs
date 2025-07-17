@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
@@ -12,6 +13,7 @@ public class GameLogicController
     private readonly Delegate[] _logicEventHandlers;
 
     // resets at every session
+    private CancellationTokenSource _taskCts; // to cancel running tasks on game exit
     private GameMode _currentGameMode;
     private UserController[] _userControllers;
     private UserController _activeUserController;
@@ -24,17 +26,13 @@ public class GameLogicController
         _campController.Create();
         _screenController = screenController;
         _screenController.Create();
-        _logicEventHandlers = new Delegate[] {
-            (Action<GameTask>)TurnStartHandler,
+        _logicEventHandlers = new Delegate[] 
+        {
             (Action<GameTask>)TurnEndHandler,
-            (Action<GameTask>)RoundEndHandler,
-            (Action<GameTask>)GameEndHandler,
             (Action<GameTask, bool>)TableToggleHandler,
-            (Action<GameTask>)CampIconsSelectHandler,
             (Action<GameTask, bool>)CampToggleHandler,
             (Action<GameTask, int, Vector3>)CampScoreReceiveHandler,
             (Action<GameTask, HolderSubType, string>)TableHitAreaHoverOverHandler,
-            (Action<GameTask>)RowPickHandler,
             (Action<GameTask, CardHolder, Card>)CardPickHandler,
             (Action<GameTask, CardType>)CardMoveHandler,
             (Action<GameTask, Card, List<RaycastResult>>)PendingCardPlaceHandler,
@@ -49,20 +47,14 @@ public class GameLogicController
             (Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler,
             (Action<GameTask, HolderType, Marker>)MarkerCancelHandler,
             (Action<GameTask, MarkerAction>)MarkerActionSelectHandler,
-            (Action<GameTask, DeckType>)DeckSelectHandler,
             (Action<GameTask, int>)ScoreCollectHandler,
             (Action<GameTask, bool>)HandScreenHandler
         };
     }
 
-    public void Execute(int handlerIndex, object[] args)
-    {
-        Delegate f = handlerIndex > -1 ? _logicEventHandlers[handlerIndex] : (Action<GameTask>)StartGameSetupHandler;
-        new GameTask().ExecHandler(f, args);
-    }
-
     public void SetupSession(GameMode gameMode, UserController[] userControllers)
     {
+        _taskCts = new CancellationTokenSource();
         _currentGameMode = gameMode;
         _userControllers = userControllers;
         _userControllers.ToList().ForEach(controller => controller.ResetCampScoreTokens());
@@ -71,14 +63,25 @@ public class GameLogicController
         (_activeUserController as PlayerController).EnableTableToggleButton(false);
     }
 
+    public void Execute(int handlerIndex, object[] args)
+    {
+        Delegate f = handlerIndex > -1 ? _logicEventHandlers[handlerIndex] : (Action<GameTask>)StartSetupHandler;
+        new GameTask().ExecHandler(_taskCts.Token, f, args);
+    }
+
+    public void Kill()
+    {
+        _taskCts?.Cancel();
+    }
+
     private DeckType GetActiveDeckType()
     {
         return _currentGameMode.IsOverHalfTime() ? DeckType.North : DeckType.South;
     }
 
-    private void SetNextActiveUserController(bool isGameStart = false)
+    private void SetNextActiveUserController(bool isGameSetup = false)
     {
-        if (!isGameStart)
+        if (!isGameSetup)
         {
             _currentGameMode.SetNextActiveUserIndex();
             _activeUserController.IconDisplayView.ToggleActiveUserFrame(false);
@@ -87,15 +90,53 @@ public class GameLogicController
         _activeUserController.IconDisplayView.ToggleActiveUserFrame(true);
     }
 
-    private void StartGameSetupHandler(GameTask task)
+    private void StartSetupHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)LevelIntroHandler);
+                break;
+            case 1:
+                task.StartHandler((Action<GameTask>)CampSetupHandler);
+                break;
+            case 2:
+                task.StartHandler((Action<GameTask>)UISetupHandler);
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask>)PlayerHandSetupHandler);
+                break;
+            case 4:
+                task.StartHandler((Action<GameTask>)NpcHandSetupHandler);
+                break;
+            case 5:
+                task.StartHandler((Action<GameTask>)RoundStartHandler);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void LevelIntroHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0: // todo: game intro
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
-            case 1:
-                task.StartHandler((Action<GameTask>)_campController.StartViewSetupHandler);
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void CampSetupHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)_campController.SetupViewHandler);
                 break;
             default:
                 task.Complete();
@@ -103,25 +144,18 @@ public class GameLogicController
         }
     }
 
-    private void CampIconsSelectHandler(GameTask task)
+    private void UISetupHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                task.StartHandler((Action<GameTask>)_campController.EndViewSetupHandler);
-                break;
-            case 1:
                 _boardController.Fade(true);
                 _campController.Fade(true);
                 _userControllers.ToList().ForEach((controller) => controller.Fade(true));
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.gameUIFadeDuration) * 1000));
                 break;
-            case 2:
+            case 1:
                 task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
-                break;
-            case 3:
-                _boardController.EnableRightSideMarkerHoldersForRowPick();
-                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -129,36 +163,91 @@ public class GameLogicController
         }
     }
 
-    private void EndHandSetupHandler(GameTask task)
+    private void PlayerHandSetupHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                task.StartHandler((Action<GameTask>)_activeUserController.MarkerView.EndHandSetupHandler);
+                _boardController.EnableRightSideMarkerHoldersForRowPick();
+                task.StartHandler((Action<GameTask>)_screenController.RowSelectionHandler);
                 break;
             case 1:
-                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
+                _activeUserController.SetMarkerUsed();
+                (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
+                task.StartHandler((Action<GameTask>)RowPickHandler);
                 break;
             case 2:
+                List<Card>[] cardsByDeck = new List<Card>[] { new(), new(), _boardController.CreateInitialGroundCards(), new() };
+                task.StartHandler((Action<GameTask, List<Card>[], bool>)_screenController.CardSelectionHandler, cardsByDeck, true);
+                break;
+            case 3:
+                List<Card> cards = new() { _boardController.GetPreparedCardByID(_screenController.GetSelectedCardID()) };
+                task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cards);
+                break;
+            case 4:
+                task.StartHandler((Action<GameTask, Card>)(_activeUserController as PlayerController).PlaceInitialCardOnTableHandler, _boardController.GetPreparedCardByID(_screenController.GetSelectedCardID()));
+                break;
+            case 5:
+                _boardController.DisposePreparedCards(true, _boardController.GetPreparedCardByID(_screenController.GetSelectedCardID()));
+                task.StartHandler((Action<GameTask>)_activeUserController.MarkerView.EndHandSetupHandler);
+                break;
+            default:
                 SetNextActiveUserController();
-                if (_currentGameMode.ActiveUserIndex == 0)
+                task.Complete();
+                break;
+        }
+    }
+
+    private void NpcHandSetupHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
+                break;
+            case 1:
+                (_activeUserController as NpcController).UpdateCampIconPairs(_campController.GetAdjacentIconPairs());
+                (_activeUserController as NpcController).SelectRow(_boardController.GetAllCardsWithAvailableMarkerHolders());
+                _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).ShowMarkerPlacementHandler);
+                break;
+            case 2:
+                task.StartHandler((Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler, (_activeUserController as NpcController).SelectedMarkerHolder, (_activeUserController as NpcController).SelectedMarker);
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask>)RowPickHandler);
+                break;
+            case 4:
+                List<Card> groundCards = _boardController.CreateInitialGroundCards();
+                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCardsWithAvailableMarkerHolders(), groundCards);
+                _screenController.SetSelectedCardID((_activeUserController as NpcController).SelectedCard.Data.ID);
+                List<Card>[] cardsByDeck = new List<Card>[] { new(), new(), groundCards, new() };
+                task.StartHandler((Action<GameTask, List<Card>[], bool>)_screenController.CardSelectionHandler, cardsByDeck, false);
+                break;
+            case 5:
+                List<Card> cards = new() { (_activeUserController as NpcController).SelectedCard };
+                task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cards);
+                break;
+            case 6:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).PlaceCardOnTableHandler);
+                break;
+            case 7:
+                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).UpdateDisplayIconsHandler);
+                break;
+            case 8:
+                _boardController.DisposePreparedCards(true, (_activeUserController as NpcController).SelectedCard);
+                task.StartHandler((Action<GameTask>)_activeUserController.MarkerView.EndHandSetupHandler);
+                break;
+            default:
+                SetNextActiveUserController();
+                if (_currentGameMode.ActiveUserIndex > 0) // next npc controller
                 {
-                    task.StartHandler(_screenController.GetRoundScreenHandler(), _currentGameMode.CurrentRoundIndex + 1);
+                    task.NextState(0);
                 }
                 else
                 {
-                    task.NextState(4);
+                    task.Complete();
                 }
-                break;
-            case 3:
-                _activeUserController.StartTurn();
-                task.NextState(5);
-                break;
-            case 4:
-                task.StartHandler((Action<GameTask>)NpcHandSetupHandler);
-                break;
-            default:
-                task.Complete();
                 break;
         }
     }
@@ -201,41 +290,38 @@ public class GameLogicController
         }
     }
 
-    private void NpcHandSetupHandler(GameTask task)
+    private void RoundStartHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
-                (_activeUserController as NpcController).UpdateCampIconPairs(_campController.GetAdjacentIconPairs());
-                (_activeUserController as NpcController).SelectRow(_boardController.GetAllCardsWithAvailableMarkerHolders());
-                _boardController.ShowMarkersAtBoard((_activeUserController as NpcController).SelectedMarkerHolder, _activeUserController.MarkerView.GetRemainingMarkers());
-                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).ShowMarkerPlacementHandler);
+                int nextRound = _currentGameMode.CurrentRoundIndex + (_currentGameMode.State == GameState.SETUP ? 1 : 2);
+                task.StartHandler(_screenController.GetRoundScreenHandler(), nextRound);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, MarkerHolder, Marker>)MarkerPlaceHandler, (_activeUserController as NpcController).SelectedMarkerHolder, (_activeUserController as NpcController).SelectedMarker);
+                if (!_currentGameMode.IsOverHalfTime() && _currentGameMode.IsOverHalfTime(_currentGameMode.CurrentRoundIndex + 1)) // check if session just reached half-time
+                {
+                    task.StartHandler((Action<GameTask>)_boardController.BoardChangeHandler);
+                }
+                else
+                {
+                    task.StartDelayMs(0);
+                }
                 break;
             case 2:
-                task.StartHandler((Action<GameTask>)RowPickHandler);
-                break;
-            case 3:
-                List<Card> groundCards = _boardController.CreateInitialGroundCards();
-                (_activeUserController as NpcController).SelectInitialGroundCard(_boardController.GetAllCardsWithAvailableMarkerHolders(), groundCards);
-                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), groundCards, false);
-                break;
-            case 4:
-                Card groundCard = (_activeUserController as NpcController).SelectedCard;
-                task.StartHandler((Action<GameTask, CardHolder, Card>)CardPickHandler, groundCard.transform.parent.GetComponent<CardHolder>(), groundCard);
-                break;
-            case 5:
-                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).PlaceCardOnTableHandler);
-                break;
-            case 6:
-                task.StartHandler((Action<GameTask>)(_activeUserController as NpcController).UpdateDisplayIconsHandler);
-                break;
-            case 7:
-                task.StartHandler((Action<GameTask>)EndHandSetupHandler);
+                if (_currentGameMode.State == GameState.SETUP)
+                {
+                    _currentGameMode.State = GameState.GAMEPLAY;
+                }
+                else
+                {
+                    _currentGameMode.SetNextRound();
+                    SetNextActiveUserController();
+                }
+                task.StartHandler((Action<GameTask>)TurnStartHandler);
                 break;
             default:
+                Debug.Log("round: " + (_currentGameMode.CurrentRoundIndex + 1));
                 task.Complete();
                 break;
         }
@@ -331,23 +417,51 @@ public class GameLogicController
                 switch (markerAction)
                 {
                     case MarkerAction.PICK_ANY_CARD_FROM_BOARD:
-                        task.StartHandler((Action<GameTask>)_boardController.EnableAnyCardSelectionHandler);
+                        task.StartHandler((Action<GameTask>)PickAnyCardFromBoardHandler);
                         break;
                     case MarkerAction.TAKE_2_ROAD_TOKENS:
-                        task.StartHandler((Action<GameTask>)_activeUserController.AddRoadTokensHandler);
+                        task.StartHandler((Action<GameTask>)Take2RoadTokensHandler);
                         break;
                     case MarkerAction.PICK_A_CARD_FROM_CHOSEN_DECK:
-                        task.StartHandler(_screenController.GetToggleDeckSelectionScreenHandler(), GetActiveDeckType(), true);
+                        task.StartHandler((Action<GameTask>)PickACardFromChosenDeckHandler);
+                        break;
+                    case MarkerAction.PLAY_UP_TO_2_CARDS:
+                        task.StartHandler((Action<GameTask>)PlayUpTo2CardsHandler);
                         break;
                     default:
-                        task.StartHandler((Action<GameTask>)_activeUserController.AddExtraCardPlacementHandler);
+                        Debug.LogError("markerAction error: " + markerAction);
+                        task.StartDelayMs(0);
                         break;
                 }
                 break;
-            case 2:
-                if (
-                    _activeUserController.userID == 0 &&
-                    Array.Exists(new[] { MarkerAction.TAKE_2_ROAD_TOKENS, MarkerAction.PLAY_UP_TO_2_CARDS }, action => action == markerAction)) // marker action ends immediately
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void PickAnyCardFromBoardHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)_boardController.EnableAnyCardSelectionHandler);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void Take2RoadTokensHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)_activeUserController.AddRoadTokensHandler);
+                break;
+            case 1:
+                if(_activeUserController.userID == 0)
                 {
                     (_activeUserController as PlayerController).EnableTableToggleButton(true);
                     (_activeUserController as PlayerController).EnableTurnEndButton(true);
@@ -360,15 +474,59 @@ public class GameLogicController
         }
     }
 
-    private void DeckSelectHandler(GameTask task, DeckType deckType)
+    private void PickACardFromChosenDeckHandler(GameTask task)
     {
-        switch (task.State)
+        switch(task.State)
         {
             case 0:
-                task.StartHandler(_screenController.GetToggleDeckSelectionScreenHandler(), deckType, false);
+                if (_activeUserController.userID == 0)
+                {
+                    _boardController.ToggleRayCastOfCards(false);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(false);
+                    (_activeUserController as PlayerController).ToggleHandScreenHitarea(false);
+                    (_activeUserController as PlayerController).EnableTableToggleButton(false);
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
+                }
+                List<Card>[] cardsByDeck = _boardController.GetRandomCardOfAllDecks(3);
+                task.StartHandler((Action<GameTask, DeckType, List<Card>[], bool>)_screenController.CardSelectionActionHandler, GetActiveDeckType(), cardsByDeck, _activeUserController.userID == 0);
                 break;
             case 1:
-                task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.GetRandomCardOfDeck(deckType, 3), _activeUserController.userID == 0);
+                List<Card> cards = new() { _boardController.GetPreparedCardByID(_screenController.GetSelectedCardID()) };
+                task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cards);
+                break;
+            case 2:
+                _boardController.DisposePreparedCards(false, _boardController.GetPreparedCardByID(_screenController.GetSelectedCardID()));
+                if (_activeUserController.userID == 0)
+                {
+                    (_activeUserController as PlayerController).EnableTurnEndButton(true);
+                    (_activeUserController as PlayerController).ToggleHandScreenHitarea(true);
+                    (_activeUserController as PlayerController).EnableTableToggleButton(true);
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
+                    _boardController.ToggleCanInspectFlagOfCards(true);
+                    _boardController.ToggleRayCastOfCards(true);
+                }
+                task.StartDelayMs(0);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    private void PlayUpTo2CardsHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)_activeUserController.AddExtraCardPlacementHandler);
+                break;
+            case 1:
+                if (_activeUserController.userID == 0)
+                {
+                    (_activeUserController as PlayerController).EnableTableToggleButton(true);
+                    (_activeUserController as PlayerController).EnableTurnEndButton(true);
+                }
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -408,9 +566,8 @@ public class GameLogicController
         switch(task.State)
         {
             case 0: // reset animation?
-                if (_activeUserController.userID == 0 & _currentGameMode.State == GameState.SETUP)
+                if (_activeUserController.userID == 0)
                 {
-                    _currentGameMode.State = GameState.GAMEPLAY;
                     (_activeUserController as PlayerController).FadeTurnEndButton(true);
                     (_activeUserController as PlayerController).EnableCampButton(true);
                     (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
@@ -460,17 +617,12 @@ public class GameLogicController
                 if (_userControllers.ToList().Find(controller => controller.userID == nextUserID).MarkerView.GetRemainingMarkers().Count > 0)
                 {
                     SetNextActiveUserController();
-                    _activeUserController.StartTurn();
-                }
-                else if(_currentGameMode.IsGameEnded)
-                {
-                    _activeUserController.EndGame();
+                    task.StartHandler((Action<GameTask>)TurnStartHandler);
                 }
                 else
                 {
-                    _activeUserController.EndRound();
+                    task.StartHandler((Action<GameTask>)RoundEndHandler);
                 }
-                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();
@@ -483,28 +635,24 @@ public class GameLogicController
         switch(task.State)
         {
             case 0:
-                task.StartHandler(_screenController.GetRoundScreenHandler(), _currentGameMode.CurrentRoundIndex + 2);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
                 break;
             case 1: // marker reset animation?
                 _userControllers.ToList().ForEach(controller => controller.MarkerView.Reset());
                 task.StartDelayMs(1000);
                 break;
             case 2:
-                int prevRoundIndex = _currentGameMode.CurrentRoundIndex;
-                _currentGameMode.SetNextRound();
-                if(!_currentGameMode.IsOverHalfTime(prevRoundIndex) && _currentGameMode.IsOverHalfTime()) // check if session just reached half-time
+                if (_currentGameMode.IsGameEnded)
                 {
-                    task.StartHandler((Action<GameTask>)_boardController.BoardChangeHandler);
+                    task.StartHandler((Action<GameTask>)GameEndHandler);
                 }
                 else
                 {
-                    task.StartDelayMs(0);
+                    task.StartHandler((Action<GameTask>)RoundStartHandler);
                 }
                 break;
             default:
-                Debug.Log("round: " + (_currentGameMode.CurrentRoundIndex + 1));
-                SetNextActiveUserController();
-                _activeUserController.StartTurn();
+                Debug.Log("Round Ended");
                 task.Complete();
                 break;
         }
@@ -595,12 +743,6 @@ public class GameLogicController
         switch (task.State)
         {
             case 0:
-                if (_activeUserController.userID == 0)
-                {
-                    _activeUserController.SetMarkerUsed();
-                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
-                    _screenController.ToggleRowHighlightFrame();
-                }
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
                 task.StartHandler((Action<GameTask>)_boardController.DrawRandomNorthCardFromDeckHandler);
                 break;
@@ -608,7 +750,7 @@ public class GameLogicController
                 List<Card> cardsOfRow = _boardController.GetRowOfSelectedCards();
                 _boardController.ToggleCardsSelection(false);
                 cardsOfRow.ForEach(card => card.transform.parent.GetComponent<CardHolder>().Data.RemoveItemFromContentList(card));
-                cardsOfRow.Insert(0, _boardController.GetUnselectedCards(null).First()); // include random north card
+                cardsOfRow.Insert(0, _boardController.GetPreparedCardByID(-1)); // include random north card
                 task.StartHandler(_activeUserController.GetAddCardToHandHandler(), cardsOfRow);
                 break;
             case 2:
@@ -616,16 +758,6 @@ public class GameLogicController
                 break;
             case 3:
                 task.StartDelayMs(500);
-                break;
-            case 4:
-                if (_activeUserController.userID == 0)
-                {
-                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(true), _boardController.CreateInitialGroundCards(), true);
-                }
-                else
-                {
-                    task.StartDelayMs(0);
-                }
                 break;
             default:
                 task.Complete();
@@ -647,63 +779,28 @@ public class GameLogicController
                     (_activeUserController as PlayerController).HandView.EnableCardsRaycast(false);
                 }
                 _boardController.ToggleBlackOverlayOfCardHolders(false, new int[][] { });
-                if (holder == null) // card picked from selection screen
-                {
-                    task.StartHandler(_screenController.GetCardSelectionToggleHandler(false), _boardController.GetUnselectedCards(card), _activeUserController.userID == 0);
-                }
-                else
-                {
-                    _activeUserController.SetMarkerUsed();
-                    _boardController.ToggleCardsSelection(false);
-                    holder.Data.RemoveItemFromContentList(card);
-                    task.StartDelayMs(0);
-                }
-                break;
-            case 1:
-                if (holder == null) // card picked from selection screen
-                {
-                    _boardController.DisposeUnselectedCards(_currentGameMode.State == GameState.SETUP);
-                }
+                _activeUserController.SetMarkerUsed();
+                _boardController.ToggleCardsSelection(false);
+                holder.Data.RemoveItemFromContentList(card);
                 task.StartDelayMs(0);
                 break;
-            case 2:
+            case 1:
                 task.StartHandler(_activeUserController.GetAddCardToHandHandler(), new List<Card>() { card });
                 break;
-            case 3:
+            case 2:
                 task.StartHandler((Action<GameTask, DeckType>)_boardController.BoardFillHandler, GetActiveDeckType());
                 break;
-            case 4:
+            case 3:
                 if(_activeUserController.userID == 0)
                 {
-                    if (_currentGameMode.State == GameState.SETUP)
-                    {
-                        task.StartHandler((Action<GameTask, Card>)(_activeUserController as PlayerController).PlaceInitialCardOnTableHandler, card);
-                    }
-                    else
-                    {
-                        (_activeUserController as PlayerController).EnableTurnEndButton(true);
-                        (_activeUserController as PlayerController).ToggleHandScreenHitarea(true);
-                        (_activeUserController as PlayerController).EnableTableToggleButton(true);
-                        (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
-                        _boardController.ToggleCanInspectFlagOfCards(true);
-                        _boardController.ToggleRayCastOfCards(true);
-                        task.StartDelayMs(0);
-                    }
+                    (_activeUserController as PlayerController).EnableTurnEndButton(true);
+                    (_activeUserController as PlayerController).ToggleHandScreenHitarea(true);
+                    (_activeUserController as PlayerController).EnableTableToggleButton(true);
+                    (_activeUserController as PlayerController).HandView.EnableCardsRaycast(true);
+                    _boardController.ToggleCanInspectFlagOfCards(true);
+                    _boardController.ToggleRayCastOfCards(true);
                 }
-                else
-                {
-                    task.NextState(6);
-                }
-                break;
-            case 5:
-                if(_currentGameMode.State == GameState.SETUP)
-                {
-                    task.StartHandler((Action<GameTask>)EndHandSetupHandler);
-                }
-                else
-                {
-                    task.StartDelayMs(0);
-                }
+                task.StartDelayMs(0);
                 break;
             default:
                 task.Complete();

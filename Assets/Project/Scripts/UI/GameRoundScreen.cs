@@ -88,7 +88,14 @@ public class GameRoundScreen : MonoBehaviour
                 task.StartDelayMs((int)fadeDuration * 1000);
                 break;
             case 1:
-                task.StartHandler((Action<GameTask, int>)ShowProgressUI, nextRound);
+                if(nextRound > 1)
+                {
+                    task.StartHandler((Action<GameTask, int>)ShowProgressUI, nextRound);
+                }
+                else
+                {
+                    task.StartDelayMs(0);
+                }
                 break;
             case 2:
                 _text.enabled = true;
@@ -147,15 +154,8 @@ public class GameRoundScreen : MonoBehaviour
         switch (task.State)
         {
             case 0:
-                if (nextRound == 1)
-                {
-                    task.NextState(6);
-                }
-                else
-                {
-                    DOTween.Sequence().Append(rect.DOScale(1.4f, progressPanelSpeed)).Join(rect.DOAnchorPos(Vector3.zero, progressPanelSpeed).SetEase(Ease.Linear));
-                    task.StartDelayMs((int)progressPanelSpeed * 1000);
-                }
+                DOTween.Sequence().Append(rect.DOScale(1.4f, progressPanelSpeed)).Join(rect.DOAnchorPos(Vector3.zero, progressPanelSpeed).SetEase(Ease.Linear));
+                task.StartDelayMs((int)progressPanelSpeed * 1000);
                 break;
             case 1:
                 task.StartDelayMs((int)waitDelay * 1000);

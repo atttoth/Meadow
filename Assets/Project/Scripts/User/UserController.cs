@@ -7,7 +7,7 @@ using UnityEngine;
 public abstract class UserController : MonoBehaviour
 {
     [HideInInspector]public int userID;
-    protected LogicEventDispatcher _dispatcher;
+    protected GameEventController _eventController;
     protected UserControllerLayout _userControllerLayout;
     protected TableView _tableView;
     protected HandView _handView;
@@ -19,7 +19,7 @@ public abstract class UserController : MonoBehaviour
 
     public virtual void CreateUser(GameMode gameMode)
     {
-        _dispatcher = new();
+        _eventController = new();
         _userControllerLayout = new UserControllerLayout();
         if(userID > 0) // ignore player layout for now
         {
@@ -43,24 +43,9 @@ public abstract class UserController : MonoBehaviour
         return (Action<GameTask, List<Card>>)_handView.AddCardHandler;
     }
 
-    public void StartTurn()
-    {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.TURN_STARTED, new object[0]);
-    }
-
     public void EndTurn()
     {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.TURN_ENDED, new object[0]);
-    }
-
-    public void EndRound()
-    {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.ROUND_ENDED, new object[0]);
-    }
-
-    public void EndGame()
-    {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.GAME_ENDED, new object[0]);
+        _eventController.InvokeEventHandler(GameLogicEventType.TURN_ENDED, new object[0]);
     }
 
     public void Fade(bool value)

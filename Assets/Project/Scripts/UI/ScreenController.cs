@@ -9,7 +9,8 @@ using UnityEngine.UI;
 
 public class ScreenController : MonoBehaviour
 {
-    private LogicEventDispatcher _dispatcher;
+    private GameEventController _eventController;
+    private GameTask _waitingTask;
     private CardInspectionScreen _cardInspectionScreen;
     private MarkerActionScreen _markerActionScreen;
     private SelectionScreen _selectionScreen;
@@ -20,36 +21,40 @@ public class ScreenController : MonoBehaviour
 
     public void Create()
     {
-        _dispatcher = new();
+        _eventController = new();
         _cardInspectionScreen = transform.GetChild(0).GetComponent<CardInspectionScreen>();
         Button approveIconRemoveButton = _cardInspectionScreen.Init();
         approveIconRemoveButton.onClick.AddListener(() =>
         {
             approveIconRemoveButton.enabled = false;
-            _dispatcher.InvokeEventHandler(GameLogicEventType.REMOVED_CARD_ICON, new object[] { _cardInspectionScreen.GetDisposedIconItem() });
+            _eventController.InvokeEventHandler(GameLogicEventType.REMOVED_CARD_ICON, new object[] { _cardInspectionScreen.GetDisposedIconItem() });
         });
         _markerActionScreen = transform.GetChild(1).GetComponent<MarkerActionScreen>();
         List<Button> actionIconButtons = _markerActionScreen.Init();
-        actionIconButtons.ForEach(button => button.onClick.AddListener(() =>
-        {
-            button.enabled = true;
-            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_ACTION_SELECTED, new object[] { (MarkerAction)button.GetComponent<ScreenDisplayItem>().type });
-        }));
+        actionIconButtons.ForEach(button => button.onClick.AddListener(() => _eventController.InvokeEventHandler(GameLogicEventType.MARKER_ACTION_SELECTED, new object[] { (MarkerAction)button.GetComponent<ScreenDisplayItem>().type })));
 
         _selectionScreen = transform.GetChild(2).GetComponent<SelectionScreen>();
-        List<Button> deckButtons = _selectionScreen.Init();
-        deckButtons.ForEach(button => button.onClick.AddListener(() =>
+        List<Button>[] itemButtons = _selectionScreen.Init();
+        itemButtons[0].ForEach(button => button.onClick.AddListener(() =>
         {
-            button.enabled = true;
-            _dispatcher.InvokeEventHandler(GameLogicEventType.DECK_SELECTED, new object[] { (DeckType)button.GetComponent<ScreenDisplayItem>().type });
+            button.enabled = false;
+            _selectionScreen.SelectedDeckType = (DeckType)button.GetComponent<ScreenDisplayItem>().type;
+            CancelTaskWait();
+        }));
+        itemButtons[1].ForEach(button => button.onClick.AddListener(() =>
+        {
+            _selectionScreen.EnableCardItemButtons(false);
+            _selectionScreen.SelectedCardID = button.GetComponent<ScreenDisplayItem>().ID;
+            CancelTaskWait();
         }));
 
         _rowHighlightScreen = transform.GetChild(3).GetComponent<RowHighlightScreen>();
         Button highlightFrameButton = _rowHighlightScreen.Init();
         highlightFrameButton.onClick.AddListener(() =>
         {
-            highlightFrameButton.enabled = true;
-            _dispatcher.InvokeEventHandler(GameLogicEventType.ROW_PICKED, new object[0]);
+            highlightFrameButton.enabled = false;
+            ToggleRowHighlightFrame();
+            CancelTaskWait();
         });
 
         _scoreCollectionScreen = transform.GetChild(4).GetComponent<ScoreCollectionScreen>();
@@ -77,6 +82,102 @@ public class ScreenController : MonoBehaviour
         _markerActionScreen.ToggleScreen(marker);
     }
 
+    public void SetSelectedCardID(int cardID)
+    {
+        _selectionScreen.SelectedCardID = cardID;
+    }
+
+    public int GetSelectedCardID()
+    {
+        return _selectionScreen.SelectedCardID;
+    }
+
+    private void CancelTaskWait()
+    {
+        _waitingTask.CancelWait();
+        _waitingTask = null;
+    }
+
+    private void SelectionWaitHandler(GameTask task)
+    {
+        switch (task.State)
+        {
+            case 0:
+                _waitingTask = task;
+                task.StartDelayMs(0, true);
+                break;
+            case 1:
+                task.Wait();
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void RowSelectionHandler(GameTask task)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask>)SelectionWaitHandler);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void CardSelectionActionHandler(GameTask task, DeckType activeDeckType, List<Card>[] cardsByDeck, bool isPlayerSelection)
+    {
+        switch(task.State)
+        {
+            case 0:
+                task.StartHandler((Action<GameTask, DeckType, bool>)_selectionScreen.ToggleDeckSelectionScreenHandler, activeDeckType, true);
+                break;
+            case 1:
+                task.StartHandler((Action<GameTask>)SelectionWaitHandler);
+                break;
+            case 2:
+                task.StartHandler((Action<GameTask, DeckType, bool>)_selectionScreen.ToggleDeckSelectionScreenHandler, _selectionScreen.SelectedDeckType, false);
+                break;
+            case 3:
+                task.StartHandler((Action<GameTask, List<Card>[], bool>)CardSelectionHandler, cardsByDeck, isPlayerSelection);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
+    public void CardSelectionHandler(GameTask task, List<Card>[] cardsByDeck, bool isPlayerSelection)
+    {
+        switch (task.State)
+        {
+            case 0:
+                List<Card> cards = cardsByDeck[(int)_selectionScreen.SelectedDeckType];
+                task.StartHandler((Action<GameTask, List<Card>, bool>)_selectionScreen.ShowCardSelectionHandler, cards, isPlayerSelection);
+                break;
+            case 1:
+                if(isPlayerSelection)
+                {
+                    task.StartHandler((Action<GameTask>)SelectionWaitHandler);
+                }
+                else
+                {
+                    task.StartDelayMs(0);
+                }
+                break;
+            case 2:
+                List<Card> unselectedCards = cardsByDeck[(int)_selectionScreen.SelectedDeckType].Where(card => card.Data.ID != _selectionScreen.SelectedCardID).ToList();
+                task.StartHandler((Action<GameTask, List<Card>, bool>)_selectionScreen.HideCardSelectionHandler, unselectedCards, isPlayerSelection);
+                break;
+            default:
+                task.Complete();
+                break;
+        }
+    }
+
     public void CollectCardScoreHandler(GameTask task, List<Card> cards, Vector3 targetPosition)
     {
         switch (task.State)
@@ -98,7 +199,7 @@ public class ScreenController : MonoBehaviour
                     scoreTextPrefab.SetPositionAndRotation(card.CardIconItemsView.GetScoreItemPosition(), Quaternion.identity);
                     DOTween.Sequence().Append(scoreTextPrefab.DOMove(targetPosition, speed).SetEase(Ease.InOutQuart).SetDelay(delay)).OnComplete(() =>
                     {
-                        _dispatcher.InvokeEventHandler(GameLogicEventType.SCORE_COLLECTED, new object[] { card.Data.score });
+                        _eventController.InvokeEventHandler(GameLogicEventType.SCORE_COLLECTED, new object[] { card.Data.score });
                         _scoreCollectionScreen.DisposeScoreTextObject(scoreTextPrefab);
                     });
                     i++;
@@ -123,7 +224,7 @@ public class ScreenController : MonoBehaviour
                 scoreTextPrefab.GetChild(1).GetComponent<TextMeshProUGUI>().text = score.ToString();
                 DOTween.Sequence().Append(scoreTextPrefab.DOMove(targetPosition, speed).SetEase(Ease.InOutQuart)).OnComplete(() =>
                 {
-                    _dispatcher.InvokeEventHandler(GameLogicEventType.SCORE_COLLECTED, new object[] { score });
+                    _eventController.InvokeEventHandler(GameLogicEventType.SCORE_COLLECTED, new object[] { score });
                     _scoreCollectionScreen.DisposeScoreTextObject(scoreTextPrefab);
                 });
                 task.StartDelayMs(duration);
@@ -152,11 +253,6 @@ public class ScreenController : MonoBehaviour
     public Delegate GetRemoveIconItemHandler()
     {
         return (Action<GameTask, CardIconItem>)_cardInspectionScreen.RemoveIconItemHandler;
-    }
-
-    public Delegate GetToggleDeckSelectionScreenHandler()
-    {
-        return (Action<GameTask, DeckType, bool>)_selectionScreen.ToggleDeckSelectionScreenHandler;
     }
 
     public Delegate GetCardSelectionToggleHandler(bool isShow)

@@ -3,11 +3,11 @@ using UnityEngine.EventSystems;
 
 public abstract class HitArea : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    protected LogicEventDispatcher _dispatcher;
+    protected GameEventController _eventController;
 
     public virtual void Init()
     {
-        _dispatcher = new();
+        _eventController = new();
     }
 
     public virtual void OnPointerEnter(PointerEventData eventData) { }

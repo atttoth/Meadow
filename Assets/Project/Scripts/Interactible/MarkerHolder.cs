@@ -10,7 +10,7 @@ public enum MarkerDirection
 
 public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, IScrollHandler
 {
-    private LogicEventDispatcher _dispatcher;
+    private GameEventController _eventController;
     private Image _mainImage;
     private MarkerDirection _direction;
 
@@ -19,7 +19,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     public override void Init(int id, HolderType type)
     {
         base.Init(id, type);
-        _dispatcher = new();
+        _eventController = new();
         _mainImage = GetComponent<Image>();
         switch (transform.parent.gameObject.tag)
         {
@@ -51,7 +51,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, true, 0 });
+            _eventController.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, true, 0 });
         }
     }
 
@@ -59,7 +59,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, 0 });
+            _eventController.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, 0 });
         }
     }
 
@@ -67,7 +67,7 @@ public class MarkerHolder : Holder, IPointerEnterHandler, IPointerExitHandler, I
     {
         if (IsAvailable())
         {
-            _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, (int)eventData.scrollDelta.y });
+            _eventController.InvokeEventHandler(GameLogicEventType.MARKER_HOLDER_TRIGGERED, new object[] { this, false, (int)eventData.scrollDelta.y });
         }
     }
 

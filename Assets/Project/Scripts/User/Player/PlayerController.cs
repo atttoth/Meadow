@@ -64,7 +64,7 @@ public class PlayerController : UserController
             {
                 EnableTableApproveButton(false);
                 (_tableView as PlayerTableView).UpdateApproveButton(false);
-                _dispatcher.InvokeEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), _infoView.scoreTransform.position });
+                _eventController.InvokeEventHandler(GameLogicEventType.APPROVED_PENDING_CARD_PLACED, new object[] { GetPlacedCardsWithScore(), _infoView.scoreTransform.position });
             }
             else
             {
@@ -96,13 +96,13 @@ public class PlayerController : UserController
             FadeTurnEndButton(!(_tableView as PlayerTableView).isTableVisible);
             ToggleHandScreenHitarea(!(_tableView as PlayerTableView).isTableVisible);
         }
-        _dispatcher.InvokeEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !(_tableView as PlayerTableView).isTableVisible });
+        _eventController.InvokeEventHandler(GameLogicEventType.TABLE_TOGGLED, new object[] { !(_tableView as PlayerTableView).isTableVisible });
     }
 
     public void ToggleCamp()
     {
         _isCampVisible = !_isCampVisible;
-        _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_TOGGLED, new object[] { _isCampVisible });
+        _eventController.InvokeEventHandler(GameLogicEventType.CAMP_TOGGLED, new object[] { _isCampVisible });
         Transform parent = _isCampVisible ? transform.root : _infoView.transform;
         _campToggleButton.transform.SetParent(parent); // place button above camp view in the hierarchy
     }

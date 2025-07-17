@@ -158,18 +158,16 @@ public class BoardController : MonoBehaviour
                 break;
             case 1:
                 int duration = 0;
-                List<Card> cards = new();
-                cards.AddRange(_preparedCards);
                 float cardDrawDelay = GameSettings.Instance.GetDuration(Duration.cardDrawDelayFromDeck);
                 float cardDrawSpeed = GameSettings.Instance.GetDuration(Duration.cardDrawSpeedFromDeck);
                 float cardRotationSpeed = GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard);
                 duration = (int)(((_preparedCards.Count - 1) * cardDrawDelay + cardDrawSpeed + cardRotationSpeed) * 1000);
                 int i = 0;
                 int colIndex = 0;
-                while (cards.Count > 0)
+                while (_preparedCards.Count > 0)
                 {
                     float delay = i * cardDrawDelay;
-                    Card card = GetNextItem(cards);
+                    Card card = GetNextItem(_preparedCards);
                     card.ClearBoardTween(_deckController.GetDisplayDeckTransform(colIndex), delay);
                     i++;
                     if(i % 4 == 0)
@@ -180,7 +178,7 @@ public class BoardController : MonoBehaviour
                 task.StartDelayMs(duration);
                 break;
             case 2:
-                DisposeUnselectedCards(false);
+                DisposePreparedCards(false);
                 task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.waitDelay) * 1000));
                 break;
             case 3:
@@ -409,28 +407,27 @@ public class BoardController : MonoBehaviour
         }
     }
 
-    public List<Card> GetUnselectedCards(Card pickedCard)
+    public Card GetPreparedCardByID(int cardID)
     {
-        if(!pickedCard)
-        {
-            return _preparedCards;
-        }
-        else
-        {
-            _preparedCards.ForEach(card => card.ToggleSelection(false));
-            List<Card> unselectedTopCards = _preparedCards.Where(card => card != pickedCard).ToList();
-            _preparedCards = unselectedTopCards;
-            return unselectedTopCards;
-        }
+        return cardID > -1 ? _preparedCards.Find(card => card.Data.ID == cardID) : _preparedCards.First();
     }
 
-    public List<Card> GetRandomCardOfDeck(DeckType deckType, int amount)
+    public List<Card>[] GetRandomCardOfAllDecks(int amount)
     {
-        for (int i = 0; i < amount; i++)
+        int length = (int)DeckType.NUM_OF_DECKS;
+        List<Card>[] cardsByDeck = new List<Card>[length];
+        for(int i = 0; i < length; i++)
         {
-            _preparedCards.Add(_deckController.GetCardFromDeck(deckType));
+            List<Card> cards = new();
+            for(int j = 0; j < amount; j++)
+            {
+                Card card = _deckController.GetCardFromDeck((DeckType)i);
+                _preparedCards.Add(card);
+                cards.Add(card);
+            }
+            cardsByDeck[i] = cards;
         }
-        return _preparedCards;
+        return cardsByDeck;
     }
 
     public List<Card> CreateInitialGroundCards()
@@ -446,11 +443,16 @@ public class BoardController : MonoBehaviour
         return _preparedCards;
     }
 
-    public void DisposeUnselectedCards(bool isHandSetup)
+    public void DisposePreparedCards(bool isHandSetup, Card card = null)
     {
-        if(isHandSetup) // destroy unselected ground card copy
+        if (card) // prevent disposing selected card
         {
-            Destroy(_preparedCards.First().gameObject);
+            _preparedCards.Remove(card);
+        }
+
+        if (isHandSetup) // destroy unselected ground card copy
+        {
+            _preparedCards.ForEach(card => Destroy(card.gameObject));
         }
         else // put cards back to deck
         {
@@ -460,7 +462,6 @@ public class BoardController : MonoBehaviour
                 Deck deck = _deckController.GetDeckByDeckType(deckType);
                 card.transform.SetParent(deck.transform);
                 card.transform.position = deck.transform.position;
-                card.gameObject.SetActive(false);
                 deck.AddCard(card);
             });
         }

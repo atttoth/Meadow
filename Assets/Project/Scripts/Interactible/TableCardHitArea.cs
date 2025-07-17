@@ -16,6 +16,6 @@ public class TableCardHitArea : HitArea
 
     private void UpdateHitArea(string hitAreaTag = null)
     {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.TABLE_HITAREA_HOVERED_OVER, new object[] { type, hitAreaTag });
+        _eventController.InvokeEventHandler(GameLogicEventType.TABLE_HITAREA_HOVERED_OVER, new object[] { type, hitAreaTag });
     }
 }

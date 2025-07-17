@@ -21,6 +21,11 @@ public class GameLogicManager : MonoBehaviour
         }
     }
 
+    private void OnApplicationQuit()
+    {
+        _gameLogicController.Kill();
+    }
+
     private UserController[] CreateUserControllersForSession(GameMode gameMode)
     {
         List<UserController> userControllers = new() { GameResourceManager.Instance.playerController };

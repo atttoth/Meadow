@@ -2,16 +2,11 @@ using System;
 
 public enum GameLogicEventType
 {
-    TURN_STARTED,
     TURN_ENDED,
-    ROUND_ENDED,
-    GAME_ENDED,
     TABLE_TOGGLED,
-    CAMP_ICONS_SELECTED,
     CAMP_TOGGLED,
     CAMP_SCORE_RECEIVED,
     TABLE_HITAREA_HOVERED_OVER,
-    ROW_PICKED,
     CARD_PICKED,
     CARD_MOVED,
     CARD_PLACED,
@@ -26,22 +21,29 @@ public enum GameLogicEventType
     MARKER_PLACED,
     MARKER_CANCELLED,
     MARKER_ACTION_SELECTED,
-    DECK_SELECTED,
     SCORE_COLLECTED,
     HAND_SCREEN_TOGGLED
 }
 
-public class LogicEventDispatcher
+public class GameEventController
 {
     private event EventHandler<object[]> _logicEventHandler;
 
-    public LogicEventDispatcher()
+    public GameEventController()
     {
         _logicEventHandler += GameResourceManager.Instance.gameLogicManager.OnLogicEvent;
     }
 
-    public void InvokeEventHandler(GameLogicEventType type, object[] args)
+    public void InvokeEventHandler(object eventType, object[] args)
     {
-        _logicEventHandler.Invoke(Enum.ToObject(typeof(GameLogicEventType), type), args);
+        Type type = eventType.GetType();
+        switch (type)
+        {
+            case Type value when type == typeof(GameLogicEventType):
+                _logicEventHandler.Invoke(Enum.ToObject(typeof(GameLogicEventType), eventType), args);
+                break;
+            default:
+                break;
+        }
     }
 }

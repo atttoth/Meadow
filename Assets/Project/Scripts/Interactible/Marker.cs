@@ -84,7 +84,7 @@ public class Marker : Interactable
                 {
                     holder = _parent.GetComponent<MarkerHolder>();
                 }
-                _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.Data.holderType, this });
+                _eventController.InvokeEventHandler(GameLogicEventType.MARKER_CANCELLED, new object[] { holder.Data.holderType, this });
             }
         }
 
@@ -93,7 +93,7 @@ public class Marker : Interactable
             if (_status == MarkerStatus.NONE)
             {
                 MarkerHolder holder = transform.parent.GetComponent<MarkerHolder>();
-                _dispatcher.InvokeEventHandler(GameLogicEventType.MARKER_PLACED, new object[] { holder, this });
+                _eventController.InvokeEventHandler(GameLogicEventType.MARKER_PLACED, new object[] { holder, this });
             }
         }
     }

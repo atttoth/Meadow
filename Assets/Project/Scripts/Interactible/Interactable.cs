@@ -4,13 +4,13 @@ using UnityEngine.UI;
 
 public abstract class Interactable : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler, IBeginDragHandler, IDragHandler, IEndDragHandler
 {
-    protected LogicEventDispatcher _dispatcher;
+    protected GameEventController _eventController;
     protected Image _mainImage; // to toggle raycast
     protected Transform _parent; // used at marker and card hierarchy positioning
 
     public virtual void Init()
     {
-        _dispatcher = new();
+        _eventController = new();
     }
 
     public Image MainImage {  get { return _mainImage; } }

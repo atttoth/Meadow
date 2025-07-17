@@ -1,26 +1,23 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
+using UnityEngine;
 
-/**
- * execute handler task - ExecHandler()
- * insert new handler - StartHandler()
- * jump to next task state - StartDelayMs()
- * jump to any task state - NextState()
- * complete handler task - Complete()
- **/
 public class GameTask
 {
     private List<ArrayList> _taskItems;
     private ArrayList _currentTaskItem;
     private int _duration;
+    private bool _isWaiting;
 
     public GameTask()
     {
-        _duration = 0;
         _taskItems = new List<ArrayList>() { };
         _currentTaskItem = new ArrayList() { };
+        _duration = 0;
+        _isWaiting = false;
     }
 
     public int State
@@ -29,17 +26,37 @@ public class GameTask
         set { _currentTaskItem[2] = value; }
     }
 
+    /**
+     * start task handler execution
+     **/
+    public void ExecHandler(CancellationToken cancellationToken, Delegate f, params object[] args)
+    {
+        CreateTaskItem(f, args);
+        Execute(cancellationToken).ContinueWith(task =>
+        {
+            if (task.IsCanceled)
+            {
+                //Debug.Log("task canceled.");
+            }
+            else if (task.IsFaulted)
+            {
+                Debug.LogError("task error: " + task.Exception);
+            }  
+            else
+            {
+                //Debug.Log("task completed.");
+            }
+        }, TaskScheduler.FromCurrentSynchronizationContext());
+    }
+
+    /**
+     * insert new task handler into existing task handler, nested handlers execute in reverse call order (newest first)
+     **/
     public void StartHandler(Delegate f, params object[] args)
     {
         State++;
         _duration = 0;
         CreateTaskItem(f, args);
-    }
-
-    public async void ExecHandler(Delegate f, params object[] args)
-    {
-        CreateTaskItem(f, args);
-        await Task.WhenAll(Execute());
     }
 
     private void CreateTaskItem(Delegate f, object[] args)
@@ -49,52 +66,92 @@ public class GameTask
         _currentTaskItem = item;
     }
 
-    private async Task Execute()
+    /**
+     * task handler waits at current state
+     **/
+    public void Wait()
     {
-        if (State == -1) // check if current Delegate f has finished
+        if(_isWaiting)
         {
-            _taskItems.RemoveAt(_taskItems.Count - 1);
-            if (_taskItems.Count > 0) // check if any Delegate f left
-            {
-                _currentTaskItem = _taskItems[_taskItems.Count - 1];
-            }
-        }
-
-        if (State > -1)
-        {
-            await Task.Delay(_duration);
-            Delegate f = (Delegate)_currentTaskItem[0];
-            object[] args = (object[])_currentTaskItem[1];
-            object[] updatedArgs = new object[args.Length + 1];
-            updatedArgs[0] = this;
-            for (int i = 0; i < args.Length; i++)
-            {
-                updatedArgs[i + 1] = args[i];
-            }
-            f.DynamicInvoke(updatedArgs);
-            await Execute();
+            NextState(State, 25);
         }
         else
         {
-            await Task.Yield();
+            StartDelayMs(0);
         }
     }
 
-    public void StartDelayMs(int duration)
+    /**
+     * stop task handler waiting and continue task handler
+     **/
+    public void CancelWait()
     {
+        _isWaiting = false;
+    }
+
+    /**
+     * increment task handler state, start next state after delay, set wait flag to wait at next handler state
+     **/
+    public void StartDelayMs(int duration, bool wait = false)
+    {
+        if (wait)
+        {
+            _isWaiting = true;
+        }
         State++;
         _duration = duration;
     }
 
-    public void NextState(int state, int duration = 0)
+    /**
+     * set next task handler state, start next state after delay, set wait flag to wait at next handler state
+     **/
+    public void NextState(int state, int duration = 0, bool wait = false)
     {
+        if (wait)
+        {
+            _isWaiting = true;
+        }
         State = state;
         _duration = duration;
     }
 
+    /**
+     * set task handler state to -1 to finish handler execution
+     **/
     public void Complete()
     {
         State = -1;
         _duration = 0;
+    }
+
+    private async Task Execute(CancellationToken cancellationToken)
+    {
+        while (true)
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+            if (State == -1) // check if current Delegate f has finished
+            {
+                _taskItems.RemoveAt(_taskItems.Count - 1);
+                if (_taskItems.Count > 0) // check if any Delegate f left
+                {
+                    _currentTaskItem = _taskItems[_taskItems.Count - 1];
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            Delegate f = (Delegate)_currentTaskItem[0];
+            object[] args = (object[])_currentTaskItem[1];
+            object[] updatedArgs = new object[args.Length + 1];
+            updatedArgs[0] = this;
+            for (int j = 0; j < args.Length; j++)
+            {
+                updatedArgs[j + 1] = args[j];
+            }
+            f.DynamicInvoke(updatedArgs);
+            await Task.Delay(_duration, cancellationToken);
+        }
     }
 }

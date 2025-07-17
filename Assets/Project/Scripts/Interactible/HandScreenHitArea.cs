@@ -26,7 +26,7 @@ public class HandScreenHitArea : HitArea
 
     private void ToggleHandScreen(bool value)
     {
-        _dispatcher.InvokeEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
+        _eventController.InvokeEventHandler(GameLogicEventType.HAND_SCREEN_TOGGLED, new object[] { value });
     }
 
     public void EnableFakeCard(CardData cardData)

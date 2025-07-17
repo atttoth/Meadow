@@ -9,14 +9,15 @@ using UnityEngine.UI;
 public class CampController : MonoBehaviour
 {
     private static readonly int NUM_OF_MARKER_SLOTS = 3;
-    private LogicEventDispatcher _dispatcher;
+    private GameEventController _eventController;
     private List<MarkerHolder> _markerHolders;
+    private GameTask _waitingTask;
     private CampView _view;
     private CanvasGroup _canvasGroup;
 
     public void Create()
     {
-        _dispatcher = new();
+        _eventController = new();
         _markerHolders = new();
         SpriteAtlas atlas = GameResourceManager.Instance.Base;
         RectTransform markerDisplayHolders = transform.GetChild(0).GetComponent<RectTransform>();
@@ -50,7 +51,8 @@ public class CampController : MonoBehaviour
             if (_view.selectionsLeft < 1)
             {
                 campItems.ForEach(item => item.button.enabled = false);
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_ICONS_SELECTED, new object[0]);
+                _waitingTask.CancelWait();
+                _waitingTask = null;
             }
         }));
 
@@ -62,7 +64,7 @@ public class CampController : MonoBehaviour
             if (_view.isCampActionEnabled && score > 0)
             {
                 _view.OnItemButtonClick(item);
-                _dispatcher.InvokeEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new object[] { score, item.GetComponent<Transform>().position });
+                _eventController.InvokeEventHandler(GameLogicEventType.CAMP_SCORE_RECEIVED, new object[] { score, item.GetComponent<Transform>().position });
             }
             else
             {
@@ -81,42 +83,36 @@ public class CampController : MonoBehaviour
         _view.gameObject.SetActive(value);
     }
 
-    public void StartViewSetupHandler(GameTask task)
+    public void SetupViewHandler(GameTask task)
     {
         switch(task.State)
         {
             case 0:
+                _waitingTask = task;
                 InitCampForSession();
                 ToggleCampView(true);
                 task.StartDelayMs(500);
                 break;
             case 1:
                 _view.ShowCampIconSelection();
-                task.StartDelayMs(0);
-                break;
-            default:
-                task.Complete();
-                break;
-        }
-    }
-
-    public void EndViewSetupHandler(GameTask task)
-    {
-        switch (task.State)
-        {
-            case 0:
-                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000)); // wait for last icon to flip
-                break;
-            case 1:
-                task.StartHandler((Action<GameTask>)_view.SetIconsPositionHandler);
+                task.StartDelayMs(0, true);
                 break;
             case 2:
-                task.StartDelayMs(1000);
+                task.Wait();
                 break;
             case 3:
-                task.StartHandler((Action<GameTask>)_view.ShowScoreButtonsHandler);
+                task.StartDelayMs((int)(GameSettings.Instance.GetDuration(Duration.cardRotationSpeedOnBoard) * 1000)); // wait for last icon to flip
                 break;
             case 4:
+                task.StartHandler((Action<GameTask>)_view.SetIconsPositionHandler);
+                break;
+            case 5:
+                task.StartDelayMs(1000);
+                break;
+            case 6:
+                task.StartHandler((Action<GameTask>)_view.ShowScoreButtonsHandler);
+                break;
+            case 7:
                 task.StartDelayMs(2000);
                 break;
             default:
